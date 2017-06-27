@@ -1,0 +1,9 @@
+GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
+GIT_TOKEN ?=
+DOCKER_SERVER ?= registry.ng.bluemix.net
+DOCKER_USERNAME ?= token
+DOCKER_PASSWORD ?=
+IMAGE_DESCRIPTION =
+IMAGE_NAME = trader
+IMAGE_REPO ?= kyleschlosser/trader
+RELEASE_TAG ?= latest
