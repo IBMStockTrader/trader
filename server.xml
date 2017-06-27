@@ -7,5 +7,5 @@
     <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
-    <webApplication id="TraderUI" location="trader.war" name="TraderUI" contextRoot="/trader"/>
+    <webApplication id="TraderUI" location="TraderUI.war" name="TraderUI" contextRoot="/trader"/>
 </server>
