@@ -1,0 +1,16 @@
+apply plugin: 'war'
+apply plugin: 'eclipse'
+
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile group: 'javax.json', name: 'javax.json-api', version:'1.0'
+    providedCompile group: 'javax', name: 'javaee-web-api', version:'7.0'
+
+    testCompile 'junit:junit:4.12'
+}
+
