@@ -1,3 +1,3 @@
 FROM websphere-liberty:microProfile
 COPY server.xml /config/server.xml
-COPY build/libs/trader.war /config/apps/TraderUI.war
+COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
