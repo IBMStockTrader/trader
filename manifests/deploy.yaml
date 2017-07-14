@@ -12,12 +12,10 @@ spec:
     spec:
       containers:
       - name: trader
-        image: kyleschlosser/trader:workaround
+        image: trader:latest
         ports:
           - containerPort: 9080
         imagePullPolicy: IfNotPresent
-      imagePullSecrets:
-      - name: dockerhubsecret
 ---
 #Deploy the service
 apiVersion: v1
