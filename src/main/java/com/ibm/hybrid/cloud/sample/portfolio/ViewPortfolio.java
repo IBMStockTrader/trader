@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(description = "View Portfolio servlet", urlPatterns = { "/viewPortfolio" })
 public class ViewPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static final double ERROR = -1;
+	private static final String ERROR_STRING = "Error";
 	private NumberFormat currency = null;
        
 	/**
@@ -110,12 +112,20 @@ public class ViewPortfolio extends HttpServlet {
 			String date = stock.getString("date");
 			double total = stock.getJsonNumber("total").doubleValue();
 
+			String formattedPrice = currency.format(price);
+			String formattedTotal = currency.format(total);
+
+			if (price == ERROR) {
+				formattedPrice = ERROR_STRING;
+				formattedTotal = ERROR_STRING;
+			}
+
 			rows.append("        <tr>");
 			rows.append("          <td>"+symbol+"</td>");
 			rows.append("          <td>"+shares+"</td>");
-			rows.append("          <td>$"+currency.format(price)+"</td>");
+			rows.append("          <td>$"+formattedPrice+"</td>");
 			rows.append("          <td>"+date+"</td>");
-			rows.append("          <td>$"+currency.format(total)+"</td>");
+			rows.append("          <td>$"+formattedTotal+"</td>");
 			rows.append("        </tr>");
 		}
 
