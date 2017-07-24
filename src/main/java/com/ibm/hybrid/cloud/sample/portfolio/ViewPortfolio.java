@@ -112,8 +112,8 @@ public class ViewPortfolio extends HttpServlet {
 			String date = stock.getString("date");
 			double total = stock.getJsonNumber("total").doubleValue();
 
-			String formattedPrice = currency.format(price);
-			String formattedTotal = currency.format(total);
+			String formattedPrice = "$"+currency.format(price);
+			String formattedTotal = "$"+currency.format(total);
 
 			if (price == ERROR) {
 				formattedPrice = ERROR_STRING;
@@ -123,9 +123,9 @@ public class ViewPortfolio extends HttpServlet {
 			rows.append("        <tr>");
 			rows.append("          <td>"+symbol+"</td>");
 			rows.append("          <td>"+shares+"</td>");
-			rows.append("          <td>$"+formattedPrice+"</td>");
+			rows.append("          <td>"+formattedPrice+"</td>");
 			rows.append("          <td>"+date+"</td>");
-			rows.append("          <td>$"+formattedTotal+"</td>");
+			rows.append("          <td>"+formattedTotal+"</td>");
 			rows.append("        </tr>");
 		}
 
