@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet implementation class AddPortfolio
  */
 @WebServlet(description = "Add Portfolio servlet", urlPatterns = { "/addPortfolio" })
+@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
 public class AddPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
     
@@ -66,7 +69,7 @@ public class AddPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		if ((owner!=null) && !owner.equals("")) {
-			PortfolioServices.createPortfolio(owner);
+			PortfolioServices.createPortfolio(request, owner);
 		}
 
 		//In minikube and CFC, the port number is wrong for the https redirect.

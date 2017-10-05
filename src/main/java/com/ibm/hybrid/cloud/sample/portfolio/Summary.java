@@ -1,3 +1,19 @@
+/*
+       Copyright 2017 IBM Corp All Rights Reserved
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
 package com.ibm.hybrid.cloud.sample.portfolio;
 
 import java.io.IOException;
@@ -9,6 +25,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +36,10 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet implementation class Summary
  */
 @WebServlet(description = "Portfolio summary servlet", urlPatterns = { "/summary" })
+@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static final String EDITOR   = "StockTrader";
 	private static final String CREATE   = "create";
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
@@ -32,7 +52,6 @@ public class Summary extends HttpServlet {
 	public Summary() {
 		super();
 
-		System.out.println("Workaround version of Summary servlet");
 		currency = NumberFormat.getNumberInstance();
 		currency.setMinimumFractionDigits(2);
 		currency.setMaximumFractionDigits(2);
@@ -43,6 +62,7 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		boolean editor = request.isUserInRole(EDITOR);
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
 		writer.append("<html>");
@@ -54,10 +74,14 @@ public class Summary extends HttpServlet {
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
-		writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
-		writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
-		writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (add stock)<br>");
-		writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
+		if (editor) {
+			writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
+		}
+			writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
+		if (editor) {
+			writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (add stock)<br>");
+			writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
+		}
 		writer.append("      <br/>");
 		writer.append("      <table border=\"1\" cellpadding=\"5\">");
 		writer.append("        <tr>");
@@ -99,7 +123,7 @@ public class Summary extends HttpServlet {
 			} else if (action.equals(UPDATE)) {
 				response.sendRedirect(prefix+"addStock?owner="+owner); //send control to the AddStock servlet
 			} else if (action.equals(DELETE)) {
-				PortfolioServices.deletePortfolio(owner);
+				PortfolioServices.deletePortfolio(request, owner);
 				doGet(request, response); //refresh the Summary servlet
 			} else {
 				doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -112,7 +136,7 @@ public class Summary extends HttpServlet {
 	private String getTableRows(HttpServletRequest request) {
 		StringBuffer rows = new StringBuffer();
 
-		JsonArray portfolios = PortfolioServices.getPortfolios();
+		JsonArray portfolios = PortfolioServices.getPortfolios(request);
 
 		for (int index=0; index<portfolios.size(); index++) {
 			JsonObject portfolio = (JsonObject) portfolios.get(index);

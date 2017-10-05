@@ -24,6 +24,8 @@ import java.util.Iterator;
 
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -33,12 +35,13 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet implementation class ViewPortfolio
  */
 @WebServlet(description = "View Portfolio servlet", urlPatterns = { "/viewPortfolio" })
+@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
 public class ViewPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final double ERROR = -1;
 	private static final String ERROR_STRING = "Error";
 	private NumberFormat currency = null;
-       
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -57,10 +60,17 @@ public class ViewPortfolio extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
-		JsonObject portfolio = PortfolioServices.getPortfolio(owner);
+		JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
 
 		double overallTotal = portfolio.getJsonNumber("total").doubleValue();
-		String loyaltyLevel = portfolio.getString("loyalty");
+
+		String loyaltyLevel = null;
+		try {
+			loyaltyLevel = portfolio.getString("loyalty");
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+		}
+
 		JsonObject stocks = portfolio.getJsonObject("stocks");
 
 		Writer writer = response.getWriter();

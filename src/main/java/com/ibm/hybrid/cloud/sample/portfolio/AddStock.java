@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet implementation class AddStock
  */
 @WebServlet(description = "Add Stock servlet", urlPatterns = { "/addStock" })
+@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	/**
@@ -49,7 +52,6 @@ public class AddStock extends HttpServlet {
 		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
-//		writer.append("      <table border=\"1\" cellpadding=\"5\">");
 		writer.append("      <table>");
 		writer.append("        <tr>");
 		writer.append("          <td><b>Owner:</b></th>");
@@ -85,7 +87,7 @@ public class AddStock extends HttpServlet {
 
 		if ((shareString!=null) && !shareString.equals("")) {
 			int shares = Integer.parseInt(shareString);
-			PortfolioServices.updatePortfolio(owner, symbol, shares);
+			PortfolioServices.updatePortfolio(request, owner, symbol, shares);
 		}
 
 		//In minikube and CFC, the port number is wrong for the https redirect.
