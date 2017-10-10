@@ -27,11 +27,12 @@
     <basicRegistry id="basic" realm="BasicRegistry">
     	<user name="admin" password="admin"/>
     	<user name="stock" password="trader"/>
+    	<user name="debug" password="debug"/>
     	<user name="read" password="only"/>
     	<user name="other" password="other"/>
     	<group name="StockTrader">
     		<member name="stock"/>
-    		<member name="admin"/>
+    		<member name="debug"/>
     	</group>
     	<group name="StockViewer">
     		<member name="read"/>
