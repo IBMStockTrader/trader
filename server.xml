@@ -25,18 +25,18 @@
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
     <basicRegistry id="basic" realm="BasicRegistry">
-    	<user name="admin" password="admin"/>
-    	<user name="stock" password="trader"/>
-    	<user name="debug" password="debug"/>
-    	<user name="read" password="only"/>
-    	<user name="other" password="other"/>
-    	<group name="StockTrader">
-    		<member name="stock"/>
-    		<member name="debug"/>
-    	</group>
-    	<group name="StockViewer">
-    		<member name="read"/>
-    	</group>
+        <user name="admin" password="admin"/>
+        <user name="stock" password="trader"/>
+        <user name="debug" password="debug"/>
+        <user name="read"  password="only"/>
+        <user name="other" password="other"/> <!-- ID with no access to Stock Trader -->
+        <group name="StockTrader">
+            <member name="stock"/>
+            <member name="debug"/>
+        </group>
+        <group name="StockViewer">
+            <member name="read"/>
+        </group>
     </basicRegistry>
 
     <administrator-role>
