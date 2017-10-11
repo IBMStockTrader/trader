@@ -20,21 +20,17 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class AddPortfolio
+ * Servlet implementation class Error
  */
-@WebServlet(description = "Add Portfolio servlet", urlPatterns = { "/addPortfolio" })
-@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
-public class AddPortfolio extends HttpServlet {
+@WebServlet(description = "Error servlet", urlPatterns = { "/error" })
+public class Error extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -51,9 +47,10 @@ public class AddPortfolio extends HttpServlet {
 		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
-		writer.append("      Owner: <input type=\"text\" name=\"owner\"><br/>");
+		writer.append("      An error occurred during login.  Please try again.");
 		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
+		writer.append("      <br/>");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Try again\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"http://ibm.com/bluemix\">");
@@ -67,17 +64,11 @@ public class AddPortfolio extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String owner = request.getParameter("owner");
-
-		if ((owner!=null) && !owner.equals("")) {
-			PortfolioServices.createPortfolio(request, owner);
-		}
-
 		//In minikube and CFC, the port number is wrong for the https redirect.
 		//This will fix that if needed - otherwise, it just returns an empty string
 		//so that we can still use relative paths
 		String prefix = PortfolioServices.getRedirectWorkaround(request);
 
-		response.sendRedirect(prefix+"summary"); //send control to the Summary servlet
+		response.sendRedirect(prefix+"login");
 	}
 }

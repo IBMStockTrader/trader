@@ -20,21 +20,18 @@ import java.io.IOException;
 import java.io.Writer;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class AddPortfolio
+ * Servlet implementation class Login
  */
-@WebServlet(description = "Add Portfolio servlet", urlPatterns = { "/addPortfolio" })
-@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
-public class AddPortfolio extends HttpServlet {
+@WebServlet(description = "Login servlet", urlPatterns = { "/login" })
+public class Login extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -51,7 +48,16 @@ public class AddPortfolio extends HttpServlet {
 		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
-		writer.append("      Owner: <input type=\"text\" name=\"owner\"><br/>");
+		writer.append("      <table>");
+		writer.append("        <tr>");
+		writer.append("          <td><b>User ID:</b></th>");
+		writer.append("          <td><input type=\"text\" name=\"id\"></td>");
+		writer.append("        </tr>");
+		writer.append("        <tr>");
+		writer.append("          <td><b>Password:</b></th>");
+		writer.append("          <td><input type=\"password\" name=\"password\"></td>");
+		writer.append("        </tr>");
+		writer.append("      </table>");
 		writer.append("      <br/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
@@ -67,10 +73,21 @@ public class AddPortfolio extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String owner = request.getParameter("owner");
+		boolean success = false;
+		String id = request.getParameter("id");
+		String password = request.getParameter("password");
 
-		if ((owner!=null) && !owner.equals("")) {
-			PortfolioServices.createPortfolio(request, owner);
+		try {
+			if (request.getUserPrincipal() != null) request.logout(); //in case there's a left over auth cookie but we ended up here
+
+			request.login(id, password);
+
+			Cookie cookie = new Cookie("user", id); //clear text user id that can be used in Istio routing rules
+			response.addCookie(cookie);
+
+			success = true;
+		} catch (ServletException se) {
+			se.printStackTrace();
 		}
 
 		//In minikube and CFC, the port number is wrong for the https redirect.
@@ -78,6 +95,9 @@ public class AddPortfolio extends HttpServlet {
 		//so that we can still use relative paths
 		String prefix = PortfolioServices.getRedirectWorkaround(request);
 
-		response.sendRedirect(prefix+"summary"); //send control to the Summary servlet
+		String url = prefix+"error";
+		if (success) url = prefix+"summary";
+
+		response.sendRedirect(url);
 	}
 }

@@ -77,11 +77,12 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("<!DOCTYPE html>");
 		writer.append("<html>");
 		writer.append("  <head>");
-		writer.append("    <title>Stock Portfolio</title>");
+		writer.append("    <title>Stock Trader</title>");
 		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 		writer.append("  </head>");
 		writer.append("  <body>");
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
+		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
 		writer.append("      Stock Portfolio for "+owner+": <br/>");

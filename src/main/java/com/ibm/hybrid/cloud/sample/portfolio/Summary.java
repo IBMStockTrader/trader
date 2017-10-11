@@ -28,9 +28,11 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class Summary
@@ -40,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String EDITOR   = "StockTrader";
+	private static final String LOGOUT   = "Log Out";
 	private static final String CREATE   = "create";
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
@@ -67,11 +70,12 @@ public class Summary extends HttpServlet {
 		writer.append("<!DOCTYPE html>");
 		writer.append("<html>");
 		writer.append("  <head>");
-		writer.append("    <title>Stock Portfolio</title>");
+		writer.append("    <title>Stock Trader</title>");
 		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 		writer.append("  </head>");
 		writer.append("  <body>");
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
+		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
 		if (editor) {
@@ -94,6 +98,7 @@ public class Summary extends HttpServlet {
 		writer.append("      </table>");
 		writer.append("      <br/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"http://ibm.com/bluemix\">");
@@ -107,26 +112,46 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String action = request.getParameter("action");
-		String owner = request.getParameter("owner");
+		String submit = request.getParameter("submit");
 
-		if (action != null) {
+		if (submit != null) {
 			//In minikube and CFC, the port number is wrong for the https redirect.
 			//This will fix that if needed - otherwise, it just returns an empty string
 			//so that we can still use relative paths
 			String prefix = PortfolioServices.getRedirectWorkaround(request);
 
-			if (action.equals(CREATE)) {
-				response.sendRedirect(prefix+"addPortfolio"); //send control to the AddPortfolio servlet
-			} else if (action.equals(RETRIEVE)) {
-				response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
-			} else if (action.equals(UPDATE)) {
-				response.sendRedirect(prefix+"addStock?owner="+owner); //send control to the AddStock servlet
-			} else if (action.equals(DELETE)) {
-				PortfolioServices.deletePortfolio(request, owner);
-				doGet(request, response); //refresh the Summary servlet
+			if (submit.equals(LOGOUT)) {
+				request.logout();
+
+				HttpSession session = request.getSession();
+				if (session != null) session.invalidate();
+
+				Cookie cookie = new Cookie("user", ""); //clear text user id that can be used in Istio routing rules
+				cookie.setMaxAge(0);
+				response.addCookie(cookie); //remove our Istio-related user cookie on logout
+
+				response.sendRedirect(prefix+"login");
 			} else {
-				doGet(request, response); //something went wrong - just refresh the Summary servlet
+				String action = request.getParameter("action");
+				String owner = request.getParameter("owner");
+
+				if (action != null) {
+
+					if (action.equals(CREATE)) {
+						response.sendRedirect(prefix+"addPortfolio"); //send control to the AddPortfolio servlet
+					} else if (action.equals(RETRIEVE)) {
+						response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
+					} else if (action.equals(UPDATE)) {
+						response.sendRedirect(prefix+"addStock?owner="+owner); //send control to the AddStock servlet
+					} else if (action.equals(DELETE)) {
+						PortfolioServices.deletePortfolio(request, owner);
+						doGet(request, response); //refresh the Summary servlet
+					} else {
+						doGet(request, response); //something went wrong - just refresh the Summary servlet
+					}
+				} else {
+					doGet(request, response); //something went wrong - just refresh the Summary servlet
+				}
 			}
 		} else {
 			doGet(request, response); //something went wrong - just refresh the Summary servlet
