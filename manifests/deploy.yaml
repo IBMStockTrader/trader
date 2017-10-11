@@ -9,6 +9,7 @@ spec:
     metadata:
       labels:
         app: trader
+        version: v1
     spec:
       containers:
       - name: trader
