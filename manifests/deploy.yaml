@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: trader
+  name: trader-v1
 spec:
   replicas: 1
   template:
