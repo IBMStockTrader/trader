@@ -27,3 +27,6 @@ contains all of the REST calls to the Portfolio microservice, and appropriate JS
 
 You can hit the main entry point by entering a URL such as `http://localhost:9080/trader/summary` in your
 browser's address bar.
+
+This is version 1 of trader.  See the **trader-v2** repository for an alternate version.  We use **Istio**
+routing rules to control which one actually gets used at runtime.
