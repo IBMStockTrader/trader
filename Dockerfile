@@ -15,3 +15,5 @@
 FROM openliberty/open-liberty:microProfile1
 COPY server.xml /config/server.xml
 COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
+COPY key.jks /output/resources/security/key.jks
+COPY ltpa.keys /output/resources/security/ltpa.keys
