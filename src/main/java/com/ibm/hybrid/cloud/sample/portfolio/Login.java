@@ -45,8 +45,9 @@ public class Login extends HttpServlet {
 		writer.append("  </head>");
 		writer.append("  <body>");
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <br/>");
-		writer.append("    <br/>");
+		writer.append("    <p/>");
+		writer.append("    Please login using your Blue Pages w3id e-mail/password:");
+		writer.append("    <p/>");
 		writer.append("    <form method=\"post\"/>");
 		writer.append("      <table>");
 		writer.append("        <tr>");
