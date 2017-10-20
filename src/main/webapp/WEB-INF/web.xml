@@ -4,7 +4,7 @@
 	<description>User Interface (UI) for the Stock Trader application</description>
 	<login-config>
 		<auth-method>FORM</auth-method>
-		<realm-name>Stock Traders</realm-name>
+		<realm-name>BluePages</realm-name>
 		<form-login-config>
 			<form-login-page>/login</form-login-page>
 			<form-error-page>/error</form-error-page>
