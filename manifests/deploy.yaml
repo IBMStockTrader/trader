@@ -16,7 +16,7 @@ spec:
         image: trader:latest
         ports:
           - containerPort: 9080
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
 ---
 #Deploy the service
 apiVersion: v1
