@@ -9,6 +9,7 @@ spec:
     metadata:
       labels:
         app: trader
+        solution: stock-trader
         version: v1
     spec:
       containers:
