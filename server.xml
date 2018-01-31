@@ -16,29 +16,19 @@
     <featureManager>
         <feature>microProfile-1.2</feature>
         <feature>appSecurity-2.0</feature>
-       
+        <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
          <feature>socialLogin-1.0</feature>
     </featureManager>
 
      
      
-    <keyStore id="defaultKeyStore" password="keyspass" /> 
-    <keyStore
-         id="validationKeystore"
-         password="Passw0rd"
-         type="jks"
-         location="${server.config.dir}/resources/security/validationKeystore.jks" />
-         
-    <sslDefault sslRef="RpSSLConfig" />  
-    <ssl
-         id="RpSSLConfig"
-         keyStoreRef="defaultKeyStore"
-         trustStoreRef="validationKeystore"  />    
+   
+    <keyStore id="defaultKeyStore" password="passw0rd"/>
 
     <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
 
-    <httpEndpoint httpPort="8011" httpsPort="8020" host="*" id="defaultHttpEndpoint"/>
+    <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
 <!--
     <basicRegistry id="basic" realm="BasicRegistry">
@@ -62,16 +52,10 @@
 -->
 
    
-    <!-- Define an LDAP configuration for BluePages. -->
-     <!--
-    <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
-        <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
-            groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
-    </ldapRegistry>
 
     <ltpa expiration="1h"/>
     -->
-    
+    <!-- trustAliasName="idaaskey" -->
     <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBM ID"
            clientSecret="ODg4ZGVkYzYtNTljNS00" 
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
@@ -80,6 +64,7 @@
            userNameAttribute="email"
            issuer="https://prepiam.toronto.ca.ibm.com"
            trustAliasName="idaaskey"
+           
            > 
     </oidcLogin>
      
