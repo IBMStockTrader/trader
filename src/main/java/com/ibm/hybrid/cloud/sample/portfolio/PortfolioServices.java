@@ -29,6 +29,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.servlet.http.HttpServletRequest;
+import com.ibm.websphere.security.jwt.InvalidBuilderException;
+import com.ibm.websphere.security.jwt.JwtBuilder;
+import com.ibm.websphere.security.jwt.JwtToken;
 
 public class PortfolioServices {
 	private static final String PORTFOLIO_SERVICE = "http://portfolio-service:9080/portfolio";
@@ -99,14 +102,17 @@ public class PortfolioServices {
 	}
 
 	private static JsonStructure invokeREST(HttpServletRequest request, String verb, String uri) throws IOException {
+    
+        String jwtToken = createJWT(request);
 		URL url = new URL(uri);
-
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 		copyFromRequest(conn, request); //forward headers (including cookies) from inbound request
 
 		conn.setRequestMethod(verb);
 		conn.setRequestProperty("Content-Type", "application/json");
+        // add the JWT token to the authorization header. 
+        conn.setRequestProperty("Authorization", "Bearer "+ jwtToken);
 		conn.setDoOutput(true);
 		InputStream stream = conn.getInputStream();
 
@@ -117,6 +123,39 @@ public class PortfolioServices {
 
 		return json; //I use JsonStructure here so I can return a JsonObject or a JsonArray
 	}
+    
+    /**
+    * Create Json Web Token.
+    * return: the base64 encoded and signed token. 
+    */
+    private static String createJWT(HttpServletRequest request){
+        String jwtTokenString = null;		
+		try {
+            String userName = request.getUserPrincipal().getName();
+            System.out.println("*** debug: userName: "+ userName);
+			if (userName == null) userName = "null";
+			// Put the user info into a JWT Token
+			// create() uses default settings.  
+			// For other settings, specify a JWTBuilder element in server.xml
+			// and call create(builder id)
+			JwtBuilder builder = com.ibm.websphere.security.jwt.JwtBuilder.create();
+			builder.subject(userName);
+			builder.claim("upn", userName);
+			//builder.claim("groups", groups);
+            //convention is the issuer is the url, but for demo portability a fixed value is used.
+			//builder.claim("iss", request.getRequestURL().toString());
+            builder.claim("iss", "http://jwtdemo.ibm.com");
+			JwtToken theToken = builder.buildJwt();			
+			jwtTokenString = theToken.compact();
+		} catch (Exception e) {			
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+        System.out.println("*** debug: JWT: "+ jwtTokenString);
+        return jwtTokenString;
+    }
+    
+   
 
 	//forward headers (including cookies) from inbound request
 	private static void copyFromRequest(HttpURLConnection conn, HttpServletRequest request) {

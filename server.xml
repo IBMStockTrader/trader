@@ -16,10 +16,14 @@
     <featureManager>
         <feature>microProfile-1.2</feature>
         <feature>appSecurity-2.0</feature>
-        <feature>ldapRegistry-3.0</feature>
+        <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
+         <feature>socialLogin-1.0</feature>
     </featureManager>
 
+     
+     
+   
     <keyStore id="defaultKeyStore" password="passw0rd"/>
 
     <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
@@ -47,14 +51,23 @@
     </administrator-role>
 -->
 
-    <!-- Define an LDAP configuration for BluePages. -->
-    <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
-        <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
-            groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
-    </ldapRegistry>
+   
 
     <ltpa expiration="1h"/>
-
+    -->
+    <!-- trustAliasName="idaaskey" -->
+    <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBM ID"
+           clientSecret="ODg4ZGVkYzYtNTljNS00" 
+           authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
+           tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
+           scope="openid profile email"
+           userNameAttribute="email"
+           issuer="https://prepiam.toronto.ca.ibm.com"
+           trustAliasName="idaaskey"
+           
+           > 
+    </oidcLogin>
+     
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
         useOnlyCustomCookieName="true" ssoUseDomainFromURL="true"/>
