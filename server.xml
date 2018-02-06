@@ -56,15 +56,15 @@
     <ltpa expiration="1h"/>
     -->
     <!-- trustAliasName="idaaskey" -->
-    <oidcLogin id="rtclaussStockTrader" clientId="NjAyNmEwOTYtNjQ3Ni00" displayName="IBMid"
-           clientSecret="ZWM2MDAwNGItYzFmNC00"
+    <oidcLogin id="rtclaussSTS" clientId="NzFhZjUwNmMtNTVkYi00" displayName="IBMid"
+           clientSecret="MDc5NzM5NmItNzAzYS00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
            tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
            scope="openid profile email"
            userNameAttribute="email"
            issuer="https://prepiam.toronto.ca.ibm.com"
            trustAliasName="idaaskey"
-           
+
            > 
     </oidcLogin>
      
