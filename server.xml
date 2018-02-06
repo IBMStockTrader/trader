@@ -56,8 +56,8 @@
     <ltpa expiration="1h"/>
     -->
     <!-- trustAliasName="idaaskey" -->
-    <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBM ID"
-           clientSecret="ODg4ZGVkYzYtNTljNS00" 
+    <oidcLogin id="blueLogin" clientId="NjAyNmEwOTYtNjQ3Ni00" displayName="IBM ID"
+           clientSecret="ZWM2MDAwNGItYzFmNC00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
            tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
            scope="openid profile email"
