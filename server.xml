@@ -26,7 +26,7 @@
    
     <keyStore id="defaultKeyStore" password="passw0rd"/>
 
-    <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
+    <logging traceSpecification="*=info:com.ibm.ws.security.*=all" consoleLogLevel="INFO" traceFileName="trace.log" maxFileSize="20" maxFiles="10"/>
 
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
