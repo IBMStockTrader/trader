@@ -89,8 +89,9 @@ metadata:
     ingress.kubernetes.io/affinity: "cookie"
     ingress.kubernetes.io/session-cookie-name: "route"
     ingress.kubernetes.io/session-cookie-hash: "sha1"
-    ingress.kubernetes.io/rewrite-target: "/trader"
+    ingress.kubernetes.io/rewrite-target: /
     ingress.kubernetes.io/secure-backends: "true"
+    ingress.kubernetes.io/app-root: "/trader"
   name: trader-ingress
 spec:
   rules:
