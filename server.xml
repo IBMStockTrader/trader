@@ -18,7 +18,7 @@
         <feature>appSecurity-2.0</feature>
         <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
-         <feature>socialLogin-1.0</feature>
+        <feature>socialLogin-1.0</feature>
     </featureManager>
 
      
@@ -67,6 +67,8 @@
 
            > 
     </oidcLogin>
+    
+    <oidcClientWebapp contextPath="/trader"/>
      
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
