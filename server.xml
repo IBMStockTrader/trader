@@ -56,7 +56,7 @@
     <ltpa expiration="1h"/>
     -->
     <!-- trustAliasName="idaaskey" -->
-    <oidcLogin id="blueLogin" clientId="NjAyNmEwOTYtNjQ3Ni00" displayName="IBM ID"
+    <oidcLogin id="rtclaussStockTrader" clientId="NjAyNmEwOTYtNjQ3Ni00" displayName="IBMid"
            clientSecret="ZWM2MDAwNGItYzFmNC00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
            tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
