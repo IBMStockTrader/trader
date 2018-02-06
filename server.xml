@@ -24,7 +24,7 @@
      
      
    
-    <keyStore id="defaultKeyStore" password="passw0rd"/>
+    <keyStore id="defaultKeyStore" location="/output/resources/security/key.jks" password="passw0rd"/>
 
     <logging traceSpecification="*=info:com.ibm.ws.security.*=all" consoleLogLevel="INFO" traceFileName="trace.log" maxFileSize="20" maxFiles="10"/>
 
@@ -57,7 +57,7 @@
     -->
     <!-- trustAliasName="idaaskey" -->
     <oidcClientWebapp contextPath="/trader"/>
-    
+
     <oidcLogin id="rtclaussSTS" clientId="NzFhZjUwNmMtNTVkYi00" displayName="IBMid"
            clientSecret="MDc5NzM5NmItNzAzYS00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
@@ -66,7 +66,7 @@
            userNameAttribute="email"
            issuer="https://prepiam.toronto.ca.ibm.com"
            trustAliasName="idaaskey"
-
+           redirectToRPHostAndPort="https://rtclauss-sm-proxy.rtp.raleigh.ibm.com:443"
            > 
     </oidcLogin>
 

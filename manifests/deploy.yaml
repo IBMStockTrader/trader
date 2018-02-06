@@ -17,7 +17,44 @@ spec:
         image: trader:latest
         ports:
           - containerPort: 9080
+          - containerPort: 9443
         imagePullPolicy: Always
+        env:
+        - name: MB_KEYSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mb-keystore-password
+              key: password
+        - name: MB_TRUSTSTORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mb-truststore-password
+              key: password
+        volumeMounts:
+        - name: keystores
+          mountPath: /etc/wlp/config/keystore
+          readOnly: true
+        - name: truststores
+          mountPath: /etc/wlp/config/truststore
+          readOnly: true
+        - name: liberty-ssl
+          mountPath: /config/configDropins
+          readOnly: true
+      volumes:
+        - name: keystores
+          secret:
+            secretName: mb-keystore
+        - name: truststores
+          secret:
+            secretName: mb-truststore
+        - name: liberty-ssl
+          configMap:
+            name: liberty-ssl
+            items:
+            - key: libertyssl.xml
+              path: defaults/libertyssl.xml
+      imagePullSecrets:
+              - name: admin.registrykey
 ---
 #Deploy the service
 apiVersion: v1
@@ -29,7 +66,14 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 9080
+    - name: http
+      protocol: TCP
+      port: 9080
+      targetPort: 9080
+    - name: https
+      protocol: TCP
+      port: 9443
+      targetPort: 9443
 #     nodePort: 31000
   selector:
     app: trader
@@ -40,12 +84,20 @@ kind: Ingress
 metadata:
 # annotations:
 #   ingress.kubernetes.io/rewrite-target: /trader
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/affinity: "cookie"
+    ingress.kubernetes.io/session-cookie-name: "route"
+    ingress.kubernetes.io/session-cookie-hash: "sha1"
+    ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/secure-backends: "true"
   name: trader-ingress
 spec:
   rules:
-  - http:
+  - host:
+    http:
       paths:
       - path: /trader
         backend:
           serviceName: trader-service
-          servicePort: 9080
+          servicePort: 9443
