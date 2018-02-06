@@ -67,7 +67,7 @@
 
            > 
     </oidcLogin>
-    
+
     <oidcClientWebapp contextPath="/trader"/>
      
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
