@@ -56,6 +56,8 @@
     <ltpa expiration="1h"/>
     -->
     <!-- trustAliasName="idaaskey" -->
+    <oidcClientWebapp contextPath="/trader"/>
+    
     <oidcLogin id="rtclaussSTS" clientId="NzFhZjUwNmMtNTVkYi00" displayName="IBMid"
            clientSecret="MDc5NzM5NmItNzAzYS00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
@@ -68,7 +70,7 @@
            > 
     </oidcLogin>
 
-    <oidcClientWebapp contextPath="/trader"/>
+
      
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
