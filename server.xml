@@ -18,7 +18,7 @@
         <feature>appSecurity-2.0</feature>
         <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
-        <feature>openidConnectClient-1.0</feature>
+        <feature>socialLogin-1.0</feature>
     </featureManager>
 
      
@@ -56,7 +56,7 @@
     <ltpa expiration="1h"/>
     -->
     <!-- trustAliasName="idaaskey" -->
-    <openidConnectClient id="rtclaussSTS" clientId="NzFhZjUwNmMtNTVkYi00" displayName="IBMid"
+    <oidcLogin id="rtclaussSTS" clientId="NzFhZjUwNmMtNTVkYi00" displayName="IBMid"
            clientSecret="MDc5NzM5NmItNzAzYS00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
            tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
@@ -66,7 +66,7 @@
            trustAliasName="idaaskey"
 
            > 
-    </openidConnectClient>
+    </oidcLogin>
 
     <oidcClientWebapp contextPath="/trader"/>
      
