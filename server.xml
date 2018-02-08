@@ -18,13 +18,19 @@
         <feature>appSecurity-2.0</feature>
         <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
-         <feature>socialLogin-1.0</feature>
+<!--    <feature>ldapRegistry-3.0</feature> -->
+        <feature>socialLogin-1.0</feature>
     </featureManager>
 
-     
-     
-   
-    <keyStore id="defaultKeyStore" password="passw0rd"/>
+    <keyStore id="defaultKeyStore" password="passw0rd" type="jks"
+         location="${server.config.dir}/resources/security/key.jks" />
+
+    <keyStore id="validationKeystore" password="Passw0rd" type="jks"
+         location="${server.config.dir}/resources/security/validationKeystore.jks" />
+
+    <sslDefault sslRef="RpSSLConfig" />
+
+    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore" />
 
     <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
 
@@ -51,23 +57,27 @@
     </administrator-role>
 -->
 
-   
+    <!-- Define an LDAP configuration for BluePages.
+    <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
+        <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
+            groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
+    </ldapRegistry>
 
-    <ltpa expiration="1h"/>
-    -->
-    <!-- trustAliasName="idaaskey" -->
-    <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBM ID"
-           clientSecret="ODg4ZGVkYzYtNTljNS00" 
+    <ltpa expiration="1h"/> -->
+
+    <oidcClientWebapp contextPath="/trader"/>
+
+    <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBMid"
+           clientSecret="ODg4ZGVkYzYtNTljNS00"
            authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
            tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
            scope="openid profile email"
            userNameAttribute="email"
            issuer="https://prepiam.toronto.ca.ibm.com"
            trustAliasName="idaaskey"
-           
-           > 
+           redirectToRPHostAndPort="https://9.42.95.159:32389">
     </oidcLogin>
-     
+
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
         useOnlyCustomCookieName="true" ssoUseDomainFromURL="true"/>
@@ -75,7 +85,7 @@
     <webApplication id="TraderUI" name="TraderUI" location="TraderUI.war" contextRoot="/trader">
         <application-bnd>
             <security-role id="StockTrader" name="StockTrader">
-                <special-subject type="ALL_AUTHENTICATED_USERS" id="bluePagesUsers"/>
+                <special-subject type="ALL_AUTHENTICATED_USERS" id="IBMid"/>
             </security-role>
         </application-bnd>
     </webApplication>

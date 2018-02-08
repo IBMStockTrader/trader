@@ -1,0 +1,60 @@
+#Deploy the pod
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: trader
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: trader
+        solution: stock-trader
+        version: v1
+    spec:
+      containers:
+      - name: trader
+        image: mycluster.icp:8500/stock-trader/trader:latest
+        ports:
+          - containerPort: 9080
+          - containerPort: 9443
+        imagePullPolicy: Always
+---
+#Deploy the service
+apiVersion: v1
+kind: Service
+metadata:
+  name: trader-service
+  labels:
+    app: trader
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9080
+      targetPort: 9080
+      nodePort: 32388
+    - name: https
+      protocol: TCP
+      port: 9443
+      targetPort: 9443
+      nodePort: 32389
+  selector:
+    app: trader
+---   
+#Configure the ingress 
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+# annotations:
+#   ingress.kubernetes.io/rewrite-target: /trader
+  name: trader-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /trader
+        backend:
+          serviceName: trader-service
+          servicePort: 9443
