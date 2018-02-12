@@ -22,6 +22,10 @@
         <feature>socialLogin-1.0</feature>
     </featureManager>
 
+    <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
+
+    <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
+
     <keyStore id="defaultKeyStore" password="passw0rd" type="jks"
          location="${server.config.dir}/resources/security/key.jks" />
 
@@ -31,10 +35,6 @@
     <sslDefault sslRef="RpSSLConfig" />
 
     <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore" />
-
-    <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
-
-    <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
 <!--
     <basicRegistry id="basic" realm="BasicRegistry">
@@ -65,17 +65,11 @@
 
     <ltpa expiration="1h"/> -->
 
-    <oidcClientWebapp contextPath="/trader"/>
-
-    <oidcLogin id="blueLogin" clientId="YmU1ZTZkNjQtMWYxMS00" displayName="IBMid"
-           clientSecret="ODg4ZGVkYzYtNTljNS00"
-           authorizationEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/authorize"
-           tokenEndpoint="https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/token"
-           scope="openid profile email"
-           userNameAttribute="email"
-           issuer="https://prepiam.toronto.ca.ibm.com"
-           trustAliasName="idaaskey"
-           redirectToRPHostAndPort="https://9.42.95.159:32389">
+    <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
+           clientSecret="${env.OIDC_SECRET}" authorizationEndpoint="${env.OIDC_AUTH}"
+           tokenEndpoint="${env.OIDC_TOKEN}" scope="openid profile email" userNameAttribute="email"
+           issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
+           redirectToRPHostAndPort="${env.OIDC_NODEPORT">
     </oidcLogin>
 
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
