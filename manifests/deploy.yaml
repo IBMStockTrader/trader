@@ -14,9 +14,63 @@ spec:
     spec:
       containers:
       - name: trader
-        image: trader:latest
+        image: trader:latest # Microservice Builder
+#       image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
+#       image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Container Service
+        env:
+          - name: OIDC_NAME
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: name
+          - name: OIDC_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: issuer
+          - name: OIDC_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: auth
+          - name: OIDC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: token
+          - name: OIDC_ID
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: id
+          - name: OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: secret
+          - name: OIDC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: key
+          - name: OIDC_NODEPORT
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: nodeport
+          - name: JWT_AUDIENCE
+            valueFrom:
+              secretKeyRef:
+                name: jwt 
+                key: audience
+          - name: JWT_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: jwt
+                key: issuer
         ports:
           - containerPort: 9080
+          - containerPort: 9443
         imagePullPolicy: Always
 ---
 #Deploy the service
@@ -29,8 +83,16 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 9080
-#     nodePort: 31000
+    - name: http
+      protocol: TCP
+      port: 9080
+      targetPort: 9080
+      nodePort: 32388
+    - name: https
+      protocol: TCP
+      port: 9443
+      targetPort: 9443
+      nodePort: 32389
   selector:
     app: trader
 ---   
@@ -38,14 +100,14 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-# annotations:
-#   ingress.kubernetes.io/rewrite-target: /trader
   name: trader-ingress
+  annotations:
+    kubernetes.io/ingress.class: "istio"
 spec:
   rules:
   - http:
       paths:
-      - path: /trader
+      - path: /trader/.*
         backend:
           serviceName: trader-service
-          servicePort: 9080
+          servicePort: 9443
