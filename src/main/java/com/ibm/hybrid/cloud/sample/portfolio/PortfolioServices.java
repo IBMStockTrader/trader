@@ -105,7 +105,11 @@ public class PortfolioServices {
 	}
 
 	private static JsonStructure invokeREST(HttpServletRequest request, String verb, String uri) throws IOException {
-    
+		//Get the logged in user
+		String userName = request.getUserPrincipal().getName();
+		System.out.println("*** debug: userName: "+ userName);
+		if (userName == null) userName = "null";
+
 		URL url = new URL(uri);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -116,7 +120,7 @@ public class PortfolioServices {
 		conn.setDoOutput(true);
 		
 		// add the JWT token to the authorization header. 
-		String jwtToken = createJWT(request);
+		String jwtToken = createJWT(userName);
 		conn.setRequestProperty("Authorization", "Bearer "+ jwtToken);
 
 		InputStream stream = conn.getInputStream();
@@ -133,18 +137,13 @@ public class PortfolioServices {
 	 * Create Json Web Token.
 	 * return: the base64 encoded and signed token. 
 	 */
-	private static String createJWT(HttpServletRequest request){
+	private static String createJWT(String userName){
 		String jwtTokenString = null;		
 		try {
 			// create() uses default settings.  
 			// For other settings, specify a JWTBuilder element in server.xml
 			// and call create(builder id)
 			JwtBuilder builder = JwtBuilder.create();
-
-			//Get the logged in user
-			String userName = request.getUserPrincipal().getName();
-			System.out.println("*** debug: userName: "+ userName);
-			if (userName == null) userName = "null";
 
 			// Put the user info into a JWT Token
 			builder.subject(userName);
