@@ -30,3 +30,50 @@ browser's address bar.
 
 This is version 1 of trader.  See the **trader-v2** repository for an alternate version.  We use **Istio**
 routing rules to control which one actually gets used at runtime.
+
+ ### Prerequisites for ICP Deployment
+ This project requires two secrets: `jwt` and `oidc`.  You create these secrets by running:
+  ```bash
+  kubectl create secret generic jwt -n stock-trader --from-literal=audience=stock-trader --from-literal=issuer=http://stock-trader.ibm.com
+  
+  kubectl create secret generic oidc -n stock-trader --from-literal=name=<OIDC_CLIENT_ID> 
+  --from-literal=issuer=<OIDC_ISSUER> --from-literal=auth=<OIDC_AUTH_ENDPOINT> 
+  --from-literal=token=<OIDC_TOKEN_ENDPOINT> 
+  --from-literal=id=<OIDC_CLIENT_ID> --from-literal=secret=<OIDC_CLIENT_SECRET> --from-literal=key=<OIDC_CERTIFICATE> 
+  --from-literal=nodeport=https://<TRADER_HOSTNAME>:<TRADER_HOSTPORT>
+  
+  # Example oidc:
+  kubectl create secret generic oidc -n stock-trader --from-literal=name=blueLogin 
+  --from-literal=issuer=https://prepiam.toronto.ca.ibm.com --from-literal=auth=https://iam.ibm
+  .com/idaas/oidc/endpoint/default/authorize --from-literal=token=https://iam.ibm
+  .com/idaas/oidc/endpoint/default/token --from-literal=id=N2k3kD3kks9256x3 --from-literal=secret=I33kkj2k330023 
+  --from-literal=key=idaaskey --from-literal=nodeport=https://10.42.95.159:32389
+  ```
+  
+  You'll also need to enable login to the IBM Cloud Private internal Docker registry by following [these steps]
+  (https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/manage_images/configuring_docker_cli.html).  Don't 
+  forget to restart Docker after adding your cert.  On macOS you can restart Docker by running:
+  ```bash
+  osascript -e 'quit app "Docker"'
+  open -a Docker
+  ```
+ 
+ ### Build and Deploy to ICP
+To build `trader` clone this repo and run:
+```bash
+mvn package
+docker build -t trader:latest -t <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest .
+docker tag trader:latest <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
+docker push <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
+
+kubectl apply -f manifests/
+```
+
+In practice this means you'll run something like:
+```bash
+docker build -t trader:latest -t mycluster.icp:8500/stock-trader/trader:latest .
+docker tag trader:latest mycluster.icp:8500/stock-trader/trader:latest
+docker push mycluster.icp:8500/stock-trader/trader:latest
+
+kubectl --namespace stock-trader apply -f manifests/
+```
