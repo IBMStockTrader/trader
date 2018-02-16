@@ -70,7 +70,7 @@ public class AddStock extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"http://ibm.com/bluemix\">");
+		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");

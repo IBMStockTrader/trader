@@ -101,7 +101,7 @@ public class Summary extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"http://ibm.com/bluemix\">");
+		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");

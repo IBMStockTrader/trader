@@ -64,7 +64,7 @@ public class Login extends HttpServlet {
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"http://ibm.com/bluemix\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
+		writer.append("      <img src=\"https://www.ibm.com/events/think/\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
 		writer.append("</html>");
