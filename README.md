@@ -36,18 +36,10 @@ routing rules to control which one actually gets used at runtime.
   ```bash
   kubectl create secret generic jwt -n stock-trader --from-literal=audience=stock-trader --from-literal=issuer=http://stock-trader.ibm.com
   
-  kubectl create secret generic oidc -n stock-trader --from-literal=name=<OIDC_CLIENT_ID> 
-  --from-literal=issuer=<OIDC_ISSUER> --from-literal=auth=<OIDC_AUTH_ENDPOINT> 
-  --from-literal=token=<OIDC_TOKEN_ENDPOINT> 
-  --from-literal=id=<OIDC_CLIENT_ID> --from-literal=secret=<OIDC_CLIENT_SECRET> --from-literal=key=<OIDC_CERTIFICATE> 
-  --from-literal=nodeport=https://<TRADER_HOSTNAME>:<TRADER_HOSTPORT>
+  kubectl create secret generic oidc -n stock-trader --from-literal=name=<OIDC_CLIENT_ID> --from-literal=issuer=<OIDC_ISSUER> --from-literal=auth=<OIDC_AUTH_ENDPOINT> --from-literal=token=<OIDC_TOKEN_ENDPOINT> --from-literal=id=<OIDC_CLIENT_ID> --from-literal=secret=<OIDC_CLIENT_SECRET> --from-literal=key=<OIDC_CERTIFICATE> --from-literal=nodeport=https://<TRADER_HOSTNAME>:<TRADER_HOSTPORT>
   
   # Example oidc:
-  kubectl create secret generic oidc -n stock-trader --from-literal=name=blueLogin 
-  --from-literal=issuer=https://prepiam.toronto.ca.ibm.com --from-literal=auth=https://iam.ibm
-  .com/idaas/oidc/endpoint/default/authorize --from-literal=token=https://iam.ibm
-  .com/idaas/oidc/endpoint/default/token --from-literal=id=N2k3kD3kks9256x3 --from-literal=secret=I33kkj2k330023 
-  --from-literal=key=idaaskey --from-literal=nodeport=https://10.42.95.159:32389
+  kubectl create secret generic oidc -n stock-trader --from-literal=name=blueLogin --from-literal=issuer=https://prepiam.toronto.ca.ibm.com --from-literal=auth=https://iam.ibm  .com/idaas/oidc/endpoint/default/authorize --from-literal=token=https://iam.ibm.com/idaas/oidc/endpoint/default/token --from-literal=id=N2k3kD3kks9256x3 --from-literal=secret=I33kkj2k330023 --from-literal=key=idaaskey --from-literal=nodeport=https://10.42.95.159:32389
   ```
   
   You'll also need to enable login to the IBM Cloud Private internal Docker registry by following [these steps]
