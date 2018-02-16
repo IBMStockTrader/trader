@@ -14,9 +14,9 @@ spec:
     spec:
       containers:
       - name: trader
-        image: trader:latest # Microservice Builder
-#       image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
-#       image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Container Service
+        #image: trader:latest # Microservice Builder
+        image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
+        #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Container Service
         env:
           - name: OIDC_NAME
             valueFrom:

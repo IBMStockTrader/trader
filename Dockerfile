@@ -18,5 +18,6 @@ COPY server.xml /config/server.xml
 COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
 COPY key.jks /config/resources/security/key.jks
 COPY validationKeystore.jks /config/resources/security/validationKeystore.jks
+COPY keystore.xml /config/configDropins/defaults/keystore.xml
 # COPY ltpa.keys /output/resources/security/ltpa.keys
 RUN installUtility install --acceptLicense defaultServer
