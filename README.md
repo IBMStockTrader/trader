@@ -14,10 +14,15 @@
    limitations under the License.
 -->
 
-The *trader* service provides the UI for the *Portfolio* sample.  The main entry point is the **summary**
-servlet, which lets you choose an operation and a portfolio to act upon.  It transfers control to other
-servlets, such as **addPortfolio**, **viewPortfolio**, and **addStock**, each of which transfers control back
-to **summary** when done.  The **viewPortfolio** and **addStock** servlets expect a query param named *owner*.
+The *trader* microservice provides the UI for the *Stock Trader* sample.  It calls the **portfolio** microservice,
+which then calls the **stock-quote** and **loyalty-level** microservices.
+
+![Architecural Diagram](stock-trader.png)
+
+The main entry point is the **summary** servlet, which lets you choose an operation and a portfolio to act upon.  It
+transfers control to other servlets, such as **addPortfolio**, **viewPortfolio**, and **addStock**, each of which
+transfers control back to **summary** when done.  The **viewPortfolio** and **addStock** servlets expect a query param
+named *owner*.
 
 Each page has a header and footer image, and there's an index.html that redirects to the **summary** servlet.
 
@@ -28,8 +33,8 @@ contains all of the REST calls to the Portfolio microservice, and appropriate JS
 You can hit the main entry point by entering a URL such as `http://localhost:9080/trader/summary` in your
 browser's address bar.
 
-This is version 1 of trader.  See the **trader-v2** repository for an alternate version.  We use **Istio**
-routing rules to control which one actually gets used at runtime.
+This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deliberately simplistic.  See the
+**tradr** repository for an alternate, more professional-looking version, implemented in **JavaScript** and **Vue**.
 
  ### Prerequisites for ICP Deployment
  This project requires two secrets: `jwt` and `oidc`.  You create these secrets by running:
