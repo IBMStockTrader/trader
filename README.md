@@ -17,7 +17,7 @@
 The *trader* microservice provides the UI for the *Stock Trader* sample.  It calls the **portfolio** microservice,
 which then calls the **stock-quote** and **loyalty-level** microservices.
 
-![Architecural Diagram](stock-trader.png)
+![Architecural Diagram](lab/stock-trader.png)
 
 The main entry point is the **summary** servlet, which lets you choose an operation and a portfolio to act upon.  It
 transfers control to other servlets, such as **addPortfolio**, **viewPortfolio**, and **addStock**, each of which
