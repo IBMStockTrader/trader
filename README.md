@@ -34,7 +34,7 @@ You can hit the main entry point by entering a URL such as `http://localhost:908
 browser's address bar.
 
 This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deliberately simplistic.  See the
-**tradr** repository for an alternate, more professional-looking version, implemented in **JavaScript** and **Vue**.
+**tradr** sibling repository for an alternate, more professional-looking version, implemented in **JavaScript** and **Vue**.
 
  ### Prerequisites for ICP Deployment
  This project requires two secrets: `jwt` and `oidc`.  You create these secrets by running:
@@ -47,9 +47,9 @@ This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deli
   kubectl create secret generic oidc -n stock-trader --from-literal=name=blueLogin --from-literal=issuer=https://iam.toronto.ca.ibm.com --from-literal=auth=https://iam.ibm.com/idaas/oidc/endpoint/default/authorize --from-literal=token=https://iam.ibm.com/idaas/oidc/endpoint/default/token --from-literal=id=N2k3kD3kks9256x3 --from-literal=secret=I33kkj2k330023 --from-literal=key=idaaskey --from-literal=nodeport=https://10.42.95.159:32389
   ```
   
-  You'll also need to enable login to the IBM Cloud Private internal Docker registry by following [these steps]
-  (https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/manage_images/configuring_docker_cli.html).  Don't 
-  forget to restart Docker after adding your cert.  On macOS you can restart Docker by running:
+  You'll also need to enable login to the IBM Cloud Private internal Docker registry by following
+  [these steps](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/manage_images/configuring_docker_cli.html).
+  Don't forget to restart Docker after adding your cert.  On macOS you can restart Docker by running:
   ```bash
   osascript -e 'quit app "Docker"'
   open -a Docker
@@ -59,7 +59,7 @@ This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deli
 To build `trader` clone this repo and run:
 ```bash
 mvn package
-docker build -t trader:latest -t <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest .
+docker build -t trader .
 docker tag trader:latest <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
 docker push <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
 
@@ -68,7 +68,7 @@ kubectl apply -f manifests/
 
 In practice this means you'll run something like:
 ```bash
-docker build -t trader:latest -t mycluster.icp:8500/stock-trader/trader:latest .
+docker build -t trader .
 docker tag trader:latest mycluster.icp:8500/stock-trader/trader:latest
 docker push mycluster.icp:8500/stock-trader/trader:latest
 
