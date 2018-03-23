@@ -46,8 +46,6 @@ public class Login extends HttpServlet {
 		writer.append("  <body>");
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
 		writer.append("    <p/>");
-		writer.append("    Please login using your <b>Blue Pages</b> <i>w3id</i> e-mail/password:");
-		writer.append("    <p/>");
 		writer.append("    <form method=\"post\"/>");
 		writer.append("      <table>");
 		writer.append("        <tr>");
@@ -63,8 +61,8 @@ public class Login extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"http://ibm.com/bluemix\">");
-		writer.append("      <img src=\"https://www.ibm.com/events/think/\"/>");
+		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
 		writer.append("</html>");
