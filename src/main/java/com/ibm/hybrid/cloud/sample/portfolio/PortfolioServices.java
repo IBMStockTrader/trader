@@ -28,16 +28,40 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
 
+//CDI 1.2
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+
+//mpConfig 1.2
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 //JSON-P (JSR 353).  The replaces my old usage of IBM's JSON4J (package com.ibm.json.java)
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
+
+//Servlet 3.1 (JSR 340)
 import javax.servlet.http.HttpServletRequest;
 
+
+@RequestScoped
 public class PortfolioServices {
 	private static final String PORTFOLIO_SERVICE = "http://portfolio-service:9080/portfolio";
+	private static PortfolioServices singleton = null;
+
+	private String jwtAudience = System.getenv("JWT_AUDIENCE"); //use mpConfig instead of this
+//	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
+
+	private String jwtIssuer = System.getenv("JWT_ISSUER"); //use mpConfig instead of this
+//	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
+
+
+	private static PortfolioServices getSingleton() {
+		if (singleton == null) singleton = new PortfolioServices();
+		return singleton; //CDI requires non-static methods
+	}
 
 	public static JsonArray getPortfolios(HttpServletRequest request) {
 		JsonArray portfolios = null;
@@ -107,8 +131,9 @@ public class PortfolioServices {
 	private static JsonStructure invokeREST(HttpServletRequest request, String verb, String uri) throws IOException {
 		//Get the logged in user
 		String userName = request.getUserPrincipal().getName();
-		System.out.println("*** debug: userName: "+ userName);
 		if (userName == null) userName = "null";
+
+		System.out.println(verb+" "+uri+" called by "+ userName);
 
 		URL url = new URL(uri);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -120,7 +145,7 @@ public class PortfolioServices {
 		conn.setDoOutput(true);
 		
 		// add the JWT token to the authorization header. 
-		String jwtToken = createJWT(userName);
+		String jwtToken = getSingleton().createJWT(userName);
 		conn.setRequestProperty("Authorization", "Bearer "+ jwtToken);
 
 		InputStream stream = conn.getInputStream();
@@ -137,8 +162,9 @@ public class PortfolioServices {
 	 * Create Json Web Token.
 	 * return: the base64 encoded and signed token. 
 	 */
-	private static String createJWT(String userName){
-		String jwtTokenString = null;		
+	private String createJWT(String userName){
+		String jwtTokenString = null;
+		
 		try {
 			// create() uses default settings.  
 			// For other settings, specify a JWTBuilder element in server.xml
@@ -150,15 +176,13 @@ public class PortfolioServices {
 			builder.claim("upn", userName);
 
 			// Set the audience to our sample's value
-			String audience = System.getenv("JWT_AUDIENCE");
-			builder.claim("aud", audience);
+			builder.claim("aud", jwtAudience);
 
 			//builder.claim("groups", groups);
 
 			//convention is the issuer is the url, but for demo portability a fixed value is used.
 			//builder.claim("iss", request.getRequestURL().toString());
-			String issuer = System.getenv("JWT_ISSUER");
-			builder.claim("iss", issuer);
+			builder.claim("iss", jwtIssuer);
 
 			JwtToken theToken = builder.buildJwt();			
 			jwtTokenString = theToken.compact();
@@ -166,7 +190,7 @@ public class PortfolioServices {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
-		System.out.println("*** debug: JWT: "+ jwtTokenString);
+
 		return jwtTokenString;
 	}
 
@@ -192,7 +216,6 @@ public class PortfolioServices {
 		String workaroundURL = "";
 
 		String requestURL = request.getRequestURL().toString();
-		System.out.println(requestURL);
 		if (requestURL.startsWith("https:") && requestURL.contains(":80/")) {
 			//we got redirected from http to https, but the port number didn't get updated!
 			workaroundURL = requestURL.replace(":80/", ":443/");
