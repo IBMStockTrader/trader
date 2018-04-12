@@ -97,8 +97,8 @@ public class Summary extends HttpServlet {
 		writer.append(getTableRows(request));
 		writer.append("      </table>");
 		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\">");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
@@ -125,10 +125,6 @@ public class Summary extends HttpServlet {
 
 				HttpSession session = request.getSession();
 				if (session != null) session.invalidate();
-
-				Cookie cookie = new Cookie("user", ""); //clear text user id that can be used in Istio routing rules
-				cookie.setMaxAge(0);
-				response.addCookie(cookie); //remove our Istio-related user cookie on logout
 
 				response.sendRedirect(prefix+"login");
 			} else {

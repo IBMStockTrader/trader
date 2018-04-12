@@ -24,6 +24,7 @@ import com.ibm.websphere.security.jwt.JwtToken;
 //Standard HTTP request classes.  Maybe replace these with use of JAX-RS 2.0 client package instead...
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -67,7 +68,7 @@ public class PortfolioServices {
 		JsonArray portfolios = null;
 
 		try {
-			portfolios = (JsonArray) invokeREST(request, "GET", PORTFOLIO_SERVICE);
+			portfolios = (JsonArray) invokeREST(request, "GET", PORTFOLIO_SERVICE, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 
@@ -83,7 +84,7 @@ public class PortfolioServices {
 		JsonObject portfolio = null;
 
 		try {
-			portfolio = (JsonObject) invokeREST(request, "GET", PORTFOLIO_SERVICE+"/"+owner);
+			portfolio = (JsonObject) invokeREST(request, "GET", PORTFOLIO_SERVICE+"/"+owner, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -95,7 +96,7 @@ public class PortfolioServices {
 		JsonObject portfolio = null;
 
 		try {
-			portfolio = (JsonObject) invokeREST(request, "POST", PORTFOLIO_SERVICE+"/"+owner);
+			portfolio = (JsonObject) invokeREST(request, "POST", PORTFOLIO_SERVICE+"/"+owner, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -108,7 +109,7 @@ public class PortfolioServices {
 
 		try {
 			String uri = PORTFOLIO_SERVICE+"/"+owner+"?symbol="+symbol+"&shares="+shares;
-			portfolio = (JsonObject) invokeREST(request, "PUT", uri);
+			portfolio = (JsonObject) invokeREST(request, "PUT", uri, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -120,7 +121,7 @@ public class PortfolioServices {
 		JsonObject portfolio = null;
 
 		try {
-			portfolio = (JsonObject) invokeREST(request, "DELETE", PORTFOLIO_SERVICE+"/"+owner);
+			portfolio = (JsonObject) invokeREST(request, "DELETE", PORTFOLIO_SERVICE+"/"+owner, null);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -128,7 +129,20 @@ public class PortfolioServices {
 		return portfolio;
 	}
 
-	private static JsonStructure invokeREST(HttpServletRequest request, String verb, String uri) throws IOException {
+	public static JsonObject submitFeedback(HttpServletRequest request, String owner, JsonObject feedback) {
+		JsonObject response = null;
+
+		try {
+			String text = feedback.toString();
+			response = (JsonObject) invokeREST(request, "POST", PORTFOLIO_SERVICE+"/"+owner+"/feedback", text);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+
+		return response;
+	}
+
+	private static JsonStructure invokeREST(HttpServletRequest request, String verb, String uri, String payload) throws IOException {
 		//Get the logged in user
 		String userName = request.getUserPrincipal().getName();
 		if (userName == null) userName = "null";
@@ -147,6 +161,13 @@ public class PortfolioServices {
 		// add the JWT token to the authorization header. 
 		String jwtToken = getSingleton().createJWT(userName);
 		conn.setRequestProperty("Authorization", "Bearer "+ jwtToken);
+
+		if (payload != null) {
+			OutputStream body = conn.getOutputStream();
+			body.write(payload.getBytes());
+			body.flush();
+			body.close();
+		}
 
 		InputStream stream = conn.getInputStream();
 

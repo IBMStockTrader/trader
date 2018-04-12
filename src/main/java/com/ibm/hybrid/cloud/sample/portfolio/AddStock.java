@@ -18,7 +18,10 @@ package com.ibm.hybrid.cloud.sample.portfolio;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 
+import javax.json.JsonObject;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -34,11 +37,27 @@ import javax.servlet.http.HttpServletResponse;
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private NumberFormat currency = null;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public AddStock() {
+		super();
+
+		currency = NumberFormat.getNumberInstance();
+		currency.setMinimumFractionDigits(2);
+		currency.setMaximumFractionDigits(2);
+		currency.setRoundingMode(RoundingMode.HALF_UP);
+	}
+
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
+
+		String commission = getCommission(request, owner);
 
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
@@ -54,20 +73,24 @@ public class AddStock extends HttpServlet {
 		writer.append("    <form method=\"post\"/>");
 		writer.append("      <table>");
 		writer.append("        <tr>");
-		writer.append("          <td><b>Owner:</b></th>");
+		writer.append("          <td><b>Owner:</b></td>");
 		writer.append("          <td>"+owner+"</td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
-		writer.append("          <td><b>Stock Symbol:</b></th>");
+		writer.append("          <td><b>Commission:</b></td>");
+		writer.append("          <td>"+commission+"</td>");
+		writer.append("        </tr>");
+		writer.append("        <tr>");
+		writer.append("          <td><b>Stock Symbol:</b></td>");
 		writer.append("          <td><input type=\"text\" name=\"symbol\"></td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
-		writer.append("          <td><b>Number of Shares:</b></th>");
+		writer.append("          <td><b>Number of Shares:</b></td>");
 		writer.append("          <td><input type=\"text\" name=\"shares\"></td>");
 		writer.append("        </tr>");
 		writer.append("      </table>");
 		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
@@ -96,5 +119,17 @@ public class AddStock extends HttpServlet {
 		String prefix = PortfolioServices.getRedirectWorkaround(request);
 
 		response.sendRedirect(prefix+"summary");
+	}
+
+	private String getCommission(HttpServletRequest request, String owner) {
+		String formattedCommission = "<b>Free!</b>";
+		try {
+			JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
+			double commission = portfolio.getJsonNumber("nextCommission").doubleValue();
+			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		return formattedCommission;
 	}
 }
