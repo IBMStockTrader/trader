@@ -14,7 +14,7 @@
 <server description="Trader UI server">
     <!-- Enable features -->
     <featureManager>
-        <feature>microProfile-1.2</feature>
+        <feature>microProfile-1.3</feature>
         <feature>appSecurity-2.0</feature>
         <feature>jwt-1.0</feature>
         <feature>logstashCollector-1.0</feature>
@@ -36,7 +36,7 @@
 
     <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore" />
 
-<!--
+<!-->
     <basicRegistry id="basic" realm="BasicRegistry">
         <user name="admin" password="admin"/>
         <user name="stock" password="trader"/>
@@ -63,7 +63,8 @@
             groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
     </ldapRegistry>
 
-    <ltpa expiration="1h"/> -->
+    <ltpa expiration="1h"/>
+ -->
 
     <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
            clientSecret="${env.OIDC_SECRET}" authorizationEndpoint="${env.OIDC_AUTH}"
@@ -71,7 +72,7 @@
            issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
            redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
     </oidcLogin>
-
+ 
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
         useOnlyCustomCookieName="true" ssoUseDomainFromURL="true"/>
