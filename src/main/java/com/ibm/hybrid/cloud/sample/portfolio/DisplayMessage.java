@@ -18,7 +18,7 @@ package com.ibm.hybrid.cloud.sample.portfolio;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URLEncoder;
+import java.net.URLDecoder;
 
 //JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
 import javax.json.Json;
@@ -35,18 +35,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class SubmitFeedback
+ * Servlet implementation class DisplayMessage
  */
-@WebServlet(description = "Submit Feedback servlet", urlPatterns = { "/feedback" })
+@WebServlet(description = "Display Message servlet", urlPatterns = { "/message" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
-public class SubmitFeedback extends HttpServlet {
+public class DisplayMessage extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-	private static final String SUBMIT = "Submit";
     
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String encodedMessage = request.getParameter("message");
+		String message = URLDecoder.decode(encodedMessage, "UTF-8");
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
 		writer.append("<html>");
@@ -57,13 +58,10 @@ public class SubmitFeedback extends HttpServlet {
 		writer.append("  <body>");
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
 		writer.append("    <p/>");
-		writer.append("    <i>Please share your feedback on this tool!</i>");
+		writer.append("    "+message);
 		writer.append("    <p/>");
 		writer.append("    <form method=\"post\"/>");
-		writer.append("      <textarea name=\"feedback\" rows=\"10\" cols=\"70\"></textarea>");
-		writer.append("      <p/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\" />");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Cancel\" style=\"font-family: sans-serif; font-size: 16px;\" />");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"OK\" style=\"font-family: sans-serif; font-size: 16px;\" />");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
@@ -78,34 +76,11 @@ public class SubmitFeedback extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
-		String submit = request.getParameter("submit");
 
-		if (submit != null) {
-			//In minikube and CFC, the port number is wrong for the https redirect.
-			//This will fix that if needed - otherwise, it just returns an empty string
-			//so that we can still use relative paths
-			String prefix = PortfolioServices.getRedirectWorkaround(request);
-
-			if (submit.equals(SUBMIT)) {
-				String feedback = request.getParameter("feedback");
-				System.out.println("owner="+owner+", feedback="+feedback);
-				if ((feedback!=null) && !feedback.equals("") && (owner!=null) && !owner.equals("")) {
-					JsonObjectBuilder builder = Json.createObjectBuilder();
-					builder.add("text", feedback);
-					JsonObject text = builder.build();
-					System.out.println("Calling portfolio/"+owner+"/feedback with following JSON: "+text.toString());
-					JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					System.out.println("portfolio/"+owner+"/feedback returned the following JSON: "+result.toString());
-					String message = result.getString("message");
-					String encodedMessage = URLEncoder.encode(message, "UTF-8");
-					response.sendRedirect(prefix+"message?owner="+owner+"&message="+encodedMessage); //send control to the DisplayMessage servlet
-				} else {
-					response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
-				}
-			} else {
-				response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
-			}
-		}
-
+		//In minikube and CFC, the port number is wrong for the https redirect.
+		//This will fix that if needed - otherwise, it just returns an empty string
+		//so that we can still use relative paths
+		String prefix = PortfolioServices.getRedirectWorkaround(request);
+		response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
 	}
 }
