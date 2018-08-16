@@ -16,9 +16,19 @@
 
 package com.ibm.hybrid.cloud.sample.portfolio;
 
-import java.io.IOException;
-import java.io.Writer;
+//JSON Web Token (JWT) construction
+import com.ibm.websphere.security.jwt.InvalidBuilderException;
+import com.ibm.websphere.security.jwt.JwtBuilder;
+import com.ibm.websphere.security.jwt.JwtToken;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+//Servlet 3.1
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -32,6 +42,8 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(description = "Login servlet", urlPatterns = { "/login" })
 public class Login extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static Logger logger = Logger.getLogger(Login.class.getName());
+
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -61,7 +73,7 @@ public class Login extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
@@ -89,14 +101,60 @@ public class Login extends HttpServlet {
 			se.printStackTrace();
 		}
 
-		//In minikube and CFC, the port number is wrong for the https redirect.
-		//This will fix that if needed - otherwise, it just returns an empty string
-		//so that we can still use relative paths
-		String prefix = PortfolioServices.getRedirectWorkaround(request);
-
-		String url = prefix+"error";
-		if (success) url = prefix+"summary";
+		String url = "error";
+		if (success) url = "summary";
 
 		response.sendRedirect(url);
+	}
+
+	/**
+	 * Create Json Web Token.
+	 * return: the base64 encoded and signed token. 
+	 */
+	static String createJWT(String userName, String jwtAudience, String jwtIssuer) {
+		String jwtTokenString = null;
+
+		try {
+			// create() uses default settings.  
+			// For other settings, specify a JWTBuilder element in server.xml
+			// and call create(builder id)
+			JwtBuilder builder = JwtBuilder.create();
+
+			if (userName == null) userName = "null";
+
+			// Put the user info into a JWT Token
+			builder.subject(userName);
+			builder.claim("upn", userName);
+
+			// Set the audience to our sample's value
+			builder.claim("aud", jwtAudience);
+
+			//builder.claim("groups", groups);
+
+			//convention is the issuer is the url, but for demo portability a fixed value is used.
+			//builder.claim("iss", request.getRequestURL().toString());
+			builder.claim("iss", jwtIssuer);
+
+			JwtToken theToken = builder.buildJwt();			
+			jwtTokenString = theToken.compact();
+			if (jwtTokenString!=null) logger.info("Successfully built a JWT");
+		} catch (Throwable t) {
+			logger.warning("An error occurred building a JWT!");
+			logException(t);
+			throw new RuntimeException(t);
+		}
+
+		return jwtTokenString;
+	}
+
+	static void logException(Throwable t) {
+		logger.warning(t.getClass().getName()+": "+t.getMessage());
+
+		//only log the stack trace if the level has been set to at least FINE
+		if (logger.isLoggable(Level.FINE)) {
+			StringWriter writer = new StringWriter();
+			t.printStackTrace(new PrintWriter(writer));
+			logger.fine(writer.toString());
+		}
 	}
 }

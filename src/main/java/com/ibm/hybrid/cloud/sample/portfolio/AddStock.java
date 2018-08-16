@@ -20,8 +20,16 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.logging.Logger;
 
+//CDI 1.2
+import javax.inject.Inject;
+import javax.enterprise.context.RequestScoped;
+
+//JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
 import javax.json.JsonObject;
+
+//Servlet 3.1
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -30,14 +38,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+//mpConfig 1.2
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+//mpRestClient 1.0
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 /**
  * Servlet implementation class AddStock
  */
 @WebServlet(description = "Add Stock servlet", urlPatterns = { "/addStock" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
+@RequestScoped
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static Logger logger = Logger.getLogger(AddStock.class.getName());
 	private NumberFormat currency = null;
+
+	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
+	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -93,7 +113,7 @@ public class AddStock extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
@@ -110,25 +130,26 @@ public class AddStock extends HttpServlet {
 
 		if ((shareString!=null) && !shareString.equals("")) {
 			int shares = Integer.parseInt(shareString);
-			PortfolioServices.updatePortfolio(request, owner, symbol, shares);
+			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
+			String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
+			portfolioClient.updatePortfolio("Bearer "+jwt, owner, symbol, shares);
 		}
 
-		//In minikube and CFC, the port number is wrong for the https redirect.
-		//This will fix that if needed - otherwise, it just returns an empty string
-		//so that we can still use relative paths
-		String prefix = PortfolioServices.getRedirectWorkaround(request);
-
-		response.sendRedirect(prefix+"summary");
+		response.sendRedirect("summary");
 	}
 
 	private String getCommission(HttpServletRequest request, String owner) {
 		String formattedCommission = "<b>Free!</b>";
 		try {
-			JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
+			logger.info("Getting commission");
+			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
+			String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
+			JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt, owner);
 			double commission = portfolio.getJsonNumber("nextCommission").doubleValue();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
+			logger.info("Got commission: "+formattedCommission);
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Login.logException(t);
 		}
 		return formattedCommission;
 	}

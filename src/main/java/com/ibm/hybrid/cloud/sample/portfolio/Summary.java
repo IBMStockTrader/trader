@@ -16,29 +16,47 @@
 
 package com.ibm.hybrid.cloud.sample.portfolio;
 
+
 import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 
+//JSR 47 Logging
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+//CDI 1.2
+import javax.inject.Inject;
+import javax.enterprise.context.RequestScoped;
+
+//JSON-P 1.0
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+//Servlet 3.1
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+//mpConfig 1.2
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+//mpRestClient 1.0
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
 
 /**
  * Servlet implementation class Summary
  */
 @WebServlet(description = "Portfolio summary servlet", urlPatterns = { "/summary" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
+@RequestScoped
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String EDITOR   = "StockTrader";
@@ -47,7 +65,12 @@ public class Summary extends HttpServlet {
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
 	private static final String DELETE   = "delete";
+	private static Logger logger = Logger.getLogger(Summary.class.getName());
 	private NumberFormat currency = null;
+
+	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
+	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -101,7 +124,7 @@ public class Summary extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
@@ -115,18 +138,13 @@ public class Summary extends HttpServlet {
 		String submit = request.getParameter("submit");
 
 		if (submit != null) {
-			//In minikube and CFC, the port number is wrong for the https redirect.
-			//This will fix that if needed - otherwise, it just returns an empty string
-			//so that we can still use relative paths
-			String prefix = PortfolioServices.getRedirectWorkaround(request);
-
 			if (submit.equals(LOGOUT)) {
 				request.logout();
 
 				HttpSession session = request.getSession();
 				if (session != null) session.invalidate();
 
-				response.sendRedirect(prefix+"login");
+				response.sendRedirect("login");
 			} else {
 				String action = request.getParameter("action");
 				String owner = request.getParameter("owner");
@@ -134,13 +152,15 @@ public class Summary extends HttpServlet {
 				if (action != null) {
 
 					if (action.equals(CREATE)) {
-						response.sendRedirect(prefix+"addPortfolio"); //send control to the AddPortfolio servlet
+						response.sendRedirect("addPortfolio"); //send control to the AddPortfolio servlet
 					} else if (action.equals(RETRIEVE)) {
-						response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
+						response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
 					} else if (action.equals(UPDATE)) {
-						response.sendRedirect(prefix+"addStock?owner="+owner); //send control to the AddStock servlet
+						response.sendRedirect("addStock?owner="+owner); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
-						PortfolioServices.deletePortfolio(request, owner);
+//						PortfolioServices.deletePortfolio(request, owner);
+						String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
+						portfolioClient.deletePortfolio("Bearer "+jwt, owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -157,7 +177,17 @@ public class Summary extends HttpServlet {
 	private String getTableRows(HttpServletRequest request) {
 		StringBuffer rows = new StringBuffer();
 
-		JsonArray portfolios = PortfolioServices.getPortfolios(request);
+		if (portfolioClient==null) {
+			logger.warning("Injection of PortfolioClient failed!");
+		}
+
+		if (jwtAudience==null) {
+			logger.warning("Injection of ConfigProperty JWT_AUDIENCE failed!");
+		}
+
+//		JsonArray portfolios = PortfolioServices.getPortfolios(request);
+		String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
+		JsonArray portfolios = portfolioClient.getPortfolios("Bearer "+jwt);
 
 		for (int index=0; index<portfolios.size(); index++) {
 			JsonObject portfolio = (JsonObject) portfolios.get(index);

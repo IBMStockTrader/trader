@@ -64,7 +64,7 @@ public class DisplayMessage extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"OK\" style=\"font-family: sans-serif; font-size: 16px;\" />");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
@@ -77,10 +77,6 @@ public class DisplayMessage extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
-		//In minikube and CFC, the port number is wrong for the https redirect.
-		//This will fix that if needed - otherwise, it just returns an empty string
-		//so that we can still use relative paths
-		String prefix = PortfolioServices.getRedirectWorkaround(request);
-		response.sendRedirect(prefix+"viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
+		response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
 	}
 }

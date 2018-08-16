@@ -22,7 +22,14 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
+//CDI 1.2
+import javax.inject.Inject;
+import javax.enterprise.context.RequestScoped;
+
+//JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
 import javax.json.JsonObject;
+
+//Servlet 3.1
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -31,17 +38,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+//mpConfig 1.2
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+//mpRestClient 1.0
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+
 /**
  * Servlet implementation class ViewPortfolio
  */
 @WebServlet(description = "View Portfolio servlet", urlPatterns = { "/viewPortfolio" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
+@RequestScoped
 public class ViewPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final double ERROR = -1;
 	private static final String ERROR_STRING = "Error";
 	private static final String FEEDBACK = "Submit Feedback";
 	private NumberFormat currency = null;
+
+	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
+	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -61,7 +80,9 @@ public class ViewPortfolio extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
-		JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
+		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
+		String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
+		JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt, owner);
 
 		double overallTotal = 0.0;
 		String loyaltyLevel = null;
@@ -69,6 +90,8 @@ public class ViewPortfolio extends HttpServlet {
 		double commissions = 0.0;
 		int free = 0;
 		String sentiment = null;
+		JsonObject stocks = null;
+
 		try {
 			overallTotal = portfolio.getJsonNumber("total").doubleValue();
 			loyaltyLevel = portfolio.getString("loyalty");
@@ -76,11 +99,10 @@ public class ViewPortfolio extends HttpServlet {
 			commissions = portfolio.getJsonNumber("commissions").doubleValue();
 			free = portfolio.getInt("free");
 			sentiment = portfolio.getString("sentiment");
+			stocks = portfolio.getJsonObject("stocks");
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
 		}
-
-		JsonObject stocks = portfolio.getJsonObject("stocks");
 
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
@@ -94,7 +116,7 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("    <br/>");
 		writer.append("    <br/>");
 		writer.append("    <form method=\"post\"/>");
-		writer.append("      Stock Portfolio for "+owner+": <br/>");
+		writer.append("      Stock Portfolio for <b>"+owner+"</b>: <br/>");
 		writer.append("      <br/>");
 		writer.append("      <table border=\"1\" cellpadding=\"5\">");
 		writer.append("        <tr>");
@@ -139,7 +161,7 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit Feedback\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
-		writer.append("    <a href=\"https://www.ibm.com/events/think/\">");
+		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
 		writer.append("    </a>");
 		writer.append("  </body>");
@@ -154,15 +176,10 @@ public class ViewPortfolio extends HttpServlet {
 		String submit = request.getParameter("submit");
 
 		if (submit != null) {
-			//In minikube and CFC, the port number is wrong for the https redirect.
-			//This will fix that if needed - otherwise, it just returns an empty string
-			//so that we can still use relative paths
-			String prefix = PortfolioServices.getRedirectWorkaround(request);
-
 			if (submit.equals(FEEDBACK)) {
-				response.sendRedirect(prefix+"feedback?owner="+owner); //send control to the Feedback servlet
+				response.sendRedirect("feedback?owner="+owner); //send control to the Feedback servlet
 			} else {
-				response.sendRedirect(prefix+"summary"); //send control to the Summary servlet
+				response.sendRedirect("summary"); //send control to the Summary servlet
 			}
 		}
 	}
@@ -170,37 +187,39 @@ public class ViewPortfolio extends HttpServlet {
 	private String getTableRows(JsonObject stocks) {
 		StringBuffer rows = new StringBuffer();
 
-		Iterator<String> keys = stocks.keySet().iterator();
+		if (stocks != null) {
+			Iterator<String> keys = stocks.keySet().iterator();
 
-		while (keys.hasNext()) {
-			String key = keys.next();
-			JsonObject stock = stocks.getJsonObject(key);
-
-			String symbol = stock.getString("symbol");
-			int shares = stock.getInt("shares");
-			double price = stock.getJsonNumber("price").doubleValue();
-			String date = stock.getString("date");
-			double total = stock.getJsonNumber("total").doubleValue();
-			double commission = stock.getJsonNumber("commission").doubleValue();
-
-			String formattedPrice = "$"+currency.format(price);
-			String formattedTotal = "$"+currency.format(total);
-			String formattedCommission = "$"+currency.format(commission);
-
-			if (price == ERROR) {
-				formattedPrice = ERROR_STRING;
-				formattedTotal = ERROR_STRING;
-				formattedCommission = ERROR_STRING;
+			while (keys.hasNext()) {
+				String key = keys.next();
+				JsonObject stock = stocks.getJsonObject(key);
+	
+				String symbol = stock.getString("symbol");
+				int shares = stock.getInt("shares");
+				double price = stock.getJsonNumber("price").doubleValue();
+				String date = stock.getString("date");
+				double total = stock.getJsonNumber("total").doubleValue();
+				double commission = stock.getJsonNumber("commission").doubleValue();
+	
+				String formattedPrice = "$"+currency.format(price);
+				String formattedTotal = "$"+currency.format(total);
+				String formattedCommission = "$"+currency.format(commission);
+	
+				if (price == ERROR) {
+					formattedPrice = ERROR_STRING;
+					formattedTotal = ERROR_STRING;
+					formattedCommission = ERROR_STRING;
+				}
+	
+				rows.append("        <tr>");
+				rows.append("          <td>"+symbol+"</td>");
+				rows.append("          <td>"+shares+"</td>");
+				rows.append("          <td>"+formattedPrice+"</td>");
+				rows.append("          <td>"+date+"</td>");
+				rows.append("          <td>"+formattedTotal+"</td>");
+				rows.append("          <td>"+formattedCommission+"</td>");
+				rows.append("        </tr>");
 			}
-
-			rows.append("        <tr>");
-			rows.append("          <td>"+symbol+"</td>");
-			rows.append("          <td>"+shares+"</td>");
-			rows.append("          <td>"+formattedPrice+"</td>");
-			rows.append("          <td>"+date+"</td>");
-			rows.append("          <td>"+formattedTotal+"</td>");
-			rows.append("          <td>"+formattedCommission+"</td>");
-			rows.append("        </tr>");
 		}
 
 		return rows.toString();
