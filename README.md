@@ -14,8 +14,9 @@
    limitations under the License.
 -->
 
-The *trader* microservice provides the UI for the *Stock Trader* sample.  It calls the **portfolio** microservice,
-which then calls the **stock-quote** and **loyalty-level** microservices.
+The **trader** microservice provides the UI for the *Stock Trader* sample.  It calls the **portfolio** microservice,
+which then calls various other services as needed.  It uses the *mpRestClient* to make the call, and passes a JWT on the
+request, which **portfolio** checks for via *mpJwt*.
 
 ![Architecural Diagram](lab/stock-trader.png)
 
@@ -31,7 +32,8 @@ is no use of **JavaScript** or anything fancy.  All of the real logic is in the 
 contains all of the REST calls to the Portfolio microservice, and appropriate JSON wrangling.
 
 You can hit the main entry point by entering a URL such as `http://localhost:9080/trader/summary` in your
-browser's address bar.
+browser's address bar.  Or in a Kubernetes environment, you'd replace `localhost` with your proxy node address, and
+`9080` with your node port or ingress port.  You also need to use `https` if using the IBMid version.
 
 This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deliberately simplistic.  See the
 **tradr** sibling repository for an alternate, more professional-looking version, implemented in **JavaScript** and **Vue**.
