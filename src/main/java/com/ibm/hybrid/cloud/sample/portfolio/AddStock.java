@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpConfig 1.2
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import org.eclipse.microprofile.jwt.JsonWebToken;
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -58,6 +58,8 @@ public class AddStock extends HttpServlet {
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
 	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
+
+	private @Inject JsonWebToken jwt;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -131,8 +133,7 @@ public class AddStock extends HttpServlet {
 		if ((shareString!=null) && !shareString.equals("")) {
 			int shares = Integer.parseInt(shareString);
 			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-			String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-			portfolioClient.updatePortfolio("Bearer "+jwt, owner, symbol, shares);
+			portfolioClient.updatePortfolio("Bearer "+jwt.getRawToken(), owner, symbol, shares);
 		}
 
 		response.sendRedirect("summary");
@@ -143,8 +144,7 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-			JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt, owner);
+			JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
 			double commission = portfolio.getJsonNumber("nextCommission").doubleValue();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);

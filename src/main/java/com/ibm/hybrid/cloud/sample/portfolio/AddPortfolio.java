@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpConfig 1.2
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import org.eclipse.microprofile.jwt.JsonWebToken;
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -50,6 +50,8 @@ public class AddPortfolio extends HttpServlet {
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
 	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
+
+	private @Inject JsonWebToken jwt;
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -88,8 +90,7 @@ public class AddPortfolio extends HttpServlet {
 
 		if ((owner!=null) && !owner.equals("")) {
 			//PortfolioServices.createPortfolio(request, owner);
-			String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-			portfolioClient.createPortfolio("Bearer "+jwt, owner);
+			portfolioClient.createPortfolio("Bearer "+jwt.getRawToken(), owner);
 		}
 
 		response.sendRedirect("summary"); //send control to the Summary servlet

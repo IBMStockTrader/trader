@@ -16,7 +16,7 @@
     <featureManager>
         <feature>microProfile-1.3</feature>
         <feature>appSecurity-2.0</feature>
-        <feature>jwt-1.0</feature>
+        <feature>jwtSso-1.0</feature>
         <feature>logstashCollector-1.0</feature>
 <!--    <feature>ldapRegistry-3.0</feature> -->
         <feature>socialLogin-1.0</feature>
@@ -34,9 +34,12 @@
 
     <sslDefault sslRef="RpSSLConfig" />
 
-    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="validationKeystore" />
+    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" />
 
-<!-->
+    <jwtSso jwtBuilderRef="myBuilder"/>
+    <jwtBuilder id="myBuilder" keyStoreRef="defaultKeyStore" keyAlias="default" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
+    <mpJwt id="myMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="default" ignoreApplicationAuthMethod="false"/>
+
     <basicRegistry id="basic" realm="BasicRegistry">
         <user name="admin" password="admin"/>
         <user name="stock" password="trader"/>
@@ -55,7 +58,7 @@
     <administrator-role>
     	<user>admin</user>
     </administrator-role>
--->
+
 
     <!-- Define an LDAP configuration for BluePages.
     <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
@@ -66,12 +69,12 @@
     <ltpa expiration="1h"/>
  -->
 
-    <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
+    <!-- <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
            clientSecret="${env.OIDC_SECRET}" authorizationEndpoint="${env.OIDC_AUTH}"
            tokenEndpoint="${env.OIDC_TOKEN}" scope="openid profile email" userNameAttribute="email"
            issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
            redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
-    </oidcLogin>
+    </oidcLogin> -->
  
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"

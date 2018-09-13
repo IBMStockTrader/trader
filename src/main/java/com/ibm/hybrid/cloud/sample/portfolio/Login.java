@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,46 +107,6 @@ public class Login extends HttpServlet {
 		if (success) url = "summary";
 
 		response.sendRedirect(url);
-	}
-
-	/**
-	 * Create Json Web Token.
-	 * return: the base64 encoded and signed token. 
-	 */
-	static String createJWT(String userName, String jwtAudience, String jwtIssuer) {
-		String jwtTokenString = null;
-
-		try {
-			// create() uses default settings.  
-			// For other settings, specify a JWTBuilder element in server.xml
-			// and call create(builder id)
-			JwtBuilder builder = JwtBuilder.create();
-
-			if (userName == null) userName = "null";
-
-			// Put the user info into a JWT Token
-			builder.subject(userName);
-			builder.claim("upn", userName);
-
-			// Set the audience to our sample's value
-			builder.claim("aud", jwtAudience);
-
-			//builder.claim("groups", groups);
-
-			//convention is the issuer is the url, but for demo portability a fixed value is used.
-			//builder.claim("iss", request.getRequestURL().toString());
-			builder.claim("iss", jwtIssuer);
-
-			JwtToken theToken = builder.buildJwt();			
-			jwtTokenString = theToken.compact();
-			if (jwtTokenString!=null) logger.info("Successfully built a JWT");
-		} catch (Throwable t) {
-			logger.warning("An error occurred building a JWT!");
-			logException(t);
-			throw new RuntimeException(t);
-		}
-
-		return jwtTokenString;
 	}
 
 	static void logException(Throwable t) {

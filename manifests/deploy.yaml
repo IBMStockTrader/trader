@@ -20,46 +20,6 @@ spec:
         #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
         #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Container Service
         env:
-          - name: OIDC_NAME
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: name
-          - name: OIDC_ISSUER
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: issuer
-          - name: OIDC_AUTH
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: auth
-          - name: OIDC_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: token
-          - name: OIDC_ID
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: id
-          - name: OIDC_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: secret
-          - name: OIDC_KEY
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: key
-          - name: OIDC_NODEPORT
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: nodeport
           - name: JWT_AUDIENCE
             valueFrom:
               secretKeyRef:

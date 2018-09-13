@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpConfig 1.2
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import org.eclipse.microprofile.jwt.JsonWebToken;
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -59,6 +59,8 @@ public class SubmitFeedback extends HttpServlet {
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
 	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
+
+	private @Inject JsonWebToken jwt;
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -107,8 +109,7 @@ public class SubmitFeedback extends HttpServlet {
 
 					logger.info("Calling portfolio/"+owner+"/feedback with following JSON: "+text.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-					JsonObject result = portfolioClient.submitFeedback("Bearer "+jwt, owner, text);
+					JsonObject result = portfolioClient.submitFeedback("Bearer "+jwt.getRawToken(), owner, text);
 
 					logger.info("portfolio/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
 					String message = result!=null ? result.getString("message") : "null";
