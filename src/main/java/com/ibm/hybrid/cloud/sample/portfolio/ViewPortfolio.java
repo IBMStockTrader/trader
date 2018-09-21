@@ -38,9 +38,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-//mpConfig 1.2
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+//mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -56,11 +56,10 @@ public class ViewPortfolio extends HttpServlet {
 	private static final double ERROR = -1;
 	private static final String ERROR_STRING = "Error";
 	private static final String FEEDBACK = "Submit Feedback";
+	private static Logger logger = Logger.getLogger(ViewPortfolio.class.getName());
 	private NumberFormat currency = null;
 
 	private @Inject @RestClient PortfolioClient portfolioClient;
-	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
-	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
 	private @Inject JsonWebToken jwt;
 
@@ -102,7 +101,7 @@ public class ViewPortfolio extends HttpServlet {
 			sentiment = portfolio.getString("sentiment");
 			stocks = portfolio.getJsonObject("stocks");
 		} catch (NullPointerException npe) {
-			npe.printStackTrace();
+			logException(npe);
 		}
 
 		Writer writer = response.getWriter();
@@ -224,5 +223,16 @@ public class ViewPortfolio extends HttpServlet {
 		}
 
 		return rows.toString();
+	}
+
+	private void logException(Throwable t) {
+		logger.warning(t.getClass().getName()+": "+t.getMessage());
+
+		//only log the stack trace if the level has been set to at least FINE
+		if (logger.isLoggable(Level.FINE)) {
+			StringWriter writer = new StringWriter();
+			t.printStackTrace(new PrintWriter(writer));
+			logger.fine(writer.toString());
+		}
 	}
 }
