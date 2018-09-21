@@ -38,9 +38,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-//mpConfig 1.2
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+//mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -53,11 +53,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static Logger logger = Logger.getLogger(AddStock.class.getName());
+
 	private NumberFormat currency = null;
 
 	private @Inject @RestClient PortfolioClient portfolioClient;
-	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
-	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
 	private @Inject JsonWebToken jwt;
 
@@ -149,8 +148,19 @@ public class AddStock extends HttpServlet {
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
 		} catch (Throwable t) {
-			Login.logException(t);
+			logException(t);
 		}
 		return formattedCommission;
+	}
+
+	private void logException(Throwable t) {
+		logger.warning(t.getClass().getName()+": "+t.getMessage());
+
+		//only log the stack trace if the level has been set to at least FINE
+		if (logger.isLoggable(Level.FINE)) {
+			StringWriter writer = new StringWriter();
+			t.printStackTrace(new PrintWriter(writer));
+			logger.fine(writer.toString());
+		}
 	}
 }
