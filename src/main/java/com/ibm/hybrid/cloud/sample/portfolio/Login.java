@@ -16,17 +16,11 @@
 
 package com.ibm.hybrid.cloud.sample.portfolio;
 
-//JSON Web Token (JWT) construction
-import com.ibm.websphere.security.jwt.InvalidBuilderException;
-import com.ibm.websphere.security.jwt.JwtBuilder;
-import com.ibm.websphere.security.jwt.JwtToken;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Optional;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,8 +93,9 @@ public class Login extends HttpServlet {
 			response.addCookie(cookie);
 
 			success = true;
-		} catch (ServletException se) {
-			se.printStackTrace();
+			logger.info("Successfully logged in user: "+id);
+		} catch (Throwable t) {
+			logException(t);
 		}
 
 		String url = "error";
