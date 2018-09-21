@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-
 //JSR 47 Logging
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 1.2
@@ -46,7 +44,7 @@ import javax.servlet.http.HttpSession;
 
 //mpConfig 1.2
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
+import org.eclipse.microprofile.jwt.JsonWebToken;
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -71,6 +69,8 @@ public class Summary extends HttpServlet {
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
 	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
+
+	private @Inject JsonWebToken jwt;
 
     /**
      * @see HttpServlet#HttpServlet()
@@ -159,8 +159,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-						portfolioClient.deletePortfolio("Bearer "+jwt, owner);
+						portfolioClient.deletePortfolio("Bearer "+jwt.getRawToken(), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -186,8 +185,7 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		String jwt = Login.createJWT(request.getUserPrincipal().getName(), jwtAudience, jwtIssuer);
-		JsonArray portfolios = portfolioClient.getPortfolios("Bearer "+jwt);
+		JsonArray portfolios = portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
 
 		for (int index=0; index<portfolios.size(); index++) {
 			JsonObject portfolio = (JsonObject) portfolios.get(index);
