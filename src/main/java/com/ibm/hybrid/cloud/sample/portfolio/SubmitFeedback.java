@@ -39,9 +39,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-//mpConfig 1.2
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+//mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -57,8 +57,6 @@ public class SubmitFeedback extends HttpServlet {
 	private static Logger logger = Logger.getLogger(SubmitFeedback.class.getName());
 
 	private @Inject @RestClient PortfolioClient portfolioClient;
-	private @Inject @ConfigProperty(name = "JWT_AUDIENCE") String jwtAudience;
-	private @Inject @ConfigProperty(name = "JWT_ISSUER") String jwtIssuer;
 
 	private @Inject JsonWebToken jwt;
 
