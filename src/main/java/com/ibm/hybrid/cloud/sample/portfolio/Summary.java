@@ -178,8 +178,8 @@ public class Summary extends HttpServlet {
 			logger.warning("Injection of PortfolioClient failed!");
 		}
 
-		if (jwtAudience==null) {
-			logger.warning("Injection of ConfigProperty JWT_AUDIENCE failed!");
+		if (jwt==null) {
+			logger.warning("Injection of JWT failed!");
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
