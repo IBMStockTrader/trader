@@ -17,9 +17,12 @@
 package com.ibm.hybrid.cloud.sample.portfolio;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 1.2
