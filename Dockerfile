@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# FROM open-liberty:microProfile1
-FROM websphere-liberty:microProfile
+# FROM open-liberty:microProfile2
+FROM websphere-liberty:microProfile2
 COPY server.xml /config/server.xml
 COPY jvm.options /config/jvm.options
 COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
