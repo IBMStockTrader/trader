@@ -86,6 +86,16 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		boolean error = false;
+		String message = null;
+		String rows = null;
+		try {
+			rows = getTableRows(request);
+		} catch (Throwable t) {
+			message = t.getMessage();
+			logger.warning(message);
+			error = true;
+		}
 		boolean editor = request.isUserInRole(EDITOR);
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
@@ -98,29 +108,36 @@ public class Summary extends HttpServlet {
 		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
 		writer.append("    <br/>");
 		writer.append("    <br/>");
-		writer.append("    <form method=\"post\"/>");
-		if (editor) {
-			writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
-		}
-			writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
-		if (editor) {
-			writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (add stock)<br>");
-			writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
-		}
-		writer.append("      <br/>");
-		writer.append("      <table border=\"1\" cellpadding=\"5\">");
-		writer.append("        <tr>");
-		writer.append("          <th></th>");
-		writer.append("          <th>Owner</th>");
-		writer.append("          <th>Total</th>");
-		writer.append("          <th>Loyalty Level</th>");
-		writer.append("        </tr>");
-		writer.append(getTableRows(request));
-		writer.append("      </table>");
-		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("    </form>");
+		if (error) {
+			writer.append("    Error communicating with the Portfolio microservice: \""+message+"\"");
+			writer.append("    <p/>");
+			writer.append("    Please consult the <i>trader</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.");
+			writer.append("    <p/>");
+		} else {
+			writer.append("    <form method=\"post\"/>");
+			if (editor) {
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
+			}
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
+			if (editor) {
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (add stock)<br>");
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
+			}
+			writer.append("      <br/>");
+			writer.append("      <table border=\"1\" cellpadding=\"5\">");
+			writer.append("        <tr>");
+			writer.append("          <th></th>");
+			writer.append("          <th>Owner</th>");
+			writer.append("          <th>Total</th>");
+			writer.append("          <th>Loyalty Level</th>");
+			writer.append("        </tr>");
+			writer.append(rows);
+			writer.append("      </table>");
+			writer.append("      <br/>");
+			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+			writer.append("    </form>");
+			}
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
