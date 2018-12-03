@@ -30,6 +30,54 @@ spec:
               secretKeyRef:
                 name: jwt
                 key: issuer
+          - name: OIDC_NAME
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: name
+                optional: true
+          - name: OIDC_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: issuer
+                optional: true
+          - name: OIDC_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: auth
+                optional: true
+          - name: OIDC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: token
+                optional: true
+          - name: OIDC_ID
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: id
+                optional: true
+          - name: OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: secret
+                optional: true
+          - name: OIDC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: key
+                optional: true
+          - name: OIDC_NODEPORT
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: nodeport
+                optional: true
         ports:
           - containerPort: 9080
           - containerPort: 9443
@@ -64,12 +112,21 @@ kind: Ingress
 metadata:
   name: trader-ingress
   annotations:
-    kubernetes.io/ingress.class: "istio"
+    #kubernetes.io/ingress.class: "istio"
+    #ingress.kubernetes.io/rewrite-target: /trader
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/affinity: "cookie"
+    ingress.kubernetes.io/session-cookie-name: "route"
+    ingress.kubernetes.io/session-cookie-hash: "sha1"
+    #ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/secure-backends: "true"
+    #ingress.kubernetes.io/app-root: "/trader"
 spec:
   rules:
-  - http:
+  - host:
+    http:
       paths:
-      - path: /trader/.*
+      - path: /trader
         backend:
           serviceName: trader-service
           servicePort: 9443
