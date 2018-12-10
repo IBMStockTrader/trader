@@ -125,3 +125,6 @@ ingress:
     #nginx.ingress.kubernetes.io/app-root: "/trader"
     #ingress.kubernetes.io/rewrite-target: /trader
     #nginx.ingress.kubernetes.io/rewrite-target: /trader
+
+monitoring:
+  enabled: true
