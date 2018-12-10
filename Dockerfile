@@ -14,13 +14,8 @@
 
 # FROM open-liberty:microProfile2
 FROM websphere-liberty:microProfile2
-COPY server.xml /config/server.xml
-COPY jvm.options /config/jvm.options
+COPY src/main/liberty/config /config/
 COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
-COPY key.jks /config/resources/security/key.jks
-COPY validationKeystore.jks /config/resources/security/validationKeystore.jks
-COPY keystore.xml /config/configDropins/defaults/keystore.xml
-# COPY ltpa.keys /output/resources/security/ltpa.keys
 RUN apt-get update
 RUN apt-get install curl -y
 RUN installUtility install --acceptLicense defaultServer
