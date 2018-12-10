@@ -47,6 +47,64 @@ spec:
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
             value: "{{ .Release.Name }}"
+          - name: JWT_AUDIENCE
+            valueFrom:
+              secretKeyRef:
+                name: jwt 
+                key: audience
+          - name: JWT_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: jwt
+                key: issuer
+          - name: OIDC_NAME
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: name
+                optional: true
+          - name: OIDC_ISSUER
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: issuer
+                optional: true
+          - name: OIDC_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: auth
+                optional: true
+          - name: OIDC_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: token
+                optional: true
+          - name: OIDC_ID
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: id
+                optional: true
+          - name: OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: secret
+                optional: true
+          - name: OIDC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: key
+                optional: true
+          - name: OIDC_NODEPORT
+            valueFrom:
+              secretKeyRef:
+                name: oidc
+                key: nodeport
+                optional: true
 {{- if .Values.generatedBindings.enabled }}
 {{.Files.Get "bindings.yaml" | indent 10 }}
 {{- end }}
