@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package com.ibm.hybrid.cloud.sample.portfolio;
+package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
 //JSON Web Token (JWT) construction
 import com.ibm.websphere.security.jwt.InvalidBuilderException;
