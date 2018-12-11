@@ -97,12 +97,10 @@ spec:
       protocol: TCP
       port: 9080
       targetPort: 9080
-      nodePort: 32388
     - name: https
       protocol: TCP
       port: 9443
       targetPort: 9443
-      nodePort: 32389
   selector:
     app: trader
 ---
