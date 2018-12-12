@@ -64,8 +64,12 @@ mvn package
 docker build -t trader .
 docker tag trader:latest <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
 docker push <ICP_CLUSTER>.icp:8500/stock-trader/trader:latest
+```
 
-kubectl apply -f manifests/
+Use WebSphere Liberty helm chart to deploy Trader microservice to ICP:
+```bash
+helm repo add ibm-charts https://raw.githubusercontent.com/IBM/charts/master/repo/stable/
+helm install ibm-charts/ibm-websphere-liberty -f <VALUES_YAML> -n <RELEASE_NAME> --tls
 ```
 
 In practice this means you'll run something like:
@@ -74,5 +78,6 @@ docker build -t trader .
 docker tag trader:latest mycluster.icp:8500/stock-trader/trader:latest
 docker push mycluster.icp:8500/stock-trader/trader:latest
 
-kubectl --namespace stock-trader apply -f manifests/
+helm repo add ibm-charts https://raw.githubusercontent.com/IBM/charts/master/repo/stable/
+helm install ibm-charts/ibm-websphere-liberty -f manifests/trader-values.yaml -n trader --namespace stock-trader --tls
 ```
