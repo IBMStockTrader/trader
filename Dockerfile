@@ -15,6 +15,7 @@
 # FROM open-liberty:microProfile2
 FROM websphere-liberty:microProfile2
 COPY src/main/liberty/config /config/
+COPY src/main/liberty/output /output/
 COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
 
 #apt-get needs root access
