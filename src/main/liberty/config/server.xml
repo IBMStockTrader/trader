@@ -27,10 +27,10 @@
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
     <keyStore id="defaultKeyStore" password="passw0rd" type="jks"
-         location="/config/resources/security/key.jks" />
+         location="/output/resources/security/key.jks" />
 
     <keyStore id="validationKeystore" password="Passw0rd" type="jks"
-         location="/config/resources/security/validationKeystore.jks" />
+         location="/output/resources/security/validationKeystore.jks" />
 
     <sslDefault sslRef="RpSSLConfig" />
 
