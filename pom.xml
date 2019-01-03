@@ -23,6 +23,13 @@
 
     <name>StockTrader - trader</name>
 
+    <!-- Parent needed for MC to build properly -->
+    <parent>
+        <groupId>net.wasdev.wlp.maven.parent</groupId>
+        <artifactId>liberty-maven-app-parent</artifactId>
+        <version>2.1</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -70,4 +77,44 @@
             </plugin>
         </plugins>
     </build>
+    <!-- Profile needed for microclimate to build this properly -->
+    <profiles>
+        <profile>
+            <id>microclimate</id>
+            <activation>
+                <property>
+                    <name>libertyEnv</name>
+                    <value>microclimate</value>
+                </property>
+            </activation>
+            <build>
+                <directory>${microclimateOutputDir}</directory>
+                <plugins>
+                    <!-- Enablement of liberty-maven plugin in microclimate -->
+                    <plugin>
+                        <groupId>net.wasdev.wlp.maven.plugins</groupId>
+                        <artifactId>liberty-maven-plugin</artifactId>
+                        <version>2.4.2</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <looseApplication>true</looseApplication>
+                            <appsDirectory>apps</appsDirectory>
+                            <installDirectory>/opt/ibm/wlp</installDirectory>
+                            <userDirectory>${project.build.directory}/liberty/wlp/usr</userDirectory>
+                            <configDirectory>${basedir}/src/main/liberty/config</configDirectory>
+                            <packageFile>${package.file}</packageFile>
+                            <include>${packaging.type}</include>
+                            <bootstrapProperties>
+                                <default.http.port>${testServerHttpPort}</default.http.port>
+                                <default.https.port>${testServerHttpsPort}</default.https.port>
+                                <app.location>${project.artifactId}-${project.version}.war</app.location>
+                                <server.start.wait.time>90</server.start.wait.time>
+                            </bootstrapProperties>
+                            <installAppPackages>project</installAppPackages>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>        
 </project>
