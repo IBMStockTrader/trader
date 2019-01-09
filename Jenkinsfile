@@ -1,12 +1,3 @@
-// This is what we used for "Microclimate"
-//#!groovy
-//
-//@Library('MicroserviceBuilder') _
-//microserviceBuilderPipeline {
-//  image = 'trader'
-//  test = 'false'
-//}
-
 pipeline {  
     environment {
          componentName = "trader"
@@ -25,10 +16,19 @@ pipeline {
                 script {
                     docker.build imagename
                 }
-                sh '/push2dockerhub.sh $imagename'
+//                sh '/push2dockerhub.sh $imagename'
             }
        }
        stage('Deploy') {
        }
     }
 }
+
+// This is what we used for "Microclimate"
+//#!groovy
+//
+//@Library('MicroserviceBuilder') _
+//microserviceBuilderPipeline {
+//  image = 'trader'
+//  test = 'false'
+//}
