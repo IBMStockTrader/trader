@@ -11,7 +11,7 @@ pipeline {
               sh 'mvn clean package' 
           }
        }  
-       stage('Deliver') {
+/*       stage('Deliver') {
             steps {
                 script {
                     docker.build imagename
@@ -20,7 +20,7 @@ pipeline {
             }
        }
        stage('Deploy') {
-       }
+       }  */
     }
 }
 
