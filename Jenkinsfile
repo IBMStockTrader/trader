@@ -1,34 +1,21 @@
-pipeline {  
-    environment {
-         componentName = "trader"
-         imagename = "${componentName}:${BUILD_NUMBER}"
-     }
-
+pipeline {
     agent any
+
     stages {
-       stage('Build') { 
-          steps {
-              sh 'mvn clean package' 
-          }
-       }  
-/*       stage('Deliver') {
+        stage('Build') {
             steps {
-                script {
-                    docker.build imagename
-                }
-//                sh '/push2dockerhub.sh $imagename'
+                echo 'Building..'
             }
-       }
-       stage('Deploy') {
-       }  */
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing..'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying....'
+            }
+        }
     }
 }
-
-// This is what we used for "Microclimate"
-//#!groovy
-//
-//@Library('MicroserviceBuilder') _
-//microserviceBuilderPipeline {
-//  image = 'trader'
-//  test = 'false'
-//}
