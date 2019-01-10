@@ -27,11 +27,14 @@ pipeline {
           }
         }
         
-        stage('Test') {
+       stage('Deliver') {
             steps {
-                echo 'Testing..'
+                script {
+                    docker.build imagename
+                }
+//                sh '/push2dockerhub.sh $imagename'
             }
-        }
+       }
         
         stage('Deploy') {
             steps {
