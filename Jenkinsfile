@@ -30,7 +30,8 @@ pipeline {
        stage('Deliver') {
             steps {
                 script {
-                    docker.build imagename
+                echo 'Delivering....'
+//                    docker.build imagename
                 }
 //                sh '/push2dockerhub.sh $imagename'
             }
