@@ -9,7 +9,7 @@ pipeline {
         jdk 'jdk9' 
     }
 
-    agent any
+    agent { dockerfile true }
 
     stages {
          stage ('Initialize') {
