@@ -5,8 +5,8 @@ pipeline {
     }
     
     tools { 
-        maven 'Maven 3.6.0' 
-        jdk 'jdk9' 
+//        maven 'Maven 3.6.0' 
+//        jdk 'jdk9' 
 //        Docker 'docker - latest' 
     }
 
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 script {
                 echo 'Delivering....'
-//                    docker.build imagename
+                    docker.build imagename
                 }
 //                sh '/push2dockerhub.sh $imagename'
             }
