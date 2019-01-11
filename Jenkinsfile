@@ -7,6 +7,7 @@ pipeline {
     tools { 
         maven 'Maven 3.6.0' 
         jdk 'jdk9' 
+        docker 'docker' 
     }
 
     agent { dockerfile true }
