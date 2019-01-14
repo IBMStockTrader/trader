@@ -1,3 +1,14 @@
+//Needed for Microlimate
+/*#!groovy
+
+@Library('MicroserviceBuilder') _
+microserviceBuilderPipeline {
+  image = 'messaging'
+  test = 'false'
+}
+*/
+
+//Needed for basic Jenkins
 pipeline {
     environment {
          componentName = "trader"
@@ -32,7 +43,7 @@ pipeline {
             steps {
                 script {
                 echo 'Delivering....'
-                    docker.build imagename
+//                   docker.build imagename
                 }
 //                sh '/push2dockerhub.sh $imagename'
             }
