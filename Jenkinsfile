@@ -21,7 +21,8 @@ pipeline {
 //        Docker 'docker - latest' 
     }
 
-    agent { dockerfile true }
+    agent any 
+//    agent { dockerfile true }
 
     stages {
          stage ('Initialize') {
