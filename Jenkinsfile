@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                 echo 'Delivering....'
-//                   docker.build imagename
+                   docker.build imagename
                 }
 //                sh '/push2dockerhub.sh $imagename'
             }
