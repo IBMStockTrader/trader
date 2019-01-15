@@ -33,13 +33,13 @@ pipeline {
             }
          }
 
-        stage('Build') {
+        stage('MVN Build') {
           steps {
               sh 'mvn clean package' 
           }
         }
         
-       stage('Deliver') {
+       stage('Docker Build&Push') {
             steps {
                 script {
 //                echo 'Delivering....'
@@ -49,7 +49,7 @@ pipeline {
             }
        }
         
-        stage('Deploy') {
+        stage('Deploy2ICP') {
             steps {
                 echo 'Deploying....'
               sh '/push2bigloon.sh'
