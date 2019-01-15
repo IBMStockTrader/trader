@@ -52,7 +52,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-              sh ('push2bigloon.sh')
+              sh '/push2bigloon.sh'
             }
         }
     }
