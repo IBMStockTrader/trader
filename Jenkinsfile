@@ -52,7 +52,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-              sh `kubectl -n stock-trader apply -f https://raw.githubusercontent.com/IBMStockTrader/trader/master/manifests/deploy.yaml`
+              sh 'kubectl -n stock-trader apply -f https://raw.githubusercontent.com/IBMStockTrader/trader/master/manifests/deploy.yaml'
             }
         }
     }
