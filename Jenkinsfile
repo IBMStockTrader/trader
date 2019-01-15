@@ -15,11 +15,11 @@ pipeline {
          imagename = "${componentName}:${BUILD_NUMBER}"
     }
     
-//    tools { 
-//        maven 'Maven 3.6.0' 
-//        jdk 'jdk9' 
-//        Docker 'docker - latest' 
-//    }
+    tools { 
+        maven 'Maven 3.6.0' 
+        jdk 'jdk9' 
+        Docker 'Docker' 
+    }
 
     agent any 
 //    agent { dockerfile true }
