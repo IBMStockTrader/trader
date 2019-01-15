@@ -45,14 +45,14 @@ pipeline {
 //                echo 'Delivering....'
                 docker.build imagename
                 }
-//                sh '/push2dockerhub.sh $imagename'
+                sh '/pushdocker2icp.sh $imagename'
             }
        }
         
         stage('Deploy2ICP') {
             steps {
                 echo 'Deploying....'
-              sh '/push2bigloon.sh'
+              sh '/deploy2icp.sh'
             }
         }
     }
