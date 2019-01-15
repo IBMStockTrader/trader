@@ -116,7 +116,7 @@ public class Summary extends HttpServlet {
 		} else {
 			writer.append("    <form method=\"post\"/>");
 			if (editor) {
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a NEW portfolio<br>");
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
 			}
 				writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
 			if (editor) {
