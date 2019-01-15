@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: trader
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
