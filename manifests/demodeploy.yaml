@@ -16,8 +16,8 @@ spec:
       - name: trader
 #       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl or a helm chart. 
 #             Microclimate uses the Charts folder so we can actually have both options
-        image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
-        #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
+#        image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
+        image: bigloon.icp:8500/stock-trader/trader:latest # IBM Cloud Private
         #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Container Service
         env:
           - name: JWT_AUDIENCE
