@@ -12,7 +12,7 @@ microserviceBuilderPipeline {
 pipeline {
     environment {
          componentName = "trader"
-         imagename = "${componentName}:${BUILD_NUMBER}"
+         imagename = "${componentName}:demo"
     }
     
     tools { 
