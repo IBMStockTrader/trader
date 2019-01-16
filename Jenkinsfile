@@ -52,7 +52,7 @@ pipeline {
         stage('Deploy2ICP') {
             steps {
                 echo 'Deploying....'
-              sh '/deploy2icp.sh'
+              sh '/deploy2icp.sh $componentname'
             }
         }
     }
