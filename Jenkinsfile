@@ -1,14 +1,15 @@
 //Needed for Microlimate
-/*#!groovy
+#!groovy
 
 @Library('MicroserviceBuilder') _
 microserviceBuilderPipeline {
   image = 'messaging'
   test = 'false'
 }
-*/
+
 
 //Needed for basic Jenkins
+/*
 pipeline {
     environment {
          componentName = "trader"
@@ -57,3 +58,4 @@ pipeline {
         }
     }
 }
+*/
