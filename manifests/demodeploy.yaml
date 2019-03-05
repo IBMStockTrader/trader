@@ -3,6 +3,11 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: trader
+  labels:
+    solution: stock-trader
+  annotations: { 
+    prism.subkind: Liberty
+  }
 spec:
   replicas: 1
   template:
@@ -107,6 +112,7 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: trader
+  solution: stock-trader
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -123,6 +129,7 @@ metadata:
   name: trader-service
   labels:
     app: trader
+    solution: stock-trader
 spec:
   type: NodePort
   ports:
@@ -142,6 +149,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: trader-ingress
+  solution: stock-trader
   annotations:
     #kubernetes.io/ingress.class: "istio"
     #ingress.kubernetes.io/rewrite-target: /trader
