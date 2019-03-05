@@ -112,7 +112,8 @@ apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: trader
-  solution: stock-trader
+  labels:
+    solution: stock-trader
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -149,7 +150,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: trader-ingress
-  solution: stock-trader
+  labels:
+    solution: stock-trader
   annotations:
     #kubernetes.io/ingress.class: "istio"
     #ingress.kubernetes.io/rewrite-target: /trader
