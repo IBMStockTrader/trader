@@ -3,13 +3,17 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: trader
+    labels:
+    solution: stock-trader
+  annotations: { 
+    prism.subkind: Liberty
+  }
 spec:
-  replicas: 2
+  replicas: 1
   template:
     metadata:
       labels:
         app: trader
-        solution: stock-trader
         version: v1
     spec:
       containers:
@@ -82,6 +86,41 @@ spec:
           - containerPort: 9080
           - containerPort: 9443
         imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+---
+#Deploy the autoscaler
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: trader
+  labels:
+    solution: stock-trader
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: trader
+  maxReplicas: 10
+  minReplicas: 2
+  targetCPUUtilizationPercentage: 50
 ---
 #Deploy the service
 apiVersion: v1
@@ -90,6 +129,7 @@ metadata:
   name: trader-service
   labels:
     app: trader
+    solution: stock-trader
 spec:
   type: NodePort
   ports:
@@ -109,6 +149,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: trader-ingress
+  labels:
+    solution: stock-trader
   annotations:
     #kubernetes.io/ingress.class: "istio"
     #ingress.kubernetes.io/rewrite-target: /trader
