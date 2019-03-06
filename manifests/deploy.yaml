@@ -3,7 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: trader
-    labels:
+  labels:
     solution: stock-trader
   annotations: { 
     prism.subkind: Liberty
