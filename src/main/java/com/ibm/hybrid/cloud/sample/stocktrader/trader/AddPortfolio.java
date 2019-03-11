@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.logging.Logger;
 
 //CDI 1.2
 import javax.inject.Inject;
@@ -46,7 +47,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @RequestScoped
 public class AddPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-    
+	private static Logger logger = Logger.getLogger(AddPortfolio.class.getName());
+
 	private @Inject @RestClient PortfolioClient portfolioClient;
 
 	private @Inject JsonWebToken jwt;
@@ -86,11 +88,20 @@ public class AddPortfolio extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
-		if ((owner!=null) && !owner.equals("")) {
+		if ((owner!=null) && !owner.equals("")) try {
+			logger.info("Redirecting to Summary servlet.");
+
 			//PortfolioServices.createPortfolio(request, owner);
 			portfolioClient.createPortfolio("Bearer "+jwt.getRawToken(), owner);
-		}
 
-		response.sendRedirect("summary"); //send control to the Summary servlet
+			response.sendRedirect("summary"); //send control to the Summary servlet
+		} catch (Throwable t) {
+			logger.warning("Error creating portfolio: "+t.getMessage());
+
+			String message = "Error creating portfolio.  Please check the <i>trader</i> and <i>portfolio</i> pod logs for details.";
+
+			//send control to the Display Message servlet	
+			response.sendRedirect("message?message="+message);
+		}
 	}
 }

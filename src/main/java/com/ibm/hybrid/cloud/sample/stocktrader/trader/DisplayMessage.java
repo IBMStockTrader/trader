@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,11 +19,7 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URLDecoder;
-
-//JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import java.util.logging.Logger;
 
 //Servlet 3.1
 import javax.servlet.ServletException;
@@ -41,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
 public class DisplayMessage extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static Logger logger = Logger.getLogger(DisplayMessage.class.getName());
     
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -77,6 +74,12 @@ public class DisplayMessage extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
-		response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
+		if ((owner==null) || owner.equals("")) {
+			logger.info("Redirecting to summary servlet");
+			response.sendRedirect("summary"); //send control to the Summary servlet
+		} else {
+			logger.info("Redirecting to viewPortfolio servlet");
+			response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
+		}
 	}
 }
