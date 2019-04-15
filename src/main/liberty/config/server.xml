@@ -14,8 +14,9 @@
 <server description="Trader UI server">
     <!-- Enable features -->
     <featureManager>
-        <feature>microProfile-2.1</feature>
+        <feature>microProfile-2.2</feature>
         <feature>appSecurity-2.0</feature>
+        <feature>monitor-1.0</feature>
         <feature>jwtSso-1.0</feature>
         <feature>logstashCollector-1.0</feature>
 <!--    <feature>ldapRegistry-3.0</feature> -->
@@ -60,7 +61,6 @@
     <administrator-role>
     	<user>admin</user>
     </administrator-role>
-
 
     <!-- Define an LDAP configuration for BluePages.
     <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
