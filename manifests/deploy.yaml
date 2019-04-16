@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: trader
   labels:
-    solution: stock-trader
+    app: stock-trader
   annotations: { 
     prism.subkind: Liberty
   }
