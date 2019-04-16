@@ -14,11 +14,10 @@ spec:
     metadata:
       labels:
         app: trader
-        version: v1
     spec:
       containers:
       - name: trader
-#       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl or a helm chart. 
+#       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl. 
 #             Microclimate uses the Charts folder so we can actually have both options
         image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
         #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
@@ -82,6 +81,12 @@ spec:
                 name: oidc
                 key: nodeport
                 optional: true
+          - name: COM_IBM_HYBRID_CLOUD_SAMPLE_STOCKTRADER_TRADER_PORTFOLIOCLIENT_MP_REST_URL
+            valueFrom:
+              configMapKeyRef:
+                name: urls
+                key: portfolio
+                optional: true
         ports:
           - containerPort: 9080
           - containerPort: 9443
@@ -91,13 +96,13 @@ spec:
             path: /health
             port: 9080
           initialDelaySeconds: 30
-          periodSeconds: 5
+          periodSeconds: 6
         livenessProbe:
           httpGet:
             path: /health
             port: 9080
           initialDelaySeconds: 60
-          periodSeconds: 5
+          periodSeconds: 6
         resources:
           limits:
             cpu: 500m
@@ -120,7 +125,7 @@ spec:
     name: trader
   maxReplicas: 10
   minReplicas: 2
-  targetCPUUtilizationPercentage: 50
+  targetCPUUtilizationPercentage: 60
 ---
 #Deploy the service
 apiVersion: v1
