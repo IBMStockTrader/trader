@@ -81,7 +81,7 @@ spec:
                 name: oidc
                 key: nodeport
                 optional: true
-          - name: COM_IBM_HYBRID_CLOUD_SAMPLE_STOCKTRADER_TRADER_PORTFOLIOCLIENT_MP_REST_URL
+          - name: PORTFOLIO_URL
             valueFrom:
               configMapKeyRef:
                 name: urls
