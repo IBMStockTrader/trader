@@ -70,9 +70,21 @@ public class Summary extends HttpServlet {
 
 	private @Inject JsonWebToken jwt;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
+	// Override Portfolio Client URL if config map is configured to provide URL
+	static {
+		String mpUrlPropName = PortfolioClient.class.getName() + "/mp-rest/url";
+		String portfolioURL = System.getenv("PORTFOLIO_URL");
+		if ((portfolioURL != null) && !portfolioURL.isEmpty()) {
+			logger.info("Using Portfolio URL from config map: " + portfolioURL);
+			System.setProperty(mpUrlPropName, portfolioURL);
+		} else {
+			logger.info("Portfolio URL not found from env var from config map, so defaulting to value in jvm.options: " + System.getProperty(mpUrlPropName));
+		}
+	}
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
 	public Summary() {
 		super();
 
@@ -137,7 +149,7 @@ public class Summary extends HttpServlet {
 			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 			writer.append("    </form>");
-			}
+		}
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
 		writer.append("      <img src=\"footer.jpg\"/>");
@@ -165,7 +177,6 @@ public class Summary extends HttpServlet {
 				String owner = request.getParameter("owner");
 
 				if (action != null) {
-
 					if (action.equals(CREATE)) {
 						response.sendRedirect("addPortfolio"); //send control to the AddPortfolio servlet
 					} else if (action.equals(RETRIEVE)) {
