@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,9 +31,6 @@ import java.util.logging.Logger;
 //CDI 1.2
 import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
-
-//JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
-import javax.json.JsonObject;
 
 //Servlet 3.1
 import javax.servlet.ServletException;
@@ -146,8 +146,8 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
-			double commission = portfolio.getJsonNumber("nextCommission").doubleValue();
+			Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
+			double commission = portfolio.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
 		} catch (Throwable t) {

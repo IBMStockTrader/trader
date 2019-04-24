@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
+
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Feedback;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Stock;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.WatsonInput;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -101,16 +106,14 @@ public class SubmitFeedback extends HttpServlet {
 			if (submit.equals(SUBMIT)) {
 				String feedback = request.getParameter("feedback");
 				if ((feedback!=null) && !feedback.equals("") && (owner!=null) && !owner.equals("")) {
-					JsonObjectBuilder builder = Json.createObjectBuilder();
-					builder.add("text", feedback);
-					JsonObject text = builder.build();
+					WatsonInput input = new WatsonInput(feedback);
 
-					logger.info("Calling portfolio/"+owner+"/feedback with following JSON: "+text.toString());
+					logger.info("Calling portfolio/"+owner+"/feedback with following JSON: "+input.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					JsonObject result = portfolioClient.submitFeedback("Bearer "+jwt.getRawToken(), owner, text);
+					Feedback result = portfolioClient.submitFeedback("Bearer "+jwt.getRawToken(), owner, input);
 
 					logger.info("portfolio/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
-					String message = result!=null ? result.getString("message") : "null";
+					String message = result!=null ? result.getMessage() : "null";
 					String encodedMessage = URLEncoder.encode(message, "UTF-8");
 					response.sendRedirect("message?owner="+owner+"&message="+encodedMessage); //send control to the DisplayMessage servlet
 				} else {

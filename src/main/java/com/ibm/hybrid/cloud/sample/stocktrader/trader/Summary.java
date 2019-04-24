@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -27,10 +29,6 @@ import java.util.logging.Logger;
 //CDI 1.2
 import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
-
-//JSON-P 1.0
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 
 //Servlet 3.1
 import javax.servlet.ServletException;
@@ -211,14 +209,14 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		JsonArray portfolios = portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
+		Portfolio[] portfolios = portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
 
-		for (int index=0; index<portfolios.size(); index++) {
-			JsonObject portfolio = (JsonObject) portfolios.get(index);
+		for (int index=0; index<portfolios.length; index++) {
+			Portfolio portfolio = portfolios[index];
 
-			String owner = portfolio.getString("owner");
-			double total = portfolio.getJsonNumber("total").doubleValue();
-			String loyaltyLevel = portfolio.getString("loyalty");
+			String owner = portfolio.getOwner();
+			double total = portfolio.getTotal();
+			String loyaltyLevel = portfolio.getLoyalty();
 
 			rows.append("        <tr>");
 			rows.append("          <td><input type=\"radio\" name=\"owner\" value=\""+owner+"\"");

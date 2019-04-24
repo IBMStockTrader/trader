@@ -16,6 +16,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Logger;

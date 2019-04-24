@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2019 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
+
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -86,7 +89,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		JsonObject portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
+		Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
 
 		double overallTotal = 0.0;
 		String loyaltyLevel = null;
@@ -95,17 +98,25 @@ public class ViewPortfolio extends HttpServlet {
 		int free = 0;
 		String sentiment = null;
 		JsonObject stocks = null;
+		String returnOnInvestment = "Unknown";
 
 		try {
-			overallTotal = portfolio.getJsonNumber("total").doubleValue();
-			loyaltyLevel = portfolio.getString("loyalty");
-			balance = portfolio.getJsonNumber("balance").doubleValue();
-			commissions = portfolio.getJsonNumber("commissions").doubleValue();
-			free = portfolio.getInt("free");
-			sentiment = portfolio.getString("sentiment");
-			stocks = portfolio.getJsonObject("stocks");
+			overallTotal = portfolio.getTotal();
+			loyaltyLevel = portfolio.getLoyalty();
+			balance = portfolio.getBalance();
+			commissions = portfolio.getCommissions();
+			free = portfolio.getFree();
+			sentiment = portfolio.getSentiment();
+			stocks = portfolio.getStocks();
 		} catch (NullPointerException npe) {
 			logException(npe);
+		}
+
+		try {
+			returnOnInvestment = portfolioClient.getPortfolioReturns("Bearer "+jwt.getRawToken(), owner);
+		} catch (Throwable t) {
+			logger.info("Unable to obtain return on investment for "+owner);
+			logException(t);
 		}
 
 		Writer writer = response.getWriter();
@@ -148,7 +159,7 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("          <td><b>$"+currency.format(balance)+"</b></td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
-		writer.append("          <td>Total commissions paid:</td>");
+		writer.append("          <td>Total Commissions Paid:</td>");
 		writer.append("          <td><b>$"+currency.format(commissions)+"</b></td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
@@ -158,6 +169,10 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("        <tr>");
 		writer.append("          <td>Sentiment:</td>");
 		writer.append("          <td><b>"+sentiment+"</b></td>");
+		writer.append("        </tr>");
+		writer.append("        <tr>");
+		writer.append("          <td>Return On Investment:</td>");
+		writer.append("          <td><b>"+returnOnInvestment+"</b></td>");
 		writer.append("        </tr>");
 		writer.append("      </table>");
 		writer.append("      <br/>");
