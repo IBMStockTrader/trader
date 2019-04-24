@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package com.ibm.hybrid.cloud.sample.stocktrader.trader;
+package com.ibm.hybrid.cloud.sample.stocktrader.trader.client;
 
 
 import javax.enterprise.context.Dependent;
