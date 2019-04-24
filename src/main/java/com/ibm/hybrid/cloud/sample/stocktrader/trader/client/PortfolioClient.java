@@ -16,10 +16,10 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader.client;
 
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Feedback;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.WatsonInput;
 
-import javax.enterprise.context.Dependent;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -31,42 +31,49 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+
 
 @ApplicationPath("/")
 @Path("/")
-@Dependent
 @RegisterRestClient
 /** mpRestClient "remote" interface for the Portfolio microservice */
 public interface PortfolioClient {
 	@GET
 	@Path("/")
-	@Produces("application/json")
-	public JsonArray getPortfolios(@HeaderParam("Authorization") String jwt);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Portfolio[] getPortfolios(@HeaderParam("Authorization") String jwt);
 
 	@POST
 	@Path("/{owner}")
-	@Produces("application/json")
-	public JsonObject createPortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Portfolio createPortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
 
 	@GET
 	@Path("/{owner}")
-	@Produces("application/json")
-	public JsonObject getPortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Portfolio getPortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
 
 	@PUT
 	@Path("/{owner}")
-	@Produces("application/json")
-	public JsonObject updatePortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner, @QueryParam("symbol") String symbol, @QueryParam("shares") int shares);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Portfolio updatePortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner, @QueryParam("symbol") String symbol, @QueryParam("shares") int shares);
 
 	@DELETE
 	@Path("/{owner}")
-	@Produces("application/json")
-	public JsonObject deletePortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Portfolio deletePortfolio(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
+
+	@GET
+	@Path("/{owner}/returns")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getPortfolioReturns(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
 
 	@POST
 	@Path("/{owner}/feedback")
 	@Consumes("application/json")
-	@Produces("application/json")
-	public JsonObject submitFeedback(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner, JsonObject input);
+	@Produces(MediaType.APPLICATION_JSON)
+	public Feedback submitFeedback(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner, WatsonInput input);
 }
