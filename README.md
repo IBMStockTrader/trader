@@ -50,7 +50,7 @@ This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deli
   ```
   
   You'll also need to enable login to the IBM Cloud Private internal Docker registry by following
-  [these steps](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/manage_images/configuring_docker_cli.html).
+  [these steps](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.2/manage_images/configuring_docker_cli.html).
   Don't forget to restart Docker after adding your cert.  On macOS you can restart Docker by running:
   ```bash
   osascript -e 'quit app "Docker"'
