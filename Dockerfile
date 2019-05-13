@@ -25,3 +25,6 @@ RUN apt-get install curl -y
 USER 1001
 
 RUN installUtility install --acceptLicense defaultServer
+
+#workaround for https://github.com/OpenLiberty/open-liberty/issues/7448
+RUN server start --clean && server stop
