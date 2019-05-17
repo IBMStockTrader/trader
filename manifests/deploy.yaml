@@ -15,7 +15,8 @@ spec:
       labels:
         app: trader
       annotations:
-        prometheus.io/scrape: 'true'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
     spec:
       containers:
       - name: trader
