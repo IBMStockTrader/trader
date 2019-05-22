@@ -125,6 +125,10 @@ public class Portfolio {
         return stocks;
     }
 
+    public void setStocks(JsonObject newStocks) {
+        stocks = newStocks;
+    }
+
     public void addStock(Stock newStock) {
         if (newStock != null) {
             String symbol = newStock.getSymbol();
