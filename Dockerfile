@@ -1,4 +1,4 @@
-#       Copyright 2017 IBM Corp All Rights Reserved
+#       Copyright 2017-2019 IBM Corp All Rights Reserved
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,19 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# FROM open-liberty:microProfile2
-FROM websphere-liberty:microProfile2
-COPY src/main/liberty/config /config/
-COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
+# FROM websphere-liberty:microProfile2
+FROM open-liberty:microProfile2
 
-#apt-get needs root access
-USER root
-RUN chmod g+w /config/apps
-RUN apt-get update
-RUN apt-get install curl -y
-USER 1001
+COPY --chown=1001:0 src/main/liberty/config /config/
+COPY --chown=1001:0 target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
 
-RUN installUtility install --acceptLicense defaultServer
-
-#workaround for https://github.com/OpenLiberty/open-liberty/issues/7448
-RUN server start --clean && server stop
+RUN configure.sh
