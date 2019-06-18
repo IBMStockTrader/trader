@@ -36,6 +36,10 @@ spec:
               secretKeyRef:
                 name: jwt
                 key: issuer
+          - name: WLP_LOGGING_CONSOLE_FORMAT
+            value: json
+          - name: WLP_LOGGING_CONSOLE_SOURCE
+            value: message,ffdc
           - name: OIDC_NAME
             valueFrom:
               secretKeyRef:
