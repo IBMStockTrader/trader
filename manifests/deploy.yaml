@@ -102,13 +102,17 @@ spec:
             path: /health
             port: 9080
           initialDelaySeconds: 30
-          periodSeconds: 6
+          periodSeconds: 15
+          successThreshold: 1
+          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /health
             port: 9080
           initialDelaySeconds: 60
-          periodSeconds: 6
+          periodSeconds: 15
+          successThreshold: 1
+          failureThreshold: 5 # Allow a little time to exec into the pod to grab FFDCs before it's killed
         resources:
           limits:
             cpu: 500m
