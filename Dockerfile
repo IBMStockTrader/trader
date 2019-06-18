@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 # FROM websphere-liberty:microProfile2
-FROM open-liberty:microProfile2
+FROM open-liberty:microProfile2-ubi-min
 
 COPY --chown=1001:0 src/main/liberty/config /config/
 COPY --chown=1001:0 target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
