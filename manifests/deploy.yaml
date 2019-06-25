@@ -125,7 +125,7 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: trader
+  name: trader-hpa
   labels:
     solution: stock-trader
 spec:
