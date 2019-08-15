@@ -65,8 +65,11 @@ public class Summary extends HttpServlet {
 	private NumberFormat currency = null;
 
 	private @Inject @RestClient PortfolioClient portfolioClient;
-
 	private @Inject JsonWebToken jwt;
+
+	//used in the liveness probe
+	public static boolean error = false;
+	public static String message = null;
 
 	// Override Portfolio Client URL if config map is configured to provide URL
 	static {
@@ -96,8 +99,6 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		boolean error = false;
-		String message = null;
 		String rows = null;
 		try {
 			rows = getTableRows(request);
@@ -201,11 +202,11 @@ public class Summary extends HttpServlet {
 		StringBuffer rows = new StringBuffer();
 
 		if (portfolioClient==null) {
-			logger.warning("Injection of PortfolioClient failed!");
+			throw new NullPointerException("Injection of PortfolioClient failed!");
 		}
 
 		if (jwt==null) {
-			logger.warning("Injection of JWT failed!");
+			throw new NullPointerException("Injection of JWT failed!");
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
