@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# FROM openliberty/open-liberty:microProfile3-ubi-min
-FROM open-liberty:microProfile3
+# FROM open-liberty:microProfile3 #Ubuntu flavor; I prefer the UBI instead
+FROM openliberty/open-liberty:microProfile3-ubi-min
 
 COPY --chown=1001:0 src/main/liberty/config /config/
 COPY --chown=1001:0 target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
