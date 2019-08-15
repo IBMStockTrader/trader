@@ -40,24 +40,24 @@ import org.eclipse.microprofile.health.Liveness;
 
 @Liveness
 @ApplicationScoped
-/** Use mpHealth for readiness probe */
+/** Use mpHealth for liveness probe */
 public class LivenessProbe implements HealthCheck {
-    private static Logger logger = Logger.getLogger(LivenessProbe.class.getName());
-    private static String jwtAudience = System.getenv("JWT_AUDIENCE");
-    private static String jwtIssuer = System.getenv("JWT_ISSUER");
+	private static Logger logger = Logger.getLogger(LivenessProbe.class.getName());
+	private static String jwtAudience = System.getenv("JWT_AUDIENCE");
+	private static String jwtIssuer = System.getenv("JWT_ISSUER");
 
 	//mpHealth probe
 	public HealthCheckResponse call() {
-        HealthCheckResponse response = null;
-        String message = "Live";
+		HealthCheckResponse response = null;
+		String message = "Live";
 		try {
 			HealthCheckResponseBuilder builder = HealthCheckResponse.named("Trader");
 
 			if (Summary.error) { //can't run without these env vars
-                builder = builder.down();
-                message = Summary.message;
-                logger.warning("Returning NOT live!");
-        } else {
+				builder = builder.down();
+				message = Summary.message;
+				logger.warning("Returning NOT live!");
+			} else {
 				builder = builder.up();
 				logger.fine("Returning live!");
 			}
