@@ -23,14 +23,15 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+
 //JSR 47 Logging
 import java.util.logging.Logger;
 
-//CDI 1.2
+//CDI 2.0
 import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
 
-//Servlet 3.1
+//Servlet 4.0
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -39,6 +40,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+//mpConfig 1.3
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+//mpMetrics 2.0
+import org.eclipse.microprofile.metrics.annotation.Gauge;
+import org.eclipse.microprofile.metrics.Metadata;
+import org.eclipse.microprofile.metrics.MetricRegistry;
+import org.eclipse.microprofile.metrics.MetricType;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.Tag;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -61,11 +73,21 @@ public class Summary extends HttpServlet {
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
 	private static final String DELETE   = "delete";
+	private static final String BASIC    = "basic";
+	private static final String BRONZE   = "bronze";
+	private static final String SILVER   = "silver";
+	private static final String GOLD     = "gold";
+	private static final String PLATINUM = "platinum";
+	private static final String UNKNOWN  = "unknown";
+	private static final String DOLLARS  = "USD";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
 	private NumberFormat currency = null;
+    private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
+	private @Inject @ConfigProperty(name = "TEST_MODE") boolean testMode;
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject JsonWebToken jwt;
+	private @Inject MetricRegistry metricRegistry;
 
 	//used in the liveness probe
 	public static boolean error = false;
@@ -210,14 +232,25 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		Portfolio[] portfolios = portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
+		Portfolio[] portfolios = testMode ? getHardcodedPortfolios() : portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
 
+		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
 		for (int index=0; index<portfolios.length; index++) {
 			Portfolio portfolio = portfolios[index];
 
 			String owner = portfolio.getOwner();
 			double total = portfolio.getTotal();
 			String loyaltyLevel = portfolio.getLoyalty();
+
+			setPortfolioMetric(owner, total);
+			if (loyaltyLevel!=null) {
+				if (loyaltyLevel.equalsIgnoreCase(BASIC)) basic++;
+				else if (loyaltyLevel.equalsIgnoreCase(BRONZE)) bronze++;
+				else if (loyaltyLevel.equalsIgnoreCase(SILVER)) silver++;
+				else if (loyaltyLevel.equalsIgnoreCase(GOLD)) gold++;
+				else if (loyaltyLevel.equalsIgnoreCase(PLATINUM)) platinum++;
+				else unknown++;
+			}
 
 			rows.append("        <tr>");
 			rows.append("          <td><input type=\"radio\" name=\"owner\" value=\""+owner+"\"");
@@ -233,5 +266,64 @@ public class Summary extends HttpServlet {
 		}
 
 		return rows.toString();
+	}
+
+	Portfolio[] getHardcodedPortfolios() {
+		Portfolio john = new Portfolio("John");
+		john.setTotal(1234.56);
+		john.setLoyalty("Basic");
+		Portfolio karri = new Portfolio("Karri");
+		karri.setTotal(12345.67);
+		karri.setLoyalty("Bronze");
+		Portfolio ryan = new Portfolio("Ryan");
+		ryan.setTotal(23456.78);
+		ryan.setLoyalty("Bronze");
+		Portfolio greg = new Portfolio("Greg");
+		greg.setTotal(98765.43);
+		greg.setLoyalty("Silver");
+		Portfolio eric = new Portfolio("Eric");
+		eric.setTotal(123456.78);
+		eric.setLoyalty("Gold");
+		Portfolio kyle = new Portfolio("Kyle");
+		kyle.setLoyalty("Basic");
+		Portfolio[] portfolios = { john, karri, ryan, greg, eric, kyle };
+		return portfolios;
+	}
+
+	void setPortfolioMetric(String owner, double total) {
+		org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return total; };
+		Metadata metadata = Metadata.builder().withName("portfolio_value")
+			.withType(MetricType.GAUGE).withUnit(DOLLARS).build();
+		metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
+	public int getBasic() {
+		return basic;
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=bronze", displayName="Bronze", unit=MetricUnits.NONE)
+	public int getBronze() {
+		return bronze;
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=silver", displayName="Silver", unit=MetricUnits.NONE)
+	public int getSilver() {
+		return silver;
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=gold", displayName="Gold", unit=MetricUnits.NONE)
+	public int getGold() {
+		return gold;
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=platinum", displayName="Platinum", unit=MetricUnits.NONE)
+	public int getPlatinum() {
+		return platinum;
+	}
+
+	@Gauge(name="portfolio_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
+	public int getUnknown() {
+		return unknown;
 	}
 }
