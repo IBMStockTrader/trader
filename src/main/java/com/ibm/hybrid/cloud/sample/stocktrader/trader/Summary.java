@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.HashMap;
 
 //JSR 47 Logging
 import java.util.logging.Logger;
@@ -81,10 +82,12 @@ public class Summary extends HttpServlet {
 	private static final String UNKNOWN  = "unknown";
 	private static final String DOLLARS  = "USD";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
+	private static Metadata portfolioValueMetadata = null;
+	private static HashMap<String, Tag> tagMap = new HashMap<String, Tag>();
 	private NumberFormat currency = null;
-    private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
+	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
-	private @Inject @ConfigProperty(name = "TEST_MODE") boolean testMode;
+	private @Inject @ConfigProperty(name = "TEST_MODE", defaultValue = "false") boolean testMode;
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject JsonWebToken jwt;
 	private @Inject MetricRegistry metricRegistry;
@@ -235,6 +238,7 @@ public class Summary extends HttpServlet {
 		Portfolio[] portfolios = testMode ? getHardcodedPortfolios() : portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
 
 		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
+		metricRegistry.remove("portfolio_value");
 		for (int index=0; index<portfolios.length; index++) {
 			Portfolio portfolio = portfolios[index];
 
@@ -292,9 +296,17 @@ public class Summary extends HttpServlet {
 
 	void setPortfolioMetric(String owner, double total) {
 		org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return total; };
-		Metadata metadata = Metadata.builder().withName("portfolio_value")
-			.withType(MetricType.GAUGE).withUnit(DOLLARS).build();
-		metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
+
+		if (portfolioValueMetadata==null) portfolioValueMetadata = Metadata.builder()
+			.withName("portfolio_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
+
+		Tag tag = tagMap.get(owner);
+		if (tag==null) {
+			tag = new Tag("owner", owner);
+			tagMap.put(owner, tag);
+		}
+
+		metricRegistry.register(portfolioValueMetadata, gauge, tag); //registry injected via CDI
 	}
 
 	@Gauge(name="portfolio_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
