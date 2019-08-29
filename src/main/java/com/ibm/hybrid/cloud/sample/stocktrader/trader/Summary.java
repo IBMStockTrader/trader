@@ -82,9 +82,9 @@ public class Summary extends HttpServlet {
 	private static final String DOLLARS  = "USD";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
 	private NumberFormat currency = null;
-	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
+    private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
-	private @Inject @ConfigProperty(name = "TEST_MODE", defaultValue = "false") boolean testMode;
+	private @Inject @ConfigProperty(name = "TEST_MODE") boolean testMode;
 	private @Inject @RestClient PortfolioClient portfolioClient;
 	private @Inject JsonWebToken jwt;
 	private @Inject MetricRegistry metricRegistry;
