@@ -14,8 +14,8 @@
 
 # FROM open-liberty:microProfile3 #Ubuntu flavor; I prefer the UBI instead
 FROM openliberty/open-liberty:microProfile3-ubi-min
-
-COPY --chown=1001:0 src/main/liberty/config /config/
-COPY --chown=1001:0 target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
-
+USER root
+COPY src/main/liberty/config /config/
+RUN chown -R 1001:0 /config/
+USER 1001
 RUN configure.sh

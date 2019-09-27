@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: maven-pipeline
+parameters:
+- name: APP_NAME
+  description: The name assigned to all of the application objects defined in this template.
+  displayName: Application Name
+  required: true
+  value: stocktrader-trader
+- name: GIT_SOURCE_URL
+  description: The source URL for the application
+  displayName: Source URL
+  required: true
+  value: https://github.com/IBMStockTrader/trader.git
+- name: GIT_SOURCE_REF
+  description: The source Ref for the application
+  displayName: Source Ref
+  required: true
+  value: master
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APP_NAME}
+    name: ${APP_NAME}
+  spec: {}
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      pipeline.alpha.openshift.io/uses: '[{"name": "${NAME}", "namespace": "", "kind": "DeploymentConfig"}]'
+    creationTimestamp: null
+    labels:
+      name: ${APP_NAME}
+    name: ${APP_NAME}
+  spec:
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          try {
+             timeout(time: 20, unit: 'MINUTES') {
+                def appName="${APP_NAME}"
+                def project=""
+
+                node {
+                  stage("Initialize") {
+                    project = env.PROJECT_NAME
+                  }
+                }
+
+                node("maven") {
+                  stage("Checkout") {
+                    git url: "${GIT_SOURCE_URL}", branch: "${GIT_SOURCE_REF}"
+                  }
+                  stage("Build WAR") {
+                    sh "mvn clean package -Popenshift" // not working, but clean in microclimate stops the server which is not working in this case
+                    // do some nasty file operations to copy the war into the same place as the config, such that we can all mount it to the following build
+                    def ws = pwd()
+                    sh 'mkdir ' + ws + '/src/main/liberty/config/apps/'
+                    sh 'cp ' + ws + '/target/app-1.0-SNAPSHOT.war ' + ws + '/src/main/liberty/config/apps/TraderUI.war'
+                    //stash name:"war", includes:"target/app-1.0-SNAPSHOT.war"
+                    stash name:"config", includes:"src**"
+                  }
+                }
+
+                node {
+                  stage("Build Image") {
+                    //unstash name:"war"
+                    unstash name:"config"
+                    // here the snapshot war is injected to the next build
+                    sh 'src/'
+                    def status = sh(returnStdout: true, script: "oc start-build ${appName}-docker --from-dir=. -n ${project}")
+
+                    def result = status.split("\n").find{ it.matches("^build.*started") }
+
+                    if(!result) {
+                      echo "ERROR: No started build found for ${appName}"
+                      currentBuild.result = 'FAILURE'
+                      return
+                    }
+
+                    // result can be:
+                    // - build "build-name" started
+                    // - build build.build.openshift.io/build-name started
+                    // - build "build.build.openshift.io/build-name" started
+                    // Goal is to isolate "build-name"
+                    def startedBuild = result.replaceAll("build [^0-9a-zA-Z]*", "").replaceAll("[^0-9a-zA-Z]* started", "").replaceFirst("^.*/", "")
+                    echo "Build ${startedBuild} has started. Now watching it ..."
+
+                    timeout(time: 20, unit: 'MINUTES') {
+                      openshift.withCluster() {
+                        openshift.withProject() {
+                          def build = openshift.selector('builds', "${startedBuild}")
+                          build.untilEach {
+                            def object = it.object()
+                            if(object.status.phase == "Failed") {
+                              error("Build ${startedBuild} failed")
+                            }
+                            return object.status.phase == "Complete"
+                          }
+                        }
+                      }
+                    }
+                  }
+                  stage("Deploy") {
+                    openshift.withCluster() {
+                      openshift.withProject() {
+                        def dc = openshift.selector('dc', "${appName}")
+                        dc.rollout().status()
+                      }
+                    }
+                  }
+                }
+             }
+          } catch (err) {
+             echo "in catch block"
+             echo "Caught: ${err}"
+             currentBuild.result = 'FAILURE'
+             throw err
+          }
+      type: JenkinsPipeline
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}-docker
+    name: ${APP_NAME}-docker
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APP_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      # git is not working as long as we have a binary source too
+#      git:
+#        uri: ${GIT_SOURCE_URL}
+#        prefix: ${GIT_SOURCE_REF}
+      dockerfile: |-
+        FROM openliberty/open-liberty:microProfile3-ubi-min
+        USER root
+        COPY src/main/liberty/config /config/
+        RUN chown -R 1001:0 /config/
+        USER 1001
+        RUN configure.sh
+#        COPY target/trader-1.0-SNAPSHOT.war /config/apps/TraderUI.war
+#        RUN chown 1001:0 /config/apps/TraderUI.war
+#      binary:
+#        asFile: trader-1.0-SNAPSHOT.war
+      type: Docker
+    strategy:
+      type: Docker
+    triggers: []
