@@ -145,6 +145,9 @@ metadata:
   labels:
     app: trader
     solution: stock-trader
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9080"
 spec:
   type: NodePort
   ports:
