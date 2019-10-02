@@ -82,8 +82,8 @@ public class Summary extends HttpServlet {
 	private static final String UNKNOWN  = "unknown";
 	private static final String DOLLARS  = "USD";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
-	private static Metadata portfolioValueMetadata = null;
-	private static HashMap<String, Tag> tagMap = new HashMap<String, Tag>();
+	private static HashMap<String, Double> totals = new HashMap<String, Double>();
+	private static HashMap<String, org.eclipse.microprofile.metrics.Gauge> gauges = new HashMap<String, org.eclipse.microprofile.metrics.Gauge>();
 	private NumberFormat currency = null;
 	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
@@ -295,18 +295,18 @@ public class Summary extends HttpServlet {
 	}
 
 	void setPortfolioMetric(String owner, double total) {
-		org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return total; };
+		totals.put(owner, total);
+		if (gauges.get(owner)==null) try { //gauge not yet registered for this portfolio
+			org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return totals.get(owner); };
 
-		if (portfolioValueMetadata==null) portfolioValueMetadata = Metadata.builder()
-			.withName("portfolio_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
+			Metadata metadata = Metadata.builder().withName("portfolio_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
+	
+			metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
 
-		Tag tag = tagMap.get(owner);
-		if (tag==null) {
-			tag = new Tag("owner", owner);
-			tagMap.put(owner, tag);
+			gauges.put(owner, gauge);
+		} catch (Throwable t) {
+			logger.warning(t.getMessage());
 		}
-
-		metricRegistry.register(portfolioValueMetadata, gauge, tag); //registry injected via CDI
 	}
 
 	@Gauge(name="portfolio_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
