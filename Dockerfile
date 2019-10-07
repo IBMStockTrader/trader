@@ -1,5 +1,6 @@
 FROM maven:3.6-jdk-11-slim AS build
 COPY src /usr/src
+RUN cd /usr/src
 RUN pwd
 RUN ls
 RUN mvn clean package
