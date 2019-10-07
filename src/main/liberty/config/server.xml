@@ -77,12 +77,12 @@
            issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
            redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
     </oidcLogin> -->
- 
+
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="true"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="true" ssoCookieName="StockTraderSSO"
         useOnlyCustomCookieName="true" ssoUseDomainFromURL="true"/>
 
-    <webApplication id="TraderUI" name="TraderUI" location="TraderUI.war" contextRoot="/trader">
+    <webApplication id="TraderUI" name="TraderUI" location="app.war" contextRoot="/trader">
         <application-bnd>
             <security-role id="StockTrader" name="StockTrader">
                 <special-subject type="ALL_AUTHENTICATED_USERS" id="IBMid"/>
