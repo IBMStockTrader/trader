@@ -14,5 +14,19 @@
    limitations under the License.
 -->
 
+# Quickstart
+* modify the git repo and branch to your liking in the `pipeline-template.yaml`
+* Select the OCP project you want to use this in
+* execute `oc apply -f pipeline-template.yaml`
+* execute `oc new-app --template=stocktrader-trader-pipeline`
+* you should have a BuildConfig called "stocktrader-trader" in your OCP
+
 # Multi-stage Docker
 This project is built and run using a multi-stage Dockerfile.
+
+# Github Webhook
+After applying the pipeline file, you have to create a secret. This can be easily done from the CLI for testing purposes:
+* execute (repalce <your secret> by a random string) `oc create secret generic github-webhook --from-literal=WebHookSecretKey=<your secret>`
+* execute `oc describe bc stocktrader-trader`
+* note down the webhook url and replace <secret> with <your secret>
+* configure a webhook as described here: https://developer.github.com/webhooks/creating/
