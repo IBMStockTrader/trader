@@ -7,7 +7,7 @@ FROM openliberty/open-liberty:microProfile3-ubi-min
 USER root
 COPY src/main/liberty/config config/
 RUN mkdir config/apps/
-COPY --from=build /usr/target/trader-1.0-SNAPSHOT.war config/apps/TraderUI.war
+COPY --from=build /usr/target/app-1.0-SNAPSHOT.war config/apps/app.war
 RUN ls config/
 RUN ls config/apps/
 RUN pwd
