@@ -14,11 +14,5 @@
    limitations under the License.
 -->
 
-# Maven
-This project builds using [Maven](https://maven.apache.org).
-
-# Jenkins
-Builds can be kicked off via [Jenkins](https://jenkins.io).
-
-# Microservice Builder
-It is also configured to be able to be driven by [Microservice Builder](https://www.ibm.com/us-en/marketplace/microservice-builder).
+# Multi-stage Docker
+This project is built and run using a multi-stage Dockerfile.

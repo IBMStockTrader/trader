@@ -32,8 +32,8 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      app: ${APP_NAME}-docker
-    name: ${APP_NAME}-docker
+      app: ${APP_NAME}
+    name: ${APP_NAME}
   spec:
     output:
       to:
@@ -49,4 +49,7 @@ objects:
       type: Docker
     strategy:
       type: Docker
-    triggers: []
+    triggers:
+      - type: "GitHub"
+        github:
+          secret: "secret123"
