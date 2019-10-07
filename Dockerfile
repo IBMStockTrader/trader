@@ -1,7 +1,6 @@
 FROM maven:3.6-jdk-11-slim AS build
 COPY . /usr/
 RUN mvn -f /usr/pom.xml clean package
-RUN ls target/
 
 FROM openliberty/open-liberty:microProfile3-ubi-min
 USER root
