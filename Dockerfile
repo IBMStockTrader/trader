@@ -8,6 +8,9 @@ USER root
 COPY src/main/liberty/config config/
 RUN mkdir config/apps/
 COPY --from=build /usr/target/trader-1.0-SNAPSHOT.war config/apps/TraderUI.war
+RUN ls config/
+RUN ls config/apps/
+RUN pwd
 RUN chown -R 1001:0 config/
 USER 1001
 RUN configure.sh
