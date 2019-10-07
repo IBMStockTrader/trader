@@ -1,4 +1,4 @@
-FROM maven:3.5.2-jdk-11 AS build
+FROM maven:3.6-jdk-11-slim AS build
 COPY src /usr/src
 RUN mvn clean package
 RUN pwd
