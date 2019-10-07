@@ -4,9 +4,9 @@ RUN mvn -f /usr/pom.xml clean package
 
 FROM openliberty/open-liberty:microProfile3-ubi-min
 USER root
-COPY src/main/liberty/config /config/
-RUN mkdir /config/apps/
-COPY --from=build /usr/target/app-1.0-SNAPSHOT.war /config/apps/TraderUI.war
+COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
+RUN mkdir /opt/ol/wlp/usr/servers/defaultServer/apps/
+COPY --from=build /usr/target/app-1.0-SNAPSHOT.war /opt/ol/wlp/usr/servers/defaultServer/apps/TraderUI.war
 RUN ls config/
 RUN ls config/apps/
 RUN chown -R 1001:0 config/
