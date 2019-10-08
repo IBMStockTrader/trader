@@ -8,7 +8,18 @@ metadata:
   annotations:
     prism.subkind: Liberty
 spec:
-  replicas: 1
+  replicas: 2
+  triggers:
+    - type: "ConfigChange"
+    - type: "ImageChange"
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - "trader"
+        from:
+          kind: "ImageStreamTag"
+          name: "stocktrader-trader:latest"
+          namespace: "jenkins"
   template:
     metadata:
       labels:
@@ -17,15 +28,6 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9080"
     spec:
-      triggers:
-        - type: "ImageChange"
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - "trader"
-            from:
-              kind: "ImageStreamTag"
-              name: "jenkins/stocktrader-trader:latest"
       containers:
       - name: trader
 #       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl.
