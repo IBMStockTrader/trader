@@ -15,6 +15,8 @@
 -->
 
 # Quickstart
+* Install the trader app using the modified yaml from `manifests/deploy.yaml` which includes a `DeploymentConfig`
+* Change the `namespace` field in line 22 of the file to the namespace where your `ImageStream` is deployed to
 * modify the git repo and branch to your liking in the `pipeline-template.yaml`
 * Select the OCP project you want to use this in
 * execute `oc apply -f pipeline-template.yaml`
