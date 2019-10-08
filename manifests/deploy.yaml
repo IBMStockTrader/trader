@@ -26,7 +26,7 @@ spec:
               - "trader"
             from:
               kind: "ImageStreamTag"
-              name: "stocktrader-trader:latest"
+              name: "jenkins/stocktrader-trader:latest"
       containers:
       - name: trader
 #       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl.
