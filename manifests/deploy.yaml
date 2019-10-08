@@ -18,7 +18,6 @@ spec:
         prometheus.io/port: "9080"
     spec:
       triggers:
-        - type: "ConfigChange"
         - type: "ImageChange"
           imageChangeParams:
             automatic: true
