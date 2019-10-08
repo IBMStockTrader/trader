@@ -1,6 +1,6 @@
 #Deploy the pod
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: trader
   labels:
@@ -17,18 +17,29 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9080"
     spec:
+      triggers:
+        - type: "ConfigChange"
+        - type: "ImageChange"
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - "trader"
+            from:
+              kind: "ImageStreamTag"
+              name: "stocktrader-trader:latest"
       containers:
       - name: trader
-#       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl. 
+#       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl.
 #             Microclimate uses the Charts folder so we can actually have both options
-        image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
+        #image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
+        image: docker-registry.default.svc:5000/jenkins/stocktrader-trader:latest # OCP
         #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
         #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Kubernetes Service
         env:
           - name: JWT_AUDIENCE
             valueFrom:
               secretKeyRef:
-                name: jwt 
+                name: jwt
                 key: audience
           - name: JWT_ISSUER
             valueFrom:
