@@ -14,6 +14,8 @@
    limitations under the License.
 -->
 
+Demo :-)
+
 # Quickstart
 * Install the trader app using the modified yaml from `manifests/deploy.yaml` which includes a `DeploymentConfig`
 * Change the `namespace` field in line 22 of the file to the namespace where your `ImageStream` is deployed to
