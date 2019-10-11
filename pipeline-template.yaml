@@ -12,12 +12,10 @@ parameters:
   description: The source URL for the application
   displayName: Source URL
   required: true
-  value: https://github.com/maxveit/trader #https://github.com/IBMStockTrader/trader.git
 - name: GIT_SOURCE_REF
   description: The source Ref for the application
   displayName: Source Ref
   required: true
-  value: master
 objects:
 - apiVersion: v1
   kind: ImageStream
