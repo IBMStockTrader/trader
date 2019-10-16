@@ -14,11 +14,17 @@
    limitations under the License.
 -->
 
-# Maven
-This project builds using [Maven](https://maven.apache.org).
+# Pipeline install
+* Select the OCP project you want to use this in using `oc project <project>` e.g. `oc project stock-trader`
+* Run `oc apply -f pipeline-template.yaml`
+* Run `oc new-app --template=stocktrader-trader-pipeline  -p GIT_SOURCE_URL=https://github.com/IBMStockTrader/ -p GIT_SOURCE_REF=master`
+* Install the trader app using the yaml from `manifests/deploy-openshift.yaml` which includes a `DeploymentConfig`
+  * Change the `namespace` field in line 22 and the namespace in the path of the Docker registry in line 36 of the file to the namespace where your `ImageStream` is deployed to
+* You should now have a BuildConfig called `stocktrader-trader` and a ImageStream in your OCP project
 
-# Jenkins
-Builds can be kicked off via [Jenkins](https://jenkins.io).
-
-# Microservice Builder
-It is also configured to be able to be driven by [Microservice Builder](https://www.ibm.com/us-en/marketplace/microservice-builder).
+# Github Webhook for the pipeline
+After applying the pipeline file, you have to create a secret. This can be easily done from the CLI for testing purposes:
+* execute (repalce <your secret> by a random string) `oc create secret generic github-webhook --from-literal=WebHookSecretKey=<your secret>`
+* execute `oc describe bc stocktrader-trader`
+* note down the webhook url and replace <secret> with <your secret>
+* configure a webhook as described here: https://developer.github.com/webhooks/creating/
