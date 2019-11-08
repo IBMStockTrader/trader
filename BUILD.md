@@ -17,7 +17,7 @@
 # Pipeline install
 * Select the OCP project you want to use this in using `oc project <project>` e.g. `oc project stock-trader`
 * Run `oc apply -f pipeline-template.yaml`
-* Run `oc new-app --template=stocktrader-trader-pipeline  -p GIT_SOURCE_URL=https://github.com/IBMStockTrader/ -p GIT_SOURCE_REF=master`
+* Run `oc new-app --template=stocktrader-trader-pipeline  -p GIT_SOURCE_URL=https://github.com/IBMStockTrader/trader.git -p GIT_SOURCE_REF=master`
 * Install the trader app using the yaml from `manifests/deploy-openshift.yaml` which includes a `DeploymentConfig`
   * Change the `namespace` field in line 22 and the namespace in the path of the Docker registry in line 36 of the file to the namespace where your `ImageStream` is deployed to
 * You should now have a BuildConfig called `stocktrader-trader` and a ImageStream in your OCP project
