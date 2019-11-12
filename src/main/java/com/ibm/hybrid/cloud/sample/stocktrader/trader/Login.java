@@ -57,7 +57,7 @@ public class Login extends HttpServlet {
 		writer.append("    <form method=\"post\"/>");
 		writer.append("      <table>");
 		writer.append("        <tr>");
-		writer.append("          <td><b>User ID:</b></th>");
+		writer.append("          <td><b>Username:</b></th>");
 		writer.append("          <td><input type=\"text\" name=\"id\"></td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
