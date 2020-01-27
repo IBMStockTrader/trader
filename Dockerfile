@@ -1,4 +1,4 @@
-#       Copyright 2017-2019 IBM Corp All Rights Reserved
+#       Copyright 2017-2020 IBM Corp All Rights Reserved
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ RUN mvn -f /usr/pom.xml clean package
 
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 USER root
+#   Note that I'm hard-coding the location of the Open Liberty server,
+#   because the /config soft link doesn't work in the OCP 3.11 pipeline
+#   (somehow, the soft link gets replaced by an actual /config directory)
 COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
 COPY --from=build /usr/target/trader-1.0-SNAPSHOT.war /opt/ol/wlp/usr/servers/defaultServer/apps/TraderUI.war
 RUN chown -R 1001:0 config/
