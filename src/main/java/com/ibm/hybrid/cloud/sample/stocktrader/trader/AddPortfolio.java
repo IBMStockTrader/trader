@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -94,7 +95,7 @@ public class AddPortfolio extends HttpServlet {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			portfolioClient.createPortfolio("Bearer "+jwt.getRawToken(), owner);
+			portfolioClient.createPortfolio("Bearer "+getJWT(), owner);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
@@ -102,8 +103,20 @@ public class AddPortfolio extends HttpServlet {
 
 			String message = "Error creating portfolio.  Please check the <i>trader</i> and <i>portfolio</i> pod logs for details.";
 
-			//send control to the Display Message servlet	
+			//send control to the Display Message servlet
 			response.sendRedirect("message?message="+message);
 		}
+	}
+
+	private String getJWT() {
+		String token;
+		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+			token = PropagationHelper.getIdToken().getAccessToken();
+			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		} else {
+			token = jwt.getRawToken();
+			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
+		}
+		return token;
 	}
 }

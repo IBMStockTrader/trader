@@ -1,3 +1,17 @@
+#       Copyright 2017-2020 IBM Corp All Rights Reserved
+
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 #Deploy the pod
 apiVersion: v1
 kind: DeploymentConfig
@@ -8,7 +22,7 @@ metadata:
   annotations:
     prism.subkind: Liberty
 spec:
-  replicas: 2
+  replicas: 1
   triggers:
     - type: "ConfigChange"
     - type: "ImageChange"
@@ -18,8 +32,7 @@ spec:
           - "trader"
         from:
           kind: "ImageStreamTag"
-          name: "stocktrader-trader:latest"
-          namespace: "stock-trader"
+          name: "trader:latest"
   template:
     metadata:
       labels:
@@ -33,78 +46,42 @@ spec:
 #       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl.
 #             Microclimate uses the Charts folder so we can actually have both options
         #image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
-        image: docker-registry.default.svc:5000/stock-trader/stocktrader-trader:latest # OCP
+        image: image-registry.openshift-image-registry.svc:5000/stock-trader/trader:latest # OCP
         #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
         #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Kubernetes Service
         env:
-          - name: JWT_AUDIENCE
-            valueFrom:
-              secretKeyRef:
-                name: jwt
-                key: audience
-          - name: JWT_ISSUER
-            valueFrom:
-              secretKeyRef:
-                name: jwt
-                key: issuer
           - name: WLP_LOGGING_CONSOLE_FORMAT
             value: json
           - name: WLP_LOGGING_CONSOLE_SOURCE
             value: message,ffdc
-          - name: OIDC_NAME
+          - name: JWT_AUDIENCE
+            value: trader
+          - name: JWT_ISSUER
             valueFrom:
               secretKeyRef:
-                name: oidc
-                key: name
+                name: keycloak-oidc
+                key: OIDC_ISSUER
                 optional: true
-          - name: OIDC_ISSUER
+          - name: OIDC_CLIENTID
             valueFrom:
               secretKeyRef:
-                name: oidc
-                key: issuer
+                name: keycloak-oidc
+                key: OIDC_CLIENTID
                 optional: true
-          - name: OIDC_AUTH
+          - name: OIDC_CLIENTSECRET
             valueFrom:
               secretKeyRef:
-                name: oidc
-                key: auth
+                name: keycloak-oidc
+                key: OIDC_CLIENTSECRET
                 optional: true
-          - name: OIDC_TOKEN
+          - name: OIDC_DISCOVERY_URL
             valueFrom:
               secretKeyRef:
-                name: oidc
-                key: token
-                optional: true
-          - name: OIDC_ID
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: id
-                optional: true
-          - name: OIDC_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: secret
-                optional: true
-          - name: OIDC_KEY
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: key
-                optional: true
-          - name: OIDC_NODEPORT
-            valueFrom:
-              secretKeyRef:
-                name: oidc
-                key: nodeport
+                name: keycloak-oidc
+                key: OIDC_DISCOVERY_URL
                 optional: true
           - name: PORTFOLIO_URL
-            valueFrom:
-              configMapKeyRef:
-                name: urls
-                key: portfolio
-                optional: true
+            value: http://portfolio-service:9080/portfolio
         ports:
           - containerPort: 9080
           - containerPort: 9443
@@ -158,7 +135,6 @@ metadata:
     app: trader
     solution: stock-trader
 spec:
-  type: NodePort
   ports:
     - name: http
       protocol: TCP
@@ -171,29 +147,22 @@ spec:
   selector:
     app: trader
 ---
-#Configure the ingress
-apiVersion: extensions/v1beta1
-kind: Ingress
+# Openshift Route
+kind: Route
+apiVersion: route.openshift.io/v1
 metadata:
-  name: trader-ingress
+  name: trader
   labels:
+    app: trader
     solution: stock-trader
-  annotations:
-    #kubernetes.io/ingress.class: "istio"
-    #ingress.kubernetes.io/rewrite-target: /trader
-    kubernetes.io/ingress.class: "nginx"
-    ingress.kubernetes.io/affinity: "cookie"
-    ingress.kubernetes.io/session-cookie-name: "route"
-    ingress.kubernetes.io/session-cookie-hash: "sha1"
-    #ingress.kubernetes.io/rewrite-target: /
-    ingress.kubernetes.io/secure-backends: "true"
-    #ingress.kubernetes.io/app-root: "/trader"
 spec:
-  rules:
-  - host:
-    http:
-      paths:
-      - path: /trader
-        backend:
-          serviceName: trader-service
-          servicePort: 9443
+  to:
+    kind: Service
+    name: trader-service
+    weight: 100
+  port:
+    targetPort: https
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None

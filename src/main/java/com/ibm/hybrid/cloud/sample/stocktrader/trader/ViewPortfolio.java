@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -89,7 +90,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
+		Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+getJWT(), owner);
 
 		double overallTotal = 0.0;
 		String loyaltyLevel = null;
@@ -113,7 +114,7 @@ public class ViewPortfolio extends HttpServlet {
 		}
 
 		try {
-			returnOnInvestment = portfolioClient.getPortfolioReturns("Bearer "+jwt.getRawToken(), owner);
+			returnOnInvestment = portfolioClient.getPortfolioReturns("Bearer "+getJWT(), owner);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);
 			logException(t);
@@ -212,24 +213,24 @@ public class ViewPortfolio extends HttpServlet {
 			while (keys.hasNext()) {
 				String key = keys.next();
 				JsonObject stock = stocks.getJsonObject(key);
-	
+
 				String symbol = stock.getString("symbol");
 				int shares = stock.getInt("shares");
 				double price = stock.getJsonNumber("price").doubleValue();
 				String date = stock.getString("date");
 				double total = stock.getJsonNumber("total").doubleValue();
 				double commission = stock.getJsonNumber("commission").doubleValue();
-	
+
 				String formattedPrice = "$"+currency.format(price);
 				String formattedTotal = "$"+currency.format(total);
 				String formattedCommission = "$"+currency.format(commission);
-	
+
 				if (price == ERROR) {
 					formattedPrice = ERROR_STRING;
 					formattedTotal = ERROR_STRING;
 					formattedCommission = ERROR_STRING;
 				}
-	
+
 				rows.append("        <tr>");
 				rows.append("          <td>"+symbol+"</td>");
 				rows.append("          <td>"+shares+"</td>");
@@ -253,5 +254,17 @@ public class ViewPortfolio extends HttpServlet {
 			t.printStackTrace(new PrintWriter(writer));
 			logger.fine(writer.toString());
 		}
+	}
+
+	private String getJWT() {
+		String token;
+		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+			token = PropagationHelper.getIdToken().getAccessToken();
+			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		} else {
+			token = jwt.getRawToken();
+			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
+		}
+		return token;
 	}
 }
