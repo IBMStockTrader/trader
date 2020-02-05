@@ -82,6 +82,8 @@ spec:
                 optional: true
           - name: PORTFOLIO_URL
             value: http://portfolio-service:9080/portfolio
+          - name: AUTH_TYPE
+            value: keycloak
         ports:
           - containerPort: 9080
           - containerPort: 9443
