@@ -66,7 +66,7 @@ objects:
     source:
       git:
         uri: ${GIT_SOURCE_URL}
-        prefix: ${GIT_SOURCE_REF}
+        ref: ${GIT_SOURCE_REF}
       type: Docker
     strategy:
       type: Docker
