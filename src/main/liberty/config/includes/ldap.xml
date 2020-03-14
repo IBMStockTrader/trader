@@ -16,6 +16,10 @@
         <feature>ldapRegistry-3.0</feature>
     </featureManager>
 
+    <jwtSso jwtBuilderRef="myBuilder"/>
+    <jwtBuilder id="myBuilder" keyStoreRef="defaultKeyStore" keyAlias="default" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
+    <mpJwt id="myMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="default" ignoreApplicationAuthMethod="false"/>
+
     <ldapRegistry ldapType="IBM Tivoli Directory Server" host="${env.LDAP_HOST}" port="${env.LDAP_PORT}" baseDN="${env.LDAP_BASE_DN}" realm="${env.LDAP_REALM}">
         <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
             groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
