@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -110,7 +111,7 @@ public class SubmitFeedback extends HttpServlet {
 
 					logger.info("Calling portfolio/"+owner+"/feedback with following JSON: "+input.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					Feedback result = portfolioClient.submitFeedback("Bearer "+jwt.getRawToken(), owner, input);
+					Feedback result = portfolioClient.submitFeedback("Bearer "+getJWT(), owner, input);
 
 					logger.info("portfolio/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
 					String message = result!=null ? result.getMessage() : "null";
@@ -125,5 +126,17 @@ public class SubmitFeedback extends HttpServlet {
 				response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
 			}
 		}
+	}
+
+	private String getJWT() {
+		String token;
+		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+			token = PropagationHelper.getIdToken().getAccessToken();
+			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		} else {
+			token = jwt.getRawToken();
+			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
+		}
+		return token;
 	}
 }

@@ -23,6 +23,8 @@
 <!--    <feature>socialLogin-1.0</feature>       -->
     </featureManager>
 
+    <variable name="env.AUTH_TYPE" defaultValue="nativejwt"/>
+
     <logging consoleLogLevel="INFO" traceSpecification="*=info"/>
 
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
@@ -37,9 +39,7 @@
 
     <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" />
 
-    <jwtSso jwtBuilderRef="myBuilder"/>
-    <jwtBuilder id="myBuilder" keyStoreRef="defaultKeyStore" keyAlias="default" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
-    <mpJwt id="myMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="default" ignoreApplicationAuthMethod="false"/>
+    <include optional="false" location="includes/${env.AUTH_TYPE}.xml"/>
 
     <mpMetrics authentication="false"/>
 
@@ -77,7 +77,7 @@
            issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
            redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
     </oidcLogin> -->
- 
+
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="false"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="false" ssoCookieName="StockTraderSSO"
         useOnlyCustomCookieName="true" ssoUseDomainFromURL="true"/>

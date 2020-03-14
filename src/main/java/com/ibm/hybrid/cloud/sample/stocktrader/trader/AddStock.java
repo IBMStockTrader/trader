@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -135,7 +136,7 @@ public class AddStock extends HttpServlet {
 		if ((shareString!=null) && !shareString.equals("")) {
 			int shares = Integer.parseInt(shareString);
 			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-			portfolioClient.updatePortfolio("Bearer "+jwt.getRawToken(), owner, symbol, shares);
+			portfolioClient.updatePortfolio("Bearer "+getJWT(), owner, symbol, shares);
 		}
 
 		response.sendRedirect("summary");
@@ -146,7 +147,7 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+jwt.getRawToken(), owner);
+			Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+getJWT(), owner);
 			double commission = portfolio.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
@@ -165,5 +166,17 @@ public class AddStock extends HttpServlet {
 			t.printStackTrace(new PrintWriter(writer));
 			logger.fine(writer.toString());
 		}
+	}
+
+	private String getJWT() {
+		String token;
+		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+			token = PropagationHelper.getIdToken().getAccessToken();
+			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		} else {
+			token = jwt.getRawToken();
+			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
+		}
+		return token;
 	}
 }

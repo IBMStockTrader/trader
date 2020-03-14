@@ -55,6 +55,7 @@ import org.eclipse.microprofile.metrics.Tag;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -209,7 +210,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						portfolioClient.deletePortfolio("Bearer "+jwt.getRawToken(), owner);
+						portfolioClient.deletePortfolio("Bearer "+getJWT(), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -235,7 +236,7 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		Portfolio[] portfolios = testMode ? getHardcodedPortfolios() : portfolioClient.getPortfolios("Bearer "+jwt.getRawToken());
+		Portfolio[] portfolios = testMode ? getHardcodedPortfolios() : portfolioClient.getPortfolios("Bearer "+getJWT());
 
 		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
 		metricRegistry.remove("portfolio_value");
@@ -300,7 +301,7 @@ public class Summary extends HttpServlet {
 			org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return totals.get(owner); };
 
 			Metadata metadata = Metadata.builder().withName("portfolio_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
-	
+
 			metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
 
 			gauges.put(owner, gauge);
@@ -337,5 +338,17 @@ public class Summary extends HttpServlet {
 	@Gauge(name="portfolio_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
 	public int getUnknown() {
 		return unknown;
+	}
+
+	private String getJWT() {
+		String token;
+		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+			token = PropagationHelper.getIdToken().getAccessToken();
+			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		} else {
+			token = jwt.getRawToken();
+			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
+		}
+		return token;
 	}
 }

@@ -62,6 +62,18 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.ibm.websphere.appserver.api</groupId>
+            <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
+            <version>1.0.36</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.websphere.appserver.api</groupId>
+            <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
+            <version>1.2.36</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -116,5 +128,5 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>        
+    </profiles>
 </project>
