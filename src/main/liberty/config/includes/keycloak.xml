@@ -12,16 +12,24 @@
 -->
 
 <server>
-  <featureManager>
+   <featureManager>
+<!--  <feature>socialLogin-1.0</feature> -->
       <feature>openidConnectClient-1.0</feature>
       <feature>transportSecurity-1.0</feature>
-  </featureManager>
+   </featureManager>
 
-  <openidConnectClient id="client01"
-    clientId="${env.OIDC_CLIENTID}"
-    clientSecret="${env.OIDC_CLIENTSECRET}"
-    signatureAlgorithm="RS256"
-    scope="openid profile email microprofile-jwt"
-    discoveryEndpointUrl="${env.OIDC_DISCOVERY_URL}">
-  </openidConnectClient>
+<!-- <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
+      clientSecret="${env.OIDC_SECRET}" authorizationEndpoint="${env.OIDC_AUTH}"
+      tokenEndpoint="${env.OIDC_TOKEN}" scope="openid profile email" userNameAttribute="email"
+      issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
+      redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
+   </oidcLogin> -->
+
+   <openidConnectClient id="client01"
+      clientId="${env.OIDC_CLIENTID}"
+      clientSecret="${env.OIDC_CLIENTSECRET}"
+      signatureAlgorithm="RS256"
+      scope="openid profile email microprofile-jwt"
+      discoveryEndpointUrl="${env.OIDC_DISCOVERY_URL}">
+   </openidConnectClient>
 </server>
