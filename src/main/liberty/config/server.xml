@@ -19,8 +19,6 @@
         <feature>monitor-1.0</feature>
         <feature>jwtSso-1.0</feature>
 <!--    <feature>logstashCollector-1.0</feature> -->
-<!--    <feature>ldapRegistry-3.0</feature>      -->
-<!--    <feature>socialLogin-1.0</feature>       -->
     </featureManager>
 
     <variable name="env.AUTH_TYPE" defaultValue="nativejwt"/>
@@ -37,46 +35,13 @@
 
     <sslDefault sslRef="RpSSLConfig" />
 
-    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" />
+    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustDefaultCerts="true" />
 
     <include optional="false" location="includes/${env.AUTH_TYPE}.xml"/>
 
     <mpMetrics authentication="false"/>
 
-    <basicRegistry id="basic" realm="BasicRegistry">
-        <user name="admin" password="admin"/>
-        <user name="stock" password="trader"/>
-        <user name="debug" password="debug"/>
-        <user name="read"  password="only"/>
-        <user name="other" password="other"/>
-        <group name="StockTrader">
-            <member name="stock"/>
-            <member name="debug"/>
-        </group>
-        <group name="StockViewer">
-            <member name="read"/>
-        </group>
-    </basicRegistry>
-
-    <administrator-role>
-    	<user>admin</user>
-    </administrator-role>
-
-    <!-- Define an LDAP configuration for BluePages.
-    <ldapRegistry ldapType="IBM Tivoli Directory Server" host="bluepages.ibm.com" port="389" baseDN="o=ibm.com" realm="BluePages">
-        <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
-            groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
-    </ldapRegistry>
-
     <ltpa expiration="1h"/>
- -->
-
-    <!-- <oidcLogin id="${env.OIDC_NAME}" clientId="${env.OIDC_ID}" displayName="${env.OIDC_NAME}"
-           clientSecret="${env.OIDC_SECRET}" authorizationEndpoint="${env.OIDC_AUTH}"
-           tokenEndpoint="${env.OIDC_TOKEN}" scope="openid profile email" userNameAttribute="email"
-           issuer="${env.OIDC_ISSUER}" trustAliasName="${env.OIDC_KEY}"
-           redirectToRPHostAndPort="${env.OIDC_NODEPORT}">
-    </oidcLogin> -->
 
     <webAppSecurity allowFailOverToBasicAuth="true" displayAuthenticationRealm="true" logoutOnHttpSessionExpire="false"
         webAlwaysLogin="true" preserveFullyQualifiedReferrerUrl="true" trackLoggedOutSSOCookies="false" ssoCookieName="StockTraderSSO"
