@@ -20,6 +20,7 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.RoundingMode;
