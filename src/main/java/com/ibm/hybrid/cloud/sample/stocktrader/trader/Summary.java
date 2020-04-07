@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2020 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 
 //JSR 47 Logging
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 //CDI 2.0
 import javax.inject.Inject;
@@ -126,13 +128,15 @@ public class Summary extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String rows = null;
+
 		try {
 			rows = getTableRows(request);
 		} catch (Throwable t) {
+			logException(t);
 			message = t.getMessage();
-			logger.warning(message);
 			error = true;
 		}
+
 		boolean editor = request.isUserInRole(EDITOR);
 		Writer writer = response.getWriter();
 		writer.append("<!DOCTYPE html>");
@@ -350,5 +354,17 @@ public class Summary extends HttpServlet {
 			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
 		}
 		return token;
+	}
+
+
+	static void logException(Throwable t) {
+		logger.warning(t.getClass().getName()+": "+t.getMessage());
+
+		//only log the stack trace if the level has been set to at least INFO
+		if (logger.isLoggable(Level.INFO)) {
+			StringWriter writer = new StringWriter();
+			t.printStackTrace(new PrintWriter(writer));
+			logger.info(writer.toString());
+		}
 	}
 }
