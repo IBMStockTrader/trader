@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2020 IBM Corp All Rights Reserved
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -65,14 +65,14 @@
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
-            <version>1.0.36</version>
-            <scope>compile</scope>
+            <version>1.0.38</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
-            <version>1.2.36</version>
-            <scope>compile</scope>
+            <version>1.2.38</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
