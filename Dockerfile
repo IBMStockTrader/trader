@@ -22,7 +22,7 @@ FROM maven:3.6-jdk-11-slim AS build
 COPY . /usr/
 RUN mvn -f /usr/pom.xml clean package
 
-FROM openliberty/open-liberty:kernel-java8-openj9-ubi
+FROM openliberty/open-liberty:kernel-java11-openj9-ubi
 ARG extract_keycloak_cert
 USER root
 COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
