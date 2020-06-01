@@ -25,10 +25,16 @@ RUN mvn -f /usr/pom.xml clean package
 FROM openliberty/open-liberty:kernel-java11-openj9-ubi
 ARG extract_keycloak_cert
 USER root
+
+# Following line is a workaround for an issue where sometimes the server somehow loads the built-in server.xml,
+# rather than the one I copy into the image.  That shouldn't be possible, but alas, it appears to be some Docker bug.
+RUN rm /opt/ol/wlp/usr/servers/defaultServer/server.xml
+
 COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
 COPY --from=build /usr/target/trader-1.0-SNAPSHOT.war /opt/ol/wlp/usr/servers/defaultServer/apps/TraderUI.war
 COPY --from=cert-extractor /keycloak.pem /tmp/keycloak.pem
-RUN chown -R 1001:0 config/
+RUN chown -R 1001:0 /opt/ol/wlp/usr/servers/defaultServer/
+
 USER 1001
 RUN if [ "$extract_keycloak_cert" = "true" ]; then keytool -import -v -trustcacerts -alias keycloak -file /tmp/keycloak.pem -keystore /opt/ol/wlp/usr/servers/defaultServer/resources/security/key.jks --noprompt --storepass passw0rd ; fi
 RUN configure.sh
