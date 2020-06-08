@@ -28,15 +28,13 @@
 
     <httpEndpoint httpPort="9080" httpsPort="9443" host="*" id="defaultHttpEndpoint"/>
 
-    <keyStore id="defaultKeyStore" password="passw0rd" type="jks"
-         location="${server.config.dir}/resources/security/key.jks" />
+    <keyStore id="defaultKeyStore" password="St0ckTr@der" type="pkcs12"
+         location="${server.config.dir}/resources/security/key.p12" />
 
-    <keyStore id="validationKeystore" password="Passw0rd" type="jks"
-         location="${server.config.dir}/resources/security/validationKeystore.jks" />
+    <keyStore id="defaultTrustStore" password="St0ckTr@der" type="pkcs12"
+         location="${server.config.dir}/resources/security/trust.p12" />
 
-    <sslDefault sslRef="RpSSLConfig" />
-
-    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustDefaultCerts="true" />
+    <ssl id="defaultSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="defaultTrustStore" trustDefaultCerts="true" />
 
     <include optional="false" location="${server.config.dir}/includes/${AUTH_TYPE}.xml"/>
 
