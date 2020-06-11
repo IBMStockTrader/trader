@@ -12,8 +12,8 @@
 -->
 <server>
     <jwtSso jwtBuilderRef="myBuilder"/>
-    <jwtBuilder id="myBuilder" keyStoreRef="defaultKeyStore" keyAlias="default" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
-    <mpJwt id="myMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="default" ignoreApplicationAuthMethod="false"/>
+    <jwtBuilder id="myBuilder" keyStoreRef="defaultTrustStore" keyAlias="jwtSigner" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
+    <mpJwt id="defaultMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="jwtSigner" ignoreApplicationAuthMethod="false"/>
 
     <basicRegistry id="basic" realm="BasicRegistry">
         <user name="admin" password="admin"/>
