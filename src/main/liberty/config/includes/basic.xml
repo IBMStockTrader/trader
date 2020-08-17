@@ -11,9 +11,12 @@
    limitations under the License.
 -->
 <server>
-    <jwtSso jwtBuilderRef="myBuilder"/>
-    <jwtBuilder id="myBuilder" keyStoreRef="defaultTrustStore" keyAlias="jwtSigner" issuer="${env.JWT_ISSUER}" audiences="${env.JWT_AUDIENCE}" />
-    <mpJwt id="defaultMpJwt" audiences="${env.JWT_AUDIENCE}" issuer="${env.JWT_ISSUER}" keyName="jwtSigner" ignoreApplicationAuthMethod="false"/>
+    <variable name="JWT_AUDIENCE" defaultValue="stock-trader"/>
+    <variable name="JWT_ISSUER" defaultValue="http://stock-trader.ibm.com"/>
+
+    <jwtSso id="defaultJwtSso" jwtBuilderRef="defaultJWT"/>
+    <jwtBuilder id="defaultJWT" keyStoreRef="defaultTrustStore" keyAlias="jwtSigner" issuer="${JWT_ISSUER}" audiences="${JWT_AUDIENCE}" />
+    <mpJwt id="stockTraderJWT" audiences="${JWT_AUDIENCE}" issuer="${JWT_ISSUER}" keyName="jwtSigner" ignoreApplicationAuthMethod="false" expiry="12h" sslRef="defaultSSLConfig"/>
 
     <basicRegistry id="basic" realm="BasicRegistry">
         <user name="admin" password="admin"/>
