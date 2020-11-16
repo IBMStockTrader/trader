@@ -31,6 +31,11 @@ USER root
 RUN rm /opt/ol/wlp/usr/servers/defaultServer/server.xml
 
 COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
+
+# This script will add the requested XML snippets to enable Liberty features and grow image to be fit-for-purpose using featureUtility. 
+# Only available in 'kernel-slim'. The 'full' tag already includes all features for convenience.
+RUN features.sh
+
 COPY --from=build /usr/target/trader-1.0-SNAPSHOT.war /opt/ol/wlp/usr/servers/defaultServer/apps/TraderUI.war
 COPY --from=cert-extractor /keycloak.pem /tmp/keycloak.pem
 RUN chown -R 1001:0 /opt/ol/wlp/usr/servers/defaultServer/
