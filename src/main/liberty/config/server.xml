@@ -37,7 +37,7 @@
 
     <sslDefault sslRef="RpSSLConfig" />
 
-    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" />
+    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustDefaultCerts="true"/>
 
     <include optional="false" location="includes/${env.AUTH_TYPE}.xml"/>
 

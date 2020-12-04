@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 #Deploy the pod
-apiVersion: v1
+apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   name: trader
@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: trader
-        image: image-registry.openshift-image-registry.svc:5000/stock-trader/trader:latest # OCP
+        image: quay-quay-quay.mycluster-us-sout-363772-a01ee4194ed985a1e32b1d96fd4ae346-0000.us-south.containers.appdomain.cloud/cicd/trader:latest # OCP
         env:
           - name: WLP_LOGGING_CONSOLE_FORMAT
             value: json
@@ -37,12 +37,6 @@ spec:
             value: message,ffdc
           - name: JWT_AUDIENCE
             value: trader
-          #- name: JWT_ISSUER
-          #  valueFrom:
-          #    secretKeyRef:
-          #      name: keycloak-oidc
-          #      key: OIDC_ISSUER
-          #      optional: true
           - name: OIDC_CLIENTID
             valueFrom:
               secretKeyRef:
