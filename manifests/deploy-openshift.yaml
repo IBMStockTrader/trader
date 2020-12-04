@@ -17,22 +17,8 @@ apiVersion: v1
 kind: DeploymentConfig
 metadata:
   name: trader
-  labels:
-    app: stock-trader
-  annotations:
-    prism.subkind: Liberty
 spec:
   replicas: 1
-  triggers:
-    - type: "ConfigChange"
-    - type: "ImageChange"
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - "trader"
-        from:
-          kind: "ImageStreamTag"
-          name: "trader:latest"
   template:
     metadata:
       labels:
@@ -43,12 +29,7 @@ spec:
     spec:
       containers:
       - name: trader
-#       Note: this manifests/deploy.yaml will be used when we want to deploy this directly using kubectl.
-#             Microclimate uses the Charts folder so we can actually have both options
-        #image: ibmstocktrader/trader:basicregistry # Docker Hub with basic registry sign in
         image: image-registry.openshift-image-registry.svc:5000/stock-trader/trader:latest # OCP
-        #image: mycluster.icp:8500/stock-trader/trader:latest # IBM Cloud Private
-        #image: registry.ng.bluemix.net/stock_trader/trader:latest # IBM Kubernetes Service
         env:
           - name: WLP_LOGGING_CONSOLE_FORMAT
             value: json
@@ -56,12 +37,12 @@ spec:
             value: message,ffdc
           - name: JWT_AUDIENCE
             value: trader
-          - name: JWT_ISSUER
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-oidc
-                key: OIDC_ISSUER
-                optional: true
+          #- name: JWT_ISSUER
+          #  valueFrom:
+          #    secretKeyRef:
+          #      name: keycloak-oidc
+          #      key: OIDC_ISSUER
+          #      optional: true
           - name: OIDC_CLIENTID
             valueFrom:
               secretKeyRef:
@@ -112,30 +93,11 @@ spec:
             cpu: 100m
             memory: 128Mi
 ---
-#Deploy the autoscaler
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: trader-hpa
-  labels:
-    solution: stock-trader
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: trader
-  maxReplicas: 10
-  minReplicas: 2
-  targetCPUUtilizationPercentage: 60
----
 #Deploy the service
 apiVersion: v1
 kind: Service
 metadata:
   name: trader-service
-  labels:
-    app: trader
-    solution: stock-trader
 spec:
   ports:
     - name: http
@@ -154,17 +116,12 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: trader
-  labels:
-    app: trader
-    solution: stock-trader
 spec:
   to:
     kind: Service
     name: trader-service
     weight: 100
   port:
-    targetPort: https
+    targetPort: http
   tls:
-    termination: passthrough
-    insecureEdgeTerminationPolicy: None
-  wildcardPolicy: None
+    termination: edge
