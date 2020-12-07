@@ -1,0 +1,30 @@
+<!--
+       Copyright 2017-2020 IBM Corp All Rights Reserved
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<server>
+    <featureManager>
+        <feature>ldapRegistry-3.0</feature>
+    </featureManager>
+
+    <variable name="JWT_AUDIENCE" defaultValue="stock-trader"/>
+    <variable name="JWT_ISSUER" defaultValue="http://stock-trader.ibm.com"/>
+
+    <jwtSso id="defaultJwtSso" jwtBuilderRef="defaultJWT"/>
+    <jwtBuilder id="defaultJWT" keyStoreRef="defaultTrustStore" keyAlias="jwtSigner" issuer="${JWT_ISSUER}" audiences="${JWT_AUDIENCE}" />
+    <mpJwt id="stockTraderJWT" audiences="${JWT_AUDIENCE}" issuer="${JWT_ISSUER}" keyName="jwtSigner" ignoreApplicationAuthMethod="false" expiry="12h" sslRef="defaultSSLConfig"/>
+
+    <ldapRegistry ldapType="IBM Tivoli Directory Server" host="${env.LDAP_HOST}" port="${env.LDAP_PORT}" baseDN="${env.LDAP_BASE_DN}" realm="${env.LDAP_REALM}">
+        <idsFilters userFilter="(&amp;(emailAddress=%v)(objectclass=person))"
+            groupFilter="(&amp;(cn=%v)(|(objectclass=groupOfNames)(objectclass=groupOfUniqueNames)(objectclass=groupOfURLs)))"/>
+    </ldapRegistry>
+</server>
