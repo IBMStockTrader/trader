@@ -36,8 +36,6 @@
 
     <ssl id="defaultSSLConfig" keyStoreRef="defaultKeyStore" trustStoreRef="defaultTrustStore" trustDefaultCerts="true" />
 
-    <ssl id="RpSSLConfig" keyStoreRef="defaultKeyStore" trustDefaultCerts="true"/>
-
     <include optional="false" location="${server.config.dir}/includes/${AUTH_TYPE}.xml"/>
 
     <mpMetrics authentication="false"/>
