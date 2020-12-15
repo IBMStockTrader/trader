@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# If building locally, you have to complete a maven build first, before running the Docker build
+
 FROM openliberty/open-liberty:kernel-java8-openj9-ubi
 USER root
 COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/

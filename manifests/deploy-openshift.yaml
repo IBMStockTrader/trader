@@ -13,8 +13,8 @@
 #   limitations under the License.
 
 #Deploy the pod
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: trader
 spec:
