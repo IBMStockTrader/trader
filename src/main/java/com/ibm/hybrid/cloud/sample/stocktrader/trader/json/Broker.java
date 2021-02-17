@@ -164,7 +164,7 @@ public class Broker {
 
     public boolean equals(Object obj) {
         boolean isEqual = false;
-        if ((obj != null) && (obj instanceof Portfolio)) isEqual = toString().equals(obj.toString());
+        if ((obj != null) && (obj instanceof Broker)) isEqual = toString().equals(obj.toString());
         return isEqual;
    }
 
