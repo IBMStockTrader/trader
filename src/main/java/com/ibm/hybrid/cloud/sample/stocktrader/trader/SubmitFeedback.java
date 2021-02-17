@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Feedback;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Stock;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.WatsonInput;
@@ -62,7 +62,7 @@ public class SubmitFeedback extends HttpServlet {
 	private static final String SUBMIT = "Submit";
 	private static Logger logger = Logger.getLogger(SubmitFeedback.class.getName());
 
-	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @RestClient BrokerClient brokerClient;
 
 	private @Inject JsonWebToken jwt;
 
@@ -109,11 +109,11 @@ public class SubmitFeedback extends HttpServlet {
 				if ((feedback!=null) && !feedback.equals("") && (owner!=null) && !owner.equals("")) {
 					WatsonInput input = new WatsonInput(feedback);
 
-					logger.info("Calling portfolio/"+owner+"/feedback with following JSON: "+input.toString());
+					logger.info("Calling broker/"+owner+"/feedback with following JSON: "+input.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					Feedback result = portfolioClient.submitFeedback("Bearer "+getJWT(), owner, input);
+					Feedback result = brokerClient.submitFeedback("Bearer "+getJWT(), owner, input);
 
-					logger.info("portfolio/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
+					logger.info("broker/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
 					String message = result!=null ? result.getMessage() : "null";
 					String encodedMessage = URLEncoder.encode(message, "UTF-8");
 					response.sendRedirect("message?owner="+owner+"&message="+encodedMessage); //send control to the DisplayMessage servlet
