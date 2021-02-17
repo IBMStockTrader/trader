@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 
-/** JSON-B POJO class representing a Portfolio JSON object */
-public class Portfolio {
+/** JSON-B POJO class representing a Broker JSON object */
+public class Broker {
     private String owner;
     private double total;
     private String loyalty;
@@ -38,15 +38,15 @@ public class Portfolio {
     private JsonObject stocks;
 
 
-    public Portfolio() { //default constructor
+    public Broker() { //default constructor
     }
 
-    public Portfolio(String initialOwner) { //primary key constructor
+    public Broker(String initialOwner) { //primary key constructor
         setOwner(initialOwner);
     }
 
-    public Portfolio(String initialOwner, double initialTotal, String initialLoyalty, double initialBalance,
-                     double initialCommissions, int initialFree, String initialSentiment, double initialNextCommission) {
+    public Broker(String initialOwner, double initialTotal, String initialLoyalty, double initialBalance,
+                  double initialCommissions, int initialFree, String initialSentiment, double initialNextCommission) {
         setOwner(initialOwner);
         setTotal(initialTotal);
         setLoyalty(initialLoyalty);
