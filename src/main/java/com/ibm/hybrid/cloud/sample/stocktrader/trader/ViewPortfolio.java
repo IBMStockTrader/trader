@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -67,7 +67,7 @@ public class ViewPortfolio extends HttpServlet {
 	private static Logger logger = Logger.getLogger(ViewPortfolio.class.getName());
 	private NumberFormat currency = null;
 
-	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @RestClient BrokerClient brokerClient;
 
 	private @Inject JsonWebToken jwt;
 
@@ -90,7 +90,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+getJWT(), owner);
+		Broker broker = brokerClient.getBroker("Bearer "+getJWT(), owner);
 
 		double overallTotal = 0.0;
 		String loyaltyLevel = null;
@@ -102,19 +102,19 @@ public class ViewPortfolio extends HttpServlet {
 		String returnOnInvestment = "Unknown";
 
 		try {
-			overallTotal = portfolio.getTotal();
-			loyaltyLevel = portfolio.getLoyalty();
-			balance = portfolio.getBalance();
-			commissions = portfolio.getCommissions();
-			free = portfolio.getFree();
-			sentiment = portfolio.getSentiment();
-			stocks = portfolio.getStocks();
+			overallTotal = broker.getTotal();
+			loyaltyLevel = broker.getLoyalty();
+			balance = broker.getBalance();
+			commissions = broker.getCommissions();
+			free = broker.getFree();
+			sentiment = broker.getSentiment();
+			stocks = broker.getStocks();
 		} catch (NullPointerException npe) {
 			logException(npe);
 		}
 
 		try {
-			returnOnInvestment = portfolioClient.getPortfolioReturns("Bearer "+getJWT(), owner);
+			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+getJWT(), owner);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);
 			logException(t);
