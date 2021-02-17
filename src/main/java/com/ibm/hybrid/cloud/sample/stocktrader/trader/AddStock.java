@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -60,7 +60,7 @@ public class AddStock extends HttpServlet {
 
 	private NumberFormat currency = null;
 
-	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @RestClient BrokerClient brokerClient;
 
 	private @Inject JsonWebToken jwt;
 
@@ -136,7 +136,7 @@ public class AddStock extends HttpServlet {
 		if ((shareString!=null) && !shareString.equals("")) {
 			int shares = Integer.parseInt(shareString);
 			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-			portfolioClient.updatePortfolio("Bearer "+getJWT(), owner, symbol, shares);
+			brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
 		}
 
 		response.sendRedirect("summary");
@@ -147,8 +147,8 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			Portfolio portfolio = portfolioClient.getPortfolio("Bearer "+getJWT(), owner);
-			double commission = portfolio.getNextCommission();
+			Broker broker = brokerClient.getBroker("Bearer "+getJWT(), owner);
+			double commission = broker.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
 		} catch (Throwable t) {
