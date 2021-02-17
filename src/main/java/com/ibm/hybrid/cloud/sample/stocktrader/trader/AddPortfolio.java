@@ -16,7 +16,7 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -52,7 +52,7 @@ public class AddPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static Logger logger = Logger.getLogger(AddPortfolio.class.getName());
 
-	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @RestClient BrokerClient brokerClient;
 
 	private @Inject JsonWebToken jwt;
 
@@ -95,13 +95,13 @@ public class AddPortfolio extends HttpServlet {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			portfolioClient.createPortfolio("Bearer "+getJWT(), owner);
+			brokerClient.createBroker("Bearer "+getJWT(), owner);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
 			logger.warning("Error creating portfolio: "+t.getMessage());
 
-			String message = "Error creating portfolio.  Please check the <i>trader</i> and <i>portfolio</i> pod logs for details.";
+			String message = "Error creating portfolio.  Please check the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for details.";
 
 			//send control to the Display Message servlet
 			response.sendRedirect("message?message="+message);
