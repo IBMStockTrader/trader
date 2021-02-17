@@ -16,8 +16,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.PortfolioClient;
-import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Portfolio;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -67,7 +67,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 /**
  * Servlet implementation class Summary
  */
-@WebServlet(description = "Portfolio summary servlet", urlPatterns = { "/summary" })
+@WebServlet(description = "Broker summary servlet", urlPatterns = { "/summary" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
 @RequestScoped
 public class Summary extends HttpServlet {
@@ -92,7 +92,7 @@ public class Summary extends HttpServlet {
 	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
 	private @Inject @ConfigProperty(name = "TEST_MODE", defaultValue = "false") boolean testMode;
-	private @Inject @RestClient PortfolioClient portfolioClient;
+	private @Inject @RestClient BrokerClient brokerClient;
 	private @Inject JsonWebToken jwt;
 	private @Inject MetricRegistry metricRegistry;
 
@@ -100,15 +100,15 @@ public class Summary extends HttpServlet {
 	public static boolean error = false;
 	public static String message = null;
 
-	// Override Portfolio Client URL if config map is configured to provide URL
+	// Override Broker Client URL if config map is configured to provide URL
 	static {
-		String mpUrlPropName = PortfolioClient.class.getName() + "/mp-rest/url";
-		String portfolioURL = System.getenv("PORTFOLIO_URL");
-		if ((portfolioURL != null) && !portfolioURL.isEmpty()) {
-			logger.info("Using Portfolio URL from config map: " + portfolioURL);
-			System.setProperty(mpUrlPropName, portfolioURL);
+		String mpUrlPropName = BrokerClient.class.getName() + "/mp-rest/url";
+		String brokerURL = System.getenv("BROKER_URL");
+		if ((brokerURL != null) && !brokerURL.isEmpty()) {
+			logger.info("Using Broker URL from config map: " + brokerURL);
+			System.setProperty(mpUrlPropName, brokerURL);
 		} else {
-			logger.info("Portfolio URL not found from env var from config map, so defaulting to value in jvm.options: " + System.getProperty(mpUrlPropName));
+			logger.info("Broker URL not found from env var from config map, so defaulting to value in jvm.options: " + System.getProperty(mpUrlPropName));
 		}
 	}
 
@@ -151,9 +151,9 @@ public class Summary extends HttpServlet {
 		writer.append("    <br/>");
 		writer.append("    <br/>");
 		if (error) {
-			writer.append("    Error communicating with the Portfolio microservice: \""+message+"\"");
+			writer.append("    Error communicating with the Broker microservice: \""+message+"\"");
 			writer.append("    <p/>");
-			writer.append("    Please consult the <i>trader</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.");
+			writer.append("    Please consult the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.");
 			writer.append("    <p/>");
 		} else {
 			writer.append("    <form method=\"post\"/>");
@@ -215,7 +215,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						portfolioClient.deletePortfolio("Bearer "+getJWT(), owner);
+						brokerClient.deleteBroker("Bearer "+getJWT(), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -232,8 +232,8 @@ public class Summary extends HttpServlet {
 	private String getTableRows(HttpServletRequest request) {
 		StringBuffer rows = new StringBuffer();
 
-		if (portfolioClient==null) {
-			throw new NullPointerException("Injection of PortfolioClient failed!");
+		if (brokerClient==null) {
+			throw new NullPointerException("Injection of BrokerClient failed!");
 		}
 
 		if (jwt==null) {
@@ -241,18 +241,18 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		Portfolio[] portfolios = testMode ? getHardcodedPortfolios() : portfolioClient.getPortfolios("Bearer "+getJWT());
+		Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+getJWT());
 
 		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
 		metricRegistry.remove("portfolio_value");
-		for (int index=0; index<portfolios.length; index++) {
-			Portfolio portfolio = portfolios[index];
+		for (int index=0; index<brokers.length; index++) {
+			Broker broker = brokers[index];
 
-			String owner = portfolio.getOwner();
-			double total = portfolio.getTotal();
-			String loyaltyLevel = portfolio.getLoyalty();
+			String owner = broker.getOwner();
+			double total = broker.getTotal();
+			String loyaltyLevel = broker.getLoyalty();
 
-			setPortfolioMetric(owner, total);
+			setBrokerMetric(owner, total);
 			if (loyaltyLevel!=null) {
 				if (loyaltyLevel.equalsIgnoreCase(BASIC)) basic++;
 				else if (loyaltyLevel.equalsIgnoreCase(BRONZE)) bronze++;
@@ -278,34 +278,35 @@ public class Summary extends HttpServlet {
 		return rows.toString();
 	}
 
-	Portfolio[] getHardcodedPortfolios() {
-		Portfolio john = new Portfolio("John");
+	Broker[] getHardcodedBrokers() {
+		Broker john = new Broker("John");
 		john.setTotal(1234.56);
 		john.setLoyalty("Basic");
-		Portfolio karri = new Portfolio("Karri");
+		Broker karri = new Broker("Karri");
 		karri.setTotal(12345.67);
 		karri.setLoyalty("Bronze");
-		Portfolio ryan = new Portfolio("Ryan");
+		Broker ryan = new Broker("Ryan");
 		ryan.setTotal(23456.78);
 		ryan.setLoyalty("Bronze");
-		Portfolio greg = new Portfolio("Greg");
+		Broker raunak = new Broker("Raunak");
+		raunak.setTotal(98765.43);
+		raunak.setLoyalty("Silver");
+		Broker greg = new Broker("Greg");
 		greg.setTotal(98765.43);
-		greg.setLoyalty("Silver");
-		Portfolio eric = new Portfolio("Eric");
-		eric.setTotal(123456.78);
-		eric.setLoyalty("Gold");
-		Portfolio kyle = new Portfolio("Kyle");
-		kyle.setLoyalty("Basic");
-		Portfolio[] portfolios = { john, karri, ryan, greg, eric, kyle };
-		return portfolios;
+		greg.setLoyalty("Gold");
+		Broker eric = new Broker("Eric");
+		eric.setTotal(1234567.89);
+		eric.setLoyalty("Platinum");
+		Broker[] brokers = { john, karri, ryan, raunak, greg, eric };
+		return brokers;
 	}
 
-	void setPortfolioMetric(String owner, double total) {
+	void setBrokerMetric(String owner, double total) {
 		totals.put(owner, total);
 		if (gauges.get(owner)==null) try { //gauge not yet registered for this portfolio
 			org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return totals.get(owner); };
 
-			Metadata metadata = Metadata.builder().withName("portfolio_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
+			Metadata metadata = Metadata.builder().withName("broker_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
 
 			metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
 
@@ -315,32 +316,32 @@ public class Summary extends HttpServlet {
 		}
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
 	public int getBasic() {
 		return basic;
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=bronze", displayName="Bronze", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=bronze", displayName="Bronze", unit=MetricUnits.NONE)
 	public int getBronze() {
 		return bronze;
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=silver", displayName="Silver", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=silver", displayName="Silver", unit=MetricUnits.NONE)
 	public int getSilver() {
 		return silver;
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=gold", displayName="Gold", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=gold", displayName="Gold", unit=MetricUnits.NONE)
 	public int getGold() {
 		return gold;
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=platinum", displayName="Platinum", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=platinum", displayName="Platinum", unit=MetricUnits.NONE)
 	public int getPlatinum() {
 		return platinum;
 	}
 
-	@Gauge(name="portfolio_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
+	@Gauge(name="broker_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
 	public int getUnknown() {
 		return unknown;
 	}
