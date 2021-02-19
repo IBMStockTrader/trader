@@ -39,7 +39,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @ApplicationPath("/")
 @Path("/")
 @RegisterRestClient
-/** mpRestClient "remote" interface for the Portfolio microservice */
+/** mpRestClient "remote" interface for the Broker microservice */
 public interface BrokerClient {
 	@GET
 	@Path("/")
