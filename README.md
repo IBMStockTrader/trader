@@ -1,5 +1,5 @@
 <!--
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-The **trader** microservice provides the UI for the *Stock Trader* sample.  It calls the **portfolio** microservice,
+The **trader** microservice provides the UI for the *Stock Trader* sample.  It calls the **broker** microservice,
 which then calls various other services as needed.  It uses the *mpRestClient* to make the call, and passes a JWT on the
 request, which **portfolio** checks for via *mpJwt*.
 
@@ -29,7 +29,7 @@ Each page has a header and footer image, and there's an index.html that redirect
 
 The servlets just concern themselves with constructing the right **HTML** to return.  The UI is very basic; there
 is no use of **JavaScript** or anything fancy.  All of the real logic is in the PortfolioServices.java, which
-contains all of the REST calls to the Portfolio microservice, and appropriate JSON wrangling.
+contains all of the REST calls to the Broker microservice, and appropriate JSON wrangling.
 
 You can hit the main entry point by entering a URL such as `http://localhost:9080/trader/summary` in your
 browser's address bar.  Or in a Kubernetes environment, you'd replace `localhost` with your proxy node address, and
