@@ -16,7 +16,7 @@
 
 The **trader** microservice provides the UI for the *Stock Trader* sample.  It calls the **broker** microservice,
 which then calls various other services as needed.  It uses the *mpRestClient* to make the call, and passes a JWT on the
-request, which **portfolio** checks for via *mpJwt*.
+request, which **broker** checks for via *mpJwt*.
 
 ![Architecural Diagram](lab/stock-trader.png)
 
