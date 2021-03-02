@@ -17,15 +17,15 @@
 FROM openliberty/open-liberty:kernel-slim-java11-openj9-ubi
 USER root
 
-COPY src/main/liberty/config /opt/ol/wlp/usr/servers/defaultServer/
+COPY --chown=1001:0 src/main/liberty/config /config
 #Workaround for https://github.com/OpenLiberty/ci.docker/issues/244
-RUN touch /opt/ol/wlp/servers/defaultServer/server.xml
+#RUN touch /opt/ol/wlp/servers/defaultServer/server.xml
 
 # This script will add the requested XML snippets to enable Liberty features and grow image to be fit-for-purpose using featureUtility. 
 # Only available in 'kernel-slim'. The 'full' tag already includes all features for convenience.
 RUN features.sh
-COPY target/trader-1.0-SNAPSHOT.war /opt/ol/wlp/usr/servers/defaultServer/apps/TraderUI.war
-RUN chown -R 1001:0 /opt/ol/wlp/usr/servers/defaultServer/
+COPY --chown=1001:0 target/TraderUI.war /config/apps/TraderUI.war
+
 
 USER 1001
 RUN configure.sh
