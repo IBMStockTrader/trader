@@ -25,37 +25,24 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
-public class HealthEndpointIT {
+public class HomePageIT {
 
     private String port = System.getProperty("http.port");
     private String warContext = System.getProperty("war.name");
-    private String liveUrl = "http://localhost:" + port + "/health/live";
-    private String readyUrl = "http://localhost:" + port + "/health/ready";
-    private String url = "http://localhost:" + port;
+
+    private String url = "http://localhost:" + port + "/" + warContext + "/login";
     private static final int MAX_RETRY_COUNT = 5;
     private static final int SLEEP_TIMEOUT = 3000;
 
     @Test
-    public void testLiveEndpoint() throws Exception {
+    public void testHomeEndpoint() throws Exception {
         
-        System.out.println("Testing endpoint " + liveUrl );
-        int responseCode = makeRequest(liveUrl);
+        System.out.println("Testing endpoint " + url );
+        int responseCode = makeRequest(url);
         for(int i = 0; (responseCode != 200) && (i < MAX_RETRY_COUNT); i++) {
           System.out.println("Response code : " + responseCode + ", retrying ... (" + i + " of " + MAX_RETRY_COUNT + ")");
           Thread.sleep(SLEEP_TIMEOUT);
-          responseCode = makeRequest(liveUrl);
-        }
-        assertTrue("Incorrect response code: " + responseCode, responseCode == 200);
-    }
-
-    @Test
-    public void testReadyEndpoint() throws Exception {
-        System.out.println("Testing endpoint " + readyUrl);
-        int responseCode = makeRequest(readyUrl);
-        for(int i = 0; (responseCode != 200) && (i < MAX_RETRY_COUNT); i++) {
-          System.out.println("Response code : " + responseCode + ", retrying ... (" + i + " of " + MAX_RETRY_COUNT + ")");
-          Thread.sleep(SLEEP_TIMEOUT);
-          responseCode = makeRequest(readyUrl);
+          responseCode = makeRequest(url);
         }
         assertTrue("Incorrect response code: " + responseCode, responseCode == 200);
     }

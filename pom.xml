@@ -20,16 +20,17 @@
     <artifactId>trader</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
+    
 
     <name>StockTrader - trader</name>
 
     <!-- Parent needed for MicroClimate to build properly -->
-    <parent>
+<!--    <parent>
         <groupId>io.openliberty.tools</groupId>
         <artifactId>liberty-maven-app-parent</artifactId>
         <version>3.2.1</version>
     </parent>
-
+-->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -38,8 +39,13 @@
 
         <app.name>trader</app.name>
         <warContext>${app.name}</warContext>
-        <package.file>${project.build.directory}/${app.name}.zip</package.file>
-        <packaging.type>usr</packaging.type>
+        <!-- Liberty configuration -->
+        <liberty.var.default.http.port>9080</liberty.var.default.http.port>
+        <liberty.var.default.https.port>9443</liberty.var.default.https.port>
+        <liberty.var.project.name>${project.artifactId}</liberty.var.project.name>    
+        <liberty.var.app.context.root>${project.artifactId}</liberty.var.app.context.root>
+        <liberty.env.JWT_AUDIENCE>stock</liberty.env.JWT_AUDIENCE>  
+        <liberty.env.JWT_ISSUER>trader</liberty.env.JWT_ISSUER>                    
     </properties>
 
     <dependencies>
@@ -63,6 +69,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>3.1.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
             <version>1.0.40</version>
@@ -74,9 +86,16 @@
             <version>1.2.40</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+            <scope>test</scope>
+        </dependency>        
     </dependencies>
 
     <build>
+        <finalName>TraderUI</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -87,6 +106,60 @@
                     <packagingExcludes>pom.xml</packagingExcludes>
                 </configuration>
             </plugin>
+            <!-- Enable liberty-maven plugin -->
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <version>3.3.4</version>
+                <executions>
+                <execution>
+                    <id>start-server</id>
+                    <phase>pre-integration-test</phase>
+                    <goals> 
+                        <goal>test-start</goal>
+                        <goal>deploy</goal>
+                    </goals>
+                  </execution>
+                  <execution>
+                    <id>install-feature</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>create</goal>                        
+                        <goal>install-feature</goal>
+                    </goals>
+                </execution>                  
+                  <execution>
+                    <id>stop-server</id>
+                    <phase>post-integration-test</phase>
+                    <goals> <goal>test-stop</goal> </goals>
+                  </execution>
+                    </executions>
+                    <configuration>
+                        <stripVersion>true</stripVersion>
+                    </configuration>                      
+            </plugin>            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>integration-test</goal>
+                      <goal>verify</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <http.port>${liberty.var.default.http.port}</http.port>
+                        <https.port>${liberty.var.default.https.port}</https.port>
+                        <war.name>${liberty.var.app.context.root}</war.name>
+                        <JWT_AUDIENCE>stock</JWT_AUDIENCE>
+                        <JWT_ISSUER>trader</JWT_ISSUER>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>            
         </plugins>
     </build>
     <!-- Profile needed for microclimate to build this properly -->
