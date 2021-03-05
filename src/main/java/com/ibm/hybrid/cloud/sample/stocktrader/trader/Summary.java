@@ -20,11 +20,8 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 //AWS S3 (wrapper for IBM Cloud Object Storage buckets)
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.Bucket;
+import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
+import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -109,6 +106,7 @@ public class Summary extends HttpServlet {
 
 	private static boolean useS3 = false;
 	private static AmazonS3 s3 = null;
+	private static String s3Bucket = null;
 
 	// Override Broker Client URL if config map is configured to provide URL
 	static {
@@ -375,23 +373,22 @@ public class Summary extends HttpServlet {
 
 	private void logToS3(String key, Object document) {
 		try {
-			String bucketName = null;
-
 			if (s3 == null) {
 				logger.info("Initializing S3");
 				String region = System.getenv("S3_REGION");
 				s3 = AmazonS3ClientBuilder.standard().withRegion(region).build(); //what about credentials?
-				bucketName = System.getenv("S3_BUCKET");
+
+				s3Bucket = System.getenv("S3_BUCKET");
+				if (!s3.doesBucketExistV2(s3Bucket)) {
+					logger.info("Creating S3 bucket");
+					s3.createBucket(s3Bucket);
+				}
 			}
 
-			if (!s3.doesBucketExistV2(bucketName)) {
-				logger.info("Creating S3 bucket");
-				s3.createBucket(bucketName);
-			}
 			logger.info("Putting object in S3 bucket for "+key);
-			s3.putObject(bucketName, key, document.toString());
-		} catch (AmazonS3Exception s3e) {
-			logException(s3e);
+			s3.putObject(s3Bucket, key, document.toString());
+		} catch (Throwable t) {
+			logException(t);
 		}
 	}
 
