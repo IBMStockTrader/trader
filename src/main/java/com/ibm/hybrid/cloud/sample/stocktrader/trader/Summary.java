@@ -19,6 +19,12 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
+import com.ibm.cloud.objectstorage.ClientConfiguration;
+import com.ibm.cloud.objectstorage.auth.AWSCredentials;
+import com.ibm.cloud.objectstorage.auth.AWSStaticCredentialsProvider;
+import com.ibm.cloud.objectstorage.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.ibm.cloud.objectstorage.oauth.BasicIBMOAuthCredentials;
+
 //AWS S3 (wrapper for IBM Cloud Object Storage buckets)
 import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
 import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
@@ -376,7 +382,19 @@ public class Summary extends HttpServlet {
 			if (s3 == null) {
 				logger.info("Initializing S3");
 				String region = System.getenv("S3_REGION");
-				s3 = AmazonS3ClientBuilder.standard().withRegion(region).build(); //what about credentials?
+				String apiKey = System.getenv("S3_API_KEY");
+				String serviceInstanceId = System.getenv("S3_SERVICE_INSTANCE_ID");
+				String endpointUrl = System.getenv("S3_ENDPOINT_URL");
+				String location = System.getenv("S3_LOCATION");
+
+				AWSCredentials credentials = new BasicIBMOAuthCredentials(apiKey, serviceInstanceId);
+				ClientConfiguration clientConfig = new ClientConfiguration().withRequestTimeout(5000).withTcpKeepAlive(true);
+				s3 = AmazonS3ClientBuilder.standard()
+					.withCredentials(new AWSStaticCredentialsProvider(credentials))
+					.withEndpointConfiguration(new EndpointConfiguration(endpointUrl, location))
+					.withPathStyleAccessEnabled(true)
+					.withClientConfiguration(clientConfig)
+					.build(); //what about credentials?
 
 				s3Bucket = System.getenv("S3_BUCKET");
 				if (!s3.doesBucketExistV2(s3Bucket)) {
