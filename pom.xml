@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-       Copyright 2017-2020 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -63,6 +63,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>io.jaegertracing</groupId>
+            <artifactId>jaeger-client</artifactId>
+            <version>0.34.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
@@ -77,14 +87,19 @@
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
-            <version>1.0.40</version>
+            <version>1.0.49</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
-            <version>1.2.40</version>
+            <version>1.2.49</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.cos</groupId>
+            <artifactId>ibm-cos-java-sdk-s3</artifactId>
+            <version>2.9.0</version>
         </dependency>
         <dependency>
             <groupId>jakarta.xml.bind</groupId>

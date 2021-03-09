@@ -1,4 +1,4 @@
-#       Copyright 2017-2020 IBM Corp All Rights Reserved
+#       Copyright 2017-2021 IBM Corp All Rights Reserved
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -19,13 +19,12 @@ USER root
 
 COPY --chown=1001:0 src/main/liberty/config /config
 #Workaround for https://github.com/OpenLiberty/ci.docker/issues/244
-#RUN touch /opt/ol/wlp/servers/defaultServer/server.xml
+RUN touch /config/server.xml
 
 # This script will add the requested XML snippets to enable Liberty features and grow image to be fit-for-purpose using featureUtility. 
 # Only available in 'kernel-slim'. The 'full' tag already includes all features for convenience.
 RUN features.sh
 COPY --chown=1001:0 target/TraderUI.war /config/apps/TraderUI.war
-
 
 USER 1001
 RUN configure.sh

@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2020 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +18,16 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
+
+import com.ibm.cloud.objectstorage.ClientConfiguration;
+import com.ibm.cloud.objectstorage.auth.AWSCredentials;
+import com.ibm.cloud.objectstorage.auth.AWSStaticCredentialsProvider;
+import com.ibm.cloud.objectstorage.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.ibm.cloud.objectstorage.oauth.BasicIBMOAuthCredentials;
+
+//AWS S3 (wrapper for IBM Cloud Object Storage buckets)
+import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
+import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -100,8 +110,15 @@ public class Summary extends HttpServlet {
 	public static boolean error = false;
 	public static String message = null;
 
+	private static boolean useS3 = false;
+	private static AmazonS3 s3 = null;
+	private static String s3Bucket = null;
+
 	// Override Broker Client URL if config map is configured to provide URL
 	static {
+		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
+		logger.info("useS3: "+useS3);
+
 		String mpUrlPropName = BrokerClient.class.getName() + "/mp-rest/url";
 		String brokerURL = System.getenv("BROKER_URL");
 		if ((brokerURL != null) && !brokerURL.isEmpty()) {
@@ -247,8 +264,10 @@ public class Summary extends HttpServlet {
 		metricRegistry.remove("portfolio_value");
 		for (int index=0; index<brokers.length; index++) {
 			Broker broker = brokers[index];
-
 			String owner = broker.getOwner();
+
+			if (useS3) logToS3(owner, broker);
+
 			double total = broker.getTotal();
 			String loyaltyLevel = broker.getLoyalty();
 
@@ -358,6 +377,38 @@ public class Summary extends HttpServlet {
 		return token;
 	}
 
+	private void logToS3(String key, Object document) {
+		try {
+			if (s3 == null) {
+				logger.info("Initializing S3");
+				String region = System.getenv("S3_REGION");
+				String apiKey = System.getenv("S3_API_KEY");
+				String serviceInstanceId = System.getenv("S3_SERVICE_INSTANCE_ID");
+				String endpointUrl = System.getenv("S3_ENDPOINT_URL");
+				String location = System.getenv("S3_LOCATION");
+
+				AWSCredentials credentials = new BasicIBMOAuthCredentials(apiKey, serviceInstanceId);
+				ClientConfiguration clientConfig = new ClientConfiguration().withRequestTimeout(5000).withTcpKeepAlive(true);
+				s3 = AmazonS3ClientBuilder.standard()
+					.withCredentials(new AWSStaticCredentialsProvider(credentials))
+					.withEndpointConfiguration(new EndpointConfiguration(endpointUrl, location))
+					.withPathStyleAccessEnabled(true)
+					.withClientConfiguration(clientConfig)
+					.build(); //what about credentials?
+
+				s3Bucket = System.getenv("S3_BUCKET");
+				if (!s3.doesBucketExistV2(s3Bucket)) {
+					logger.info("Creating S3 bucket");
+					s3.createBucket(s3Bucket);
+				}
+			}
+
+			logger.info("Putting object in S3 bucket for "+key);
+			s3.putObject(s3Bucket, key, document.toString());
+		} catch (Throwable t) {
+			logException(t);
+		}
+	}
 
 	static void logException(Throwable t) {
 		logger.warning(t.getClass().getName()+": "+t.getMessage());
