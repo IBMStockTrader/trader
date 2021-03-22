@@ -19,6 +19,9 @@ metadata:
   name: trader
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: trader
   template:
     metadata:
       labels:
@@ -30,6 +33,9 @@ spec:
       containers:
       - name: trader
         image: quay-quay-quay.mycluster-us-sout-363772-a01ee4194ed985a1e32b1d96fd4ae346-0000.us-south.containers.appdomain.cloud/cicd/trader:latest # OCP
+        envFrom:
+          - configMapRef:
+              name: s3-configmap
         env:
           - name: WLP_LOGGING_CONSOLE_FORMAT
             value: json
@@ -37,6 +43,8 @@ spec:
             value: message,ffdc
           - name: JWT_AUDIENCE
             value: trader
+          - name: JWT_ISSUER
+            value: trader            
           - name: OIDC_CLIENTID
             valueFrom:
               secretKeyRef:
