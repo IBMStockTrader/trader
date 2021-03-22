@@ -10,8 +10,12 @@ name: Build and Deploy to ROKS
 
 # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
 on:
-  release:
-    types: [created]
+  push:
+    # Edit to the branch(es) you want to build and deploy on each push.
+    branches: [ $default-branch ]
+  
+  # release:
+  #  types: [created]
 
 # Environment variables available to all jobs and steps in this workflow
 env:
