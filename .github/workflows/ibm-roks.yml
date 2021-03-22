@@ -76,15 +76,23 @@ jobs:
     - name: Push the image to ICR
       run: |
         docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
+    
+    # Install oc    
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        version: '4.5'        
 
     # Deploy the Docker image to the IKS cluster
     - name: Deploy to IKS
       run: |
+        ibmcloud ks cluster ls
         ibmcloud ks cluster config --cluster $IKS_CLUSTER
         kubectl config current-context
-        kubectl apply -f manifests/deploy-openshift.yaml
-        kubectl set image deployment/$DEPLOYMENT_NAME trader=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --record
-        kubectl rollout status deployment/$DEPLOYMENT_NAME
+        oc login -u apikey -p $IBM_CLOUD_API_KEY
+        oc apply -f manifests/deploy-openshift.yaml
+        oc set image deployment/$DEPLOYMENT_NAME trader=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --record
+        oc rollout status deployment/$DEPLOYMENT_NAME
         
     #         kubectl create deployment $DEPLOYMENT_NAME --image=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --dry-run -o yaml > deployment.yaml
     #    kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
