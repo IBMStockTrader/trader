@@ -24,7 +24,7 @@ env:
   ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
   REGISTRY_HOSTNAME: us.icr.io
   IMAGE_NAME: trader-gha-test
-  IKS_CLUSTER: bv2fvbvd09f9408a3nag
+  IKS_CLUSTER: dev
   DEPLOYMENT_NAME: trader-gha-test
   PORT: 5001
 
