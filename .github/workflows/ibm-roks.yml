@@ -25,7 +25,7 @@ env:
   REGISTRY_HOSTNAME: us.icr.io
   IMAGE_NAME: trader-gha-test
   IKS_CLUSTER: gas-cluster3
-  DEPLOYMENT_NAME: trader-gha-test
+  DEPLOYMENT_NAME: trader
   CLUSTER_NAMESPACE: trader-gha-test
   PORT: 5001
 
