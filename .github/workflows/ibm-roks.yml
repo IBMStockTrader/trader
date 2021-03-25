@@ -146,13 +146,14 @@ jobs:
         echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
         IMAGE_URL=${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
         echo "Getting the VA status of ${IMAGE_URL}"
+        set +e
 
         ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
 
         retry=$?
 
         while [ $retry -eq 0 ]; do
-          sleep 30
+          sleep 60
           echo "Trying again to see if scan is done"
           ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
           retry=$?
@@ -167,7 +168,7 @@ jobs:
 
         VA_STATUS=$(cat va-result.json | jq -r '.[].status')
 
-
+        set -e
         echo "VA scan status: ${VA_STATUS}"
         echo '::set-output name=scan-status::${VA_STATUS}'
 
