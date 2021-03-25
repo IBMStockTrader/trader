@@ -33,6 +33,8 @@ jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
+    outputs:
+      image-registry-path: ${{ steps.push-to-icr.outputs.image-registry-path }}
     environment: production
     steps:
 
@@ -75,8 +77,10 @@ jobs:
 
     # Push the image to IBM Container Registry
     - name: Push the image to ICR
+      id: push-to-icr
       run: |
         docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
+        echo '::set-output name=image-registry-path::$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA' 
     
     # Install oc    
     - name: Install oc
@@ -111,3 +115,76 @@ jobs:
     #    kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
     #    kubectl apply -f service.yaml
     #    kubectl get services -o wide
+  
+  va-scan:
+    name: Vulnarability advisor scan
+    runs-on: ubuntu-latest
+    needs: setup-build-publish-deploy
+    outputs:
+      va-scan-status: ${{ steps.va-scan.outputs.scan-status }}    
+    steps:
+    # Download and Install IBM Cloud CLI
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        ibmcloud --version
+        ibmcloud config --check-version=false
+        ibmcloud plugin install -f kubernetes-service
+        ibmcloud plugin install -f container-registry
+
+    # Authenticate with IBM Cloud CLI
+    - name: Authenticate with IBM Cloud CLI
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+
+    - name: VA scan
+      id: va-scan
+      run: |
+        echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
+        IMAGE_URL = ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
+        echo "Getting the VA status of ${IMAGE_URL}"
+
+        ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
+
+        retry=$?
+
+        while [ $retry -eq 0 ]; do
+          sleep 30
+          echo "Trying again to see if scan is done"
+          ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
+          retry=$?
+        done
+
+
+        echo "Saving results to va-result.json"
+
+        ibmcloud cr va ${IMAGE_URL} --output json > va-result.json
+        
+        cat va-result.json
+
+        VA_STATUS=$(cat va-result.json | jq -r '.[].status')
+
+
+        echo "VA scan status: ${VA_STATUS}"
+        echo '::set-output name=scan-status::${VA_STATUS}'
+
+        if [[ "${VA_STATUS}" == "OK" ]]; then
+          echo "VA - No Issues in the image"
+          exit 0
+        elif [[ $(cat va-result.json | jq -r '.[].vulnerabilities | length') -gt
+        0 ]]; then
+          echo "VA Failure: $(cat va-result.json | jq -r '.[].vulnerabilities | length') vulnerabilities found in the image"
+          cat va-result.json | jq -r '.[].vulnerabilities'
+          exit 1
+        elif [[ $(cat va-result.json | jq -r '.[].configuration_issues |
+        length') -gt 0 ]]; then
+          echo "VA Warning - $(cat va-result.json | jq -r '.[].configuration_issues | length') configuration issues found in the image"
+          cat va-result.json | jq -r '.[].configuration_issues'
+          exit 0
+        else
+          echo "VA Warning: non-OK status from Vulnerability Advisor ${VA_STATUS}"
+          cat va-result.json | jq -r '.[]'
+        fi        
+        
