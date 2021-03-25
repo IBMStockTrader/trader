@@ -142,6 +142,7 @@ jobs:
     - name: VA scan
       id: va-scan
       run: |
+        set -x
         echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
         IMAGE_URL=${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
         echo "Getting the VA status of ${IMAGE_URL}"
