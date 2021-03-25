@@ -143,7 +143,7 @@ jobs:
       id: va-scan
       run: |
         echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
-        IMAGE_URL = ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
+        IMAGE_URL=${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
         echo "Getting the VA status of ${IMAGE_URL}"
 
         ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
@@ -173,13 +173,11 @@ jobs:
         if [[ "${VA_STATUS}" == "OK" ]]; then
           echo "VA - No Issues in the image"
           exit 0
-        elif [[ $(cat va-result.json | jq -r '.[].vulnerabilities | length') -gt
-        0 ]]; then
+        elif [[ $(cat va-result.json | jq -r '.[].vulnerabilities | length') -gt 0 ]]; then
           echo "VA Failure: $(cat va-result.json | jq -r '.[].vulnerabilities | length') vulnerabilities found in the image"
           cat va-result.json | jq -r '.[].vulnerabilities'
           exit 1
-        elif [[ $(cat va-result.json | jq -r '.[].configuration_issues |
-        length') -gt 0 ]]; then
+        elif [[ $(cat va-result.json | jq -r '.[].configuration_issues | length') -gt 0 ]]; then
           echo "VA Warning - $(cat va-result.json | jq -r '.[].configuration_issues | length') configuration issues found in the image"
           cat va-result.json | jq -r '.[].configuration_issues'
           exit 0
