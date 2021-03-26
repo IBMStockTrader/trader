@@ -121,7 +121,7 @@ jobs:
           echo "Trying again to see if scan is done"
           ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
           retry=$?
-          if [[ $retry -neq 0  ]]; then
+          if [[ $retry -ne 0  ]]; then
             break;
           fi
           sleep 60
@@ -160,6 +160,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [setup-build-publish-deploy, va-scan]
     steps:
+    # Checkout repo   
+    - name: Checkout
+      uses: actions/checkout@v2    
     # Download and Install IBM Cloud CLI
     - name: Install IBM Cloud CLI
       run: |
