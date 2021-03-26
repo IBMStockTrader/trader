@@ -31,7 +31,7 @@ env:
 
 jobs:
   setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+    name: Setup, Build, Publish
     runs-on: ubuntu-latest
     outputs:
       image-registry-path: ${{ steps.push-to-icr.outputs.image-registry-path }}
@@ -108,6 +108,7 @@ jobs:
 
     - name: VA scan
       id: va-scan
+      continue-on-error: true
       run: |
         set -x
         echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
@@ -115,15 +116,15 @@ jobs:
         echo "Getting the VA status of ${IMAGE_URL}"
         set +e
 
-        ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
-
-        retry=$?
-
-        while [ $retry -eq 0 ]; do
-          sleep 60
+        for ITER in {1..10}
+        do
           echo "Trying again to see if scan is done"
           ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
           retry=$?
+          if [[ $retry -neq 0  ]]; then
+            break;
+          fi
+          sleep 60
         done
 
 
