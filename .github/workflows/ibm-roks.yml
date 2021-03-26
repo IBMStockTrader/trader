@@ -210,3 +210,29 @@ jobs:
     #    kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
     #    kubectl apply -f service.yaml
     #    kubectl get services -o wide
+
+  publish-evidence:
+    name: Publish evidence to evidence repo
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy, va-scan]
+    steps:
+    # Checkout repo   
+    - name: Checkout
+      uses: actions/checkout@v2    
+      
+    # Checkout evidence repo   
+    - name: Checkout evidence repo
+      run: |
+        echo "Checkout evidence repo"
+    
+    # update template
+    - name: Update evidence template
+      run: |
+        echo "updating template"
+      
+    # Commit changes to evidence repot
+    - name: Commit to evidence
+      run: |
+        echo "Update evidence repo"
+      
+      
