@@ -221,12 +221,21 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2    
       
+    - run: |
+        pwd
+        ls -la
+        
+      
     # Checkout evidence repo   
     - name: Checkout evidence repo
       uses: actions/checkout@v2
       with:
         repository: 'gasgithub/trader-evidence'
         path: '$EVIDENCE_DIR'
+        
+    - run: |
+        pwd
+        ls -la
     
     # Create new folder
     - name: Create evidence
@@ -246,6 +255,8 @@ jobs:
         mkdir -p raw/cd/$NEW_UUID2
         
         cp evidence-template/summary.json $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        jq 'map((select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "CHANGED")' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
     - name: Commit report
       run: |
