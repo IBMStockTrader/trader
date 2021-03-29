@@ -287,7 +287,7 @@ jobs:
         git config --global user.name 'GH Actions workflow'
         git config --global user.email 'workflow@users.noreply.github.com'
         git commit -am "Publish evidence"
-        git push https:://$USERNAME:$REPO_KEY@github.com/gasgithub/trader-evidence   
+        git push https://$USERNAME:$REPO_KEY@github.com/gasgithub/trader-evidence   
     
 
       
