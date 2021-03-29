@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image-registry-path: ${{ steps.push-to-icr.outputs.image-registry-path }}
-      unit-test-result: ${{ steps.push-to-icr.outputs.image-registry-path }}
+      unit-test-result: ${{ steps.unit-test.outputs.unit-test-result }}
     environment: production
     steps:
 
@@ -71,8 +71,16 @@ jobs:
       run: |
         mvn clean verify
         cat target/failsafe-reports/failsafe-summary.xml
-        grep "<failures>0</failures>" target/failsafe-reports/failsafe-summary.xml
-    
+        grep -q "<failures>0</failures>" target/failsafe-reports/failsafe-summary.xml
+        code=$?
+        echo "ret: $code"
+        if [[ $code -eq 0  ]]; then
+          echo "success"
+          echo '::set-output name=unit-test-result::success'
+        elif
+          echo "failed"
+          echo '::set-output name=unit-test-result::failed'
+        fi
      
     # Build the Docker image
     - name: Build with Docker
