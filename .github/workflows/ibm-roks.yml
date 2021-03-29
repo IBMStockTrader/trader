@@ -262,7 +262,7 @@ jobs:
         cd $EVIDENCE_DIR
         
         echo "check uuidgen"
-        NEW_UUID=$(uuidgen)"
+        NEW_UUID=$(uuidgen)
         echo "GEN UUID=$NEW_UUID"
         echo "Check proc"
         NEW_UUID2=$(cat /proc/sys/kernel/random/uuid)
@@ -272,6 +272,9 @@ jobs:
         mkdir -p raw/cd/$NEW_UUID2
         
         cp evidence-template/summary.json $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        echo "unit test: ${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"
+        echo "vascan test: ${{needs.va-scan.outputs.va-scan-status}}"
         
         jq 'map((select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "CHANGED")' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
