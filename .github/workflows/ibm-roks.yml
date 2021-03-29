@@ -249,6 +249,7 @@ jobs:
       with:
         repository: 'gasgithub/trader-evidence'
         path: ${{ env.EVIDENCE_DIR }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         
     - run: |
         pwd
