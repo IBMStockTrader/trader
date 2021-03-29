@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image-registry-path: ${{ steps.push-to-icr.outputs.image-registry-path }}
+      unit-test-result: ${{ steps.push-to-icr.outputs.image-registry-path }}
     environment: production
     steps:
 
@@ -66,7 +67,11 @@ jobs:
 
     # Build and package app
     - name: Build and package app
-      run: mvn clean package
+      id: unit-test
+      run: |
+        mvn clean verify
+        cat target/failsafe-reports/failsafe-summary.xml
+        grep "<failures>0</failures>" target/failsafe-reports/failsafe-summary.xml
     
      
     # Build the Docker image
@@ -117,7 +122,7 @@ jobs:
         echo "Getting the VA status of ${IMAGE_URL}"
         set +e
 
-        for ITER in {1..10}
+        for ITER in {1..2}
         do
           echo "Trying again to see if scan is done"
           ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
@@ -231,7 +236,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'gasgithub/trader-evidence'
-        path: '$EVIDENCE_DIR'
+        path: $EVIDENCE_DIR
         
     - run: |
         pwd
