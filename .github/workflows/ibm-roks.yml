@@ -27,6 +27,7 @@ env:
   IKS_CLUSTER: gas-cluster3
   DEPLOYMENT_NAME: trader
   CLUSTER_NAMESPACE: trader-gha-test
+  EVIDENCE_DIR: evidence-repo
   PORT: 5001
 
 jobs:
@@ -222,17 +223,38 @@ jobs:
       
     # Checkout evidence repo   
     - name: Checkout evidence repo
-      run: |
-        echo "Checkout evidence repo"
+      uses: actions/checkout@v2
+      with:
+        repository: 'gasgithub/trader-evidence'
+        path: '$EVIDENCE_DIR'
     
-    # update template
-    - name: Update evidence template
+    # Create new folder
+    - name: Create evidence
       run: |
-        echo "updating template"
-      
-    # Commit changes to evidence repot
-    - name: Commit to evidence
+        set -x
+        set +e
+        cd $EVIDENCE_DIR
+        
+        echo "check uuidgen"
+        NEW_UUID=$(uuidgen)"
+        echo "GEN UUID=$NEW_UUID"
+        echo "Check proc"
+        NEW_UUID2=$(cat /proc/sys/kernel/random/uuid)
+        echo "GEN UUID2=$NEW_UUID2"
+        set -e
+        
+        mkdir -p raw/cd/$NEW_UUID2
+        
+        cp evidence-template/summary.json $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+    
+    - name: Commit report
       run: |
-        echo "Update evidence repo"
+        cd $EVIDENCE_DIR
+        git config --global user.name 'GH Actions workflow'
+        git config --global user.email 'workflow@users.noreply.github.com'
+        git commit -am "Publish evidence"
+        git push    
+    
+
       
       
