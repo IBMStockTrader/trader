@@ -77,7 +77,7 @@ jobs:
         if [[ $code -eq 0  ]]; then
           echo "success"
           echo '::set-output name=unit-test-result::success'
-        elif
+        else
           echo "failed"
           echo '::set-output name=unit-test-result::failed'
         fi
