@@ -249,7 +249,7 @@ jobs:
       with:
         repository: 'gasgithub/trader-evidence'
         path: ${{ env.EVIDENCE_DIR }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{secrets.PUSH_TOKEN}}
         
     - run: |
         pwd
@@ -279,7 +279,7 @@ jobs:
     
     - name: Commit report
       env:
-        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        REPO_KEY: ${{secrets.PUSH_TOKEN}}
         USERNAME: github-actions[bot]    
       run: |
         cd $EVIDENCE_DIR
