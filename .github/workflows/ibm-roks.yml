@@ -261,15 +261,12 @@ jobs:
         set +e
         cd $EVIDENCE_DIR
         
-        echo "check uuidgen"
-        NEW_UUID=$(uuidgen)
-        echo "GEN UUID=$NEW_UUID"
-        echo "Check proc"
         NEW_UUID2=$(cat /proc/sys/kernel/random/uuid)
-        echo "GEN UUID2=$NEW_UUID2"
+        echo "GEN UUID=$NEW_UUID2"
         set -e
         
         mkdir -p raw/cd/$NEW_UUID2
+        cd ..
         
         cp evidence-template/summary.json $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
