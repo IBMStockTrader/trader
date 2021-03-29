@@ -278,13 +278,16 @@ jobs:
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
     - name: Commit report
+      env:
+        REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+        USERNAME: github-actions[bot]    
       run: |
         cd $EVIDENCE_DIR
         git add .
         git config --global user.name 'GH Actions workflow'
         git config --global user.email 'workflow@users.noreply.github.com'
         git commit -am "Publish evidence"
-        git push    
+        git push https:://$USERNAME:$REPO_KEY@github.com/gasgithub/trader-evidence   
     
 
       
