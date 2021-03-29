@@ -273,12 +273,13 @@ jobs:
         echo "unit test: ${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"
         echo "vascan test: ${{needs.va-scan.outputs.va-scan-status}}"
         
-        cat $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
-        jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "CHANGED"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
     - name: Commit report
       run: |
         cd $EVIDENCE_DIR
+        git add .
         git config --global user.name 'GH Actions workflow'
         git config --global user.email 'workflow@users.noreply.github.com'
         git commit -am "Publish evidence"
