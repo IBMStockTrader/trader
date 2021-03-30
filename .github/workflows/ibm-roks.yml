@@ -95,7 +95,37 @@ jobs:
       run: |
         docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
         echo '::set-output name=image-registry-path::$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA' 
-    
+
+  cra-discovery:
+    name: CRA discovery
+    runs-on: ubuntu-latest
+    container: icr.io/continuous-delivery/cra-discovery:release.1571
+    environment: production
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: discovery
+      continue-on-error: true    
+      env:
+        API_KEY: ${{secrets.API_KEY}}
+        TOOLCHAIN_REGION: us-south   
+        TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
+        REGION_ID: dal08
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        
+      run: |
+        set -x +e
+        pwd
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"       
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
   
   va-scan:
     name: Vulnarability advisor scan
