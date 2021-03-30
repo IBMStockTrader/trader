@@ -102,6 +102,17 @@ jobs:
     container: icr.io/continuous-delivery/cra-discovery:release.1571
     environment: production
     steps:
+    - name: check git
+      run: |
+        set -x
+        git --version
+        uname -a
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        
+        
     - name: Checkout
       uses: actions/checkout@v2
     
@@ -142,6 +153,7 @@ jobs:
         OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
         
         REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        ls -la
         ls -la $REPO_DIR_PATH
         
         echo "Fetching users's token"
