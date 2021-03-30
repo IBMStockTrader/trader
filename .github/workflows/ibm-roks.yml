@@ -119,7 +119,11 @@ jobs:
       env:
         COMMITTED_AT: ${{ steps.author-date.outputs.result }}
 
-      
+    - name: Check docker
+      run: |
+        set -x
+        docker version
+        docker images
       
     - name: discovery
       continue-on-error: false    
