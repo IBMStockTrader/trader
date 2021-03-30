@@ -104,9 +104,9 @@ jobs:
     steps:
     - name: check git
       run: |
-        set -x
-        git --version
+        set -x +e
         uname -a
+        git --version
         add-apt-repository ppa:git-core/ppa -y
         apt-get update
         apt-get install git -y
