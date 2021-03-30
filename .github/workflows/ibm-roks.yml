@@ -104,6 +104,21 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    
+    - name: Get timestamp
+      uses: actions/github-script@v3.1.0
+      id: author-date
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const commit_details = await github.git.getCommit({owner: context.repo.owner, repo: context.repo.repo, commit_sha: context.sha});
+          return commit_details.data.author.date
+      
+    - run: echo $COMMITTED_AT
+      env:
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
+
+      
       
     - name: discovery
       continue-on-error: false    
@@ -113,6 +128,7 @@ jobs:
         REGION_ID: dal08
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
         
       run: |
         set -x
@@ -180,6 +196,7 @@ jobs:
           -repodir $REPO_DIR_PATH  \
           -rigapi "${gitsecureUrl}" \
           -commitid "$GITHUB_SHA" \
+          -commitTimestamp "$COMMITTED_AT" \          
           -toolchainid "${TOOLCHAIN_ID}"
 
  
