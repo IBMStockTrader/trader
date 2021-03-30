@@ -130,7 +130,7 @@ jobs:
         echo "Getting the VA status of ${IMAGE_URL}"
         set +e
 
-        for ITER in {1..2}
+        for ITER in {1..10}
         do
           echo "Trying again to see if scan is done"
           ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
