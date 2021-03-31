@@ -187,24 +187,24 @@ jobs:
         # Create the request object according to the Git Flavor API
         api_prefix=""
         status_url = os.environ['GITHUB_SERVER_URL'] + api_prefix
-            + "/repos/" + os.environ['GITHUB_REPOSITORY']
-            + "/statuses/" + revision)        
+          + "/repos/" + os.environ['GITHUB_REPOSITORY']
+          + "/statuses/" + revision)        
         
         data = {
-            "state": state,
-            "target_url": target_url,
-            "description": description,
-            "context": context
+          "state": state,
+          "target_url": target_url,
+          "description": description,
+          "context": context
         }   
         
         req = urllib.request.Request(
-            status_url,
-            data=json.dumps(data).encode('utf8'),
-            headers={
-                "content-type": "application/json",
-                "Authorization": "Bearer " + os.environ['TOKEN']
-            },
-            method="POST"
+          status_url,
+          data=json.dumps(data).encode('utf8'),
+          headers={
+            "content-type": "application/json",
+            "Authorization": "Bearer " + os.environ['TOKEN']
+          },
+          method="POST"
         )
         req.add_header("User-Agent", "GH actions PR workflow")
  
