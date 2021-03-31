@@ -234,6 +234,7 @@ jobs:
         
         touch results-status.txt
         
+        ls -la
                 
         /gitsecure/vulnerability-task \
             -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
@@ -241,12 +242,14 @@ jobs:
             -rigserviceapi "${gitsecureUrl}" \
             -runid "$GITHUB_RUN_ID" \
             -commitid "$GITHUB_SHA" \
-            -comment_md "./comment_md.json" \
             -security_advisory_svc "${vcuratorUrl}" \
             -results_status "./results-status.txt" \
             -results_evidence "./gitsecure-vulnerability-results.json" \
             -toolchainid "${TOOLCHAIN_ID}" \
             -comment_md "./vulnerability-comment.md"        
         
+        ls -la
         cat results-status.txt
-        echo '::set-output name=cra-vulnerability-scan-result::success'        
+        cat gitsecure-vulnerability-results.json
+        cat vulnerability-comment.md
+        echo '::set-output name=cra-vulnerability-scan-result::success'
