@@ -153,7 +153,7 @@ jobs:
           -toolchainid "${TOOLCHAIN_ID}"
 
   cra-vulnerability-scan-status-pending:
-    name: CRA discovery
+    name: cra-vulnerability-scan-status-pending
     needs: cra-discovery
     runs-on: ubuntu-latest
     environment: production
@@ -165,6 +165,9 @@ jobs:
       uses: actions/setup-python@v2
       
     - name: Display the path
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       run: |
         import json
         import os
@@ -173,7 +176,8 @@ jobs:
         import urllib.parse
         
         state = "pending"
-        revision = "$GITHUB_SHA"
+        print(os.environ['GITHUB_SHA'])
+        revision = os.environ['GITHUB_SHA']
         description = "PR Pipeline Status"
         context = "cra-vulnerability-scan"
         
@@ -182,8 +186,8 @@ jobs:
         
         # Create the request object according to the Git Flavor API
         api_prefix=""
-        status_url = $GITHUB_SERVER_URL + api_prefix
-            + "/repos/" + $GITHUB_REPOSITORY
+        status_url = os.environ['GITHUB_SERVER_URL'] + api_prefix
+            + "/repos/" + os.environ['GITHUB_REPOSITORY']
             + "/statuses/" + revision)        
         
         data = {
@@ -198,7 +202,7 @@ jobs:
             data=json.dumps(data).encode('utf8'),
             headers={
                 "content-type": "application/json",
-                "Authorization": "Bearer " + ${{ secrets.GITHUB_TOKEN }}
+                "Authorization": "Bearer " + os.environ['TOKEN']
             },
             method="POST"
         )
@@ -210,7 +214,7 @@ jobs:
             print(resp.read())
             sys.exit(1)
           else:
-            print(" commit status '" + state + "' has been set on " + $GITHUB_REPOSITORY + "#" + revision)
+            print(" commit status '" + state + "' has been set on " + os.environ['GITHUB_REPOSITORY'] + "#" + revision)
             print("Status: %d" % (resp.status))
             print(resp.read())
             sys.exit(0)
