@@ -140,7 +140,7 @@ jobs:
     name: cra-vulnerability-scan
     runs-on: ubuntu-latest
     needs: cra-discovery
-    container: icr.io/continuous-delivery/cra-discovery:release.1571
+    container: icr.io/continuous-delivery/cra-vulnerability:release.1561
     environment: production
     outputs:
       cra-vulnerability-scan-result: ${{ steps.remediation.outputs.cra-vulnerability-scan-result }}    
@@ -234,6 +234,7 @@ jobs:
         
         touch results-status.txt
         
+                
         /gitsecure/vulnerability-task \
             -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             -gitbranch "$GITHUB_REF" \
