@@ -9,9 +9,13 @@
 name: Build and Deploy to ROKS
 
 # https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
-on: push
+on: 
+  push:
+    branches:
+      - master 
     # Edit to the branch(es) you want to build and deploy on each push.
     # branches: [ $default-branch ]
+   
   
   # release:
   #  types: [created]
