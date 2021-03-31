@@ -36,7 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     container: icr.io/continuous-delivery/cra-discovery:release.1571
     environment: production
-    if: "false"    
     steps:
     - name: Update git
       run: |
@@ -74,7 +73,8 @@ jobs:
         docker images
       
     - name: discovery
-      continue-on-error: false    
+      continue-on-error: false
+      if: "false"
       env:
         TOOLCHAIN_REGION: us-south   
         TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
