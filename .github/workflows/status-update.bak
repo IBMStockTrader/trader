@@ -1,0 +1,68 @@
+  cra-vulnerability-scan-status-pending:
+    name: cra-vulnerability-scan-status-pending
+    needs: cra-discovery
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2  
+      
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      
+    - name: Display the path
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      run: |
+        import json
+        import os
+        import sys
+        import urllib.request
+        import urllib.parse
+        
+        state = "pending"
+        print(os.environ['GITHUB_SHA'])
+        revision = os.environ['GITHUB_SHA']
+        description = "PR Pipeline Status"
+        context = "cra-vulnerability-scan"
+        
+        # compute the target url of this pipeline run
+        target_url = "https://github.com/gasgithub/trader/actions"
+        
+        # Create the request object according to the Git Flavor API
+        api_prefix=""
+        status_url = ("https://api.github.com" + api_prefix + "/repos/" + os.environ['GITHUB_REPOSITORY'] + "/statuses/" + revision)        
+        
+        print("status url: " + status_url)
+        
+        data = {
+          "state": state,
+          "target_url": target_url,
+          "description": description,
+          "context": context
+        }   
+        print("token: " + os.environ['TOKEN'])
+        req = urllib.request.Request(
+          status_url,
+          data=json.dumps(data).encode('utf8'),
+          headers={
+            "content-type": "application/json",
+            "Authorization": "Bearer " + os.environ['TOKEN']
+          },
+          method="POST"
+        )
+        req.add_header("User-Agent", "GH actions PR workflow")
+ 
+        with urllib.request.urlopen(req) as resp:
+          if not str(resp.status).startswith("2"):
+            print("Error: %d" % (resp.status))
+            print(resp.read())
+            sys.exit(1)
+          else:
+            print(" commit status '" + state + "' has been set on " + os.environ['GITHUB_REPOSITORY'] + "#" + revision)
+            print("Status: %d" % (resp.status))
+            print(resp.read())
+            sys.exit(0)
+
+      shell: python 
