@@ -74,6 +74,7 @@ jobs:
       
     - name: discovery
       continue-on-error: false    
+      if: "!contains(github.event.commits[0].message, '[skip]')"
       env:
         TOOLCHAIN_REGION: us-south   
         TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
@@ -188,13 +189,15 @@ jobs:
         api_prefix=""
         status_url = (os.environ['GITHUB_SERVER_URL'] + api_prefix + "/repos/" + os.environ['GITHUB_REPOSITORY'] + "/statuses/" + revision)        
         
+        print("status url: " + status_url)
+        
         data = {
           "state": state,
           "target_url": target_url,
           "description": description,
           "context": context
         }   
-        
+        print("token: " + os.environ['TOKEN'])
         req = urllib.request.Request(
           status_url,
           data=json.dumps(data).encode('utf8'),
