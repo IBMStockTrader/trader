@@ -232,7 +232,7 @@ jobs:
           exit 1
         fi
         
-        RESULT_STATUS=""
+        touch results-status.txt
         
         /gitsecure/vulnerability-task \
             -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
@@ -242,10 +242,10 @@ jobs:
             -commitid "$GITHUB_SHA" \
             -comment_md "./comment_md.json" \
             -security_advisory_svc "${vcuratorUrl}" \
-            -results_status "$(RESULT_STATUS)" \
+            -results_status "./results-status.txt" \
             -results_evidence "./gitsecure-vulnerability-results.json" \
             -toolchainid "${TOOLCHAIN_ID}" \
             -comment_md "./vulnerability-comment.md"        
         
-        echo "RESULT_STATUS: $RESULT_STATUS"
-        echo '::set-output name=cra-vulnerability-scan-result::$RESULT_STATUS'        
+        cat results-status.txt
+        echo '::set-output name=cra-vulnerability-scan-result::success'        
