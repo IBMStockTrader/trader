@@ -675,10 +675,11 @@ jobs:
 
         cat gitsecure-bom-results.json
         cat gitsecure-bom-comment.md
-        echo "::set-output name=cra-bom-result::${RESULT}"
+        echo "::set-output name=cra-bom-result::success"
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
+          echo "::set-output name=cra-bom-result::failed"
           exit 1
         fi
         
