@@ -344,6 +344,10 @@ jobs:
         
         echo "Fetching users's token"
         ibmcloud config --check-version false
+        
+        ls -la /github/home/
+        ls -la /github/home/.bluemix
+        
         ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
         export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
  
