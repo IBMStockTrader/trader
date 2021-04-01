@@ -533,6 +533,11 @@ jobs:
           echo "Error fetching the ui url."
           exit 1
         fi
+        
+        echo "Current dir: $(pwd)"
+        echo "changing permissions for $(pwd)"
+        
+        sudo chown -R $CURRENT_USER:$CURRENT_USER $(pwd)
 
         touch results-status.txt
         
