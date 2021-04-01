@@ -478,7 +478,8 @@ jobs:
         REPO_DIR_PATH="$GITHUB_WORKSPACE"
         
         echo "Fetching users's token"
-        ibmcloud config --check-version false
+        #commented out due to permision error - Configuration error: mkdir /github/home/.bluemix: permission denied
+        #ibmcloud config --check-version false
         ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
         export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
  
