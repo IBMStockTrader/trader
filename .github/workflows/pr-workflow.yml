@@ -176,7 +176,7 @@ jobs:
     
     - name: remediation
       id: remediation
-      continue-on-error: true
+      continue-on-error: false
       env:
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
@@ -256,6 +256,7 @@ jobs:
         fi
 
     - name: Upload results
+      if: always()
       uses: actions/upload-artifact@v2
       with:
         name: comment_md
@@ -263,6 +264,7 @@ jobs:
         
   cra-vulnerability-scan-comment:
     name: cra-vulnerability-scan-comment
+    if: always()
     runs-on: ubuntu-latest
     needs: cra-vulnerability-scan
     container: icr.io/continuous-delivery/cra-comm-editor:release.1519
@@ -321,7 +323,7 @@ jobs:
 
     - name: cis
       id: cis
-      continue-on-error: true
+      continue-on-error: false
       env:
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
@@ -394,12 +396,14 @@ jobs:
         
     - name: Upload results
       uses: actions/upload-artifact@v2
+      if: always()
       with:
         name: cis_comment_md
         path: gitsecure-cis-comment.md
 
   cra-cis-check-comment:
     name: cra-cis-check-comment
+    if: always()
     runs-on: ubuntu-latest
     needs: cra-cis-check
     container: icr.io/continuous-delivery/cra-comm-editor:release.1519
@@ -414,6 +418,7 @@ jobs:
       env:
         TOKEN: ${{ secrets.GITHUB_TOKEN }}    
         PR_NUMBER: ${{ github.event.number }}
+        BASE_SHA:  ${{ github.event.pull_request.base.sha }}
         
       run: |
         set -x +e
