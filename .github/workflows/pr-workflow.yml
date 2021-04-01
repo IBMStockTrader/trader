@@ -248,7 +248,7 @@ jobs:
 
         cat gitsecure-vulnerability-results.json
         cat vulnerability-comment.md
-        echo '::set-output name=cra-vulnerability-scan-result::$RESULT'
+        echo '::set-output name=cra-vulnerability-scan-result::$(RESULT)'
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
@@ -397,7 +397,7 @@ jobs:
 
         cat gitsecure-cis-results.json
         cat gitsecure-cis-comment.md
-        echo '::set-output name=cra-cis-check-result::$RESULT'
+        echo '::set-output name=cra-cis-check-result::$(RESULT)'
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
@@ -568,7 +568,7 @@ jobs:
 
         cat gitsecure-bom-results.json
         cat gitsecure-bom-comment.md
-        echo '::set-output name=cra-bom-result::$RESULT'
+        echo '::set-output name=cra-bom-result::$(RESULT)'
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
