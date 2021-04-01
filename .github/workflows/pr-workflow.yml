@@ -280,7 +280,7 @@ jobs:
         
       run: |
         set -x +e
-        COMMENT_FP=$(cat vulnerability-comment.md)
+        COMMENT_FP="./vulnerability-comment.md"
         
         /usr/local/bin/comm-editor \
             -repo-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
@@ -363,14 +363,8 @@ jobs:
           exit 1
         fi
 
-        vcuratorUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.vcurator')
-
-        if [ -z "$vcuratorUrl" -o "$vcuratorUrl" = "null" ]; then
-          echo "Error fetching the vcurator url."
-          exit 1
-        fi
         
-        RESULT=""
+        touch results-status.txt
         
         /usr/local/bin/deploy-analytic \
           -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
@@ -379,14 +373,14 @@ jobs:
           -apiservice "${gitsecureUrl}" \
           -runid "$GITHUB_RUN_ID" \
           -commitid "$GITHUB_SHA" \
-          -results_status "${RESULT}" \
+          -results_status "./results-status.txt" \
           -results_evidence "./gitsecure-cis-results.json" \
           -toolchainid "${TOOLCHAIN_ID}" \
           -comment_md "./gitsecure-cis-comment.md"
     
         
         ls -la
-        #RESULT=$(cat results-status.txt)
+        RESULT=$(cat results-status.txt)
         echo "RESULT=$RESULT"
 
         cat gitsecure-cis-results.json
@@ -397,4 +391,43 @@ jobs:
           echo "Scan failed."
           exit 1
         fi
+        
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      with:
+        name: cis_comment_md
+        path: gitsecure-cis-comment.md
 
+  cra-cis-check-comment:
+    name: cra-cis-check-comment
+    runs-on: ubuntu-latest
+    needs: cra-cis-check
+    container: icr.io/continuous-delivery/cra-comm-editor:release.1519
+    environment: production
+    steps:
+    - name: Download results
+      uses: actions/download-artifact@v2
+      with:
+        name: cis_comment_md
+        
+    - name: Add comment
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+        PR_NUMBER: ${{ github.event.number }}
+        
+      run: |
+        set -x +e
+        COMMENT_FP="./gitsecure-cis-comment.md"
+        
+        /usr/local/bin/comm-editor \
+            -repo-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            -pr-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER" \
+            -token "$TOKEN" \
+            -comment-fp "$COMMENT_FP" \
+            -project-id "" \
+            -scm-type "github"
+        COMM_RESULT=$?
+        if [ "$COMM_RESULT" != "0" ]; then
+            echo "Error posting comment to pull request"
+            exit 1
+        fi
