@@ -543,6 +543,7 @@ jobs:
         
         echo "BASE_SHA $BASE_SHA"
         echo "TARGET_BRANCH $TARGET_BRANCH"
+        echo "GITHUB_BASE_REF $GITHUB_BASE_REF"
         echo "GITHUB_HEAD_REF $GITHUB_HEAD_REF"
         echo "GITHUB_REF $GITHUB_REF"
 
@@ -555,7 +556,7 @@ jobs:
           -runid "$GITHUB_RUN_ID" \
           -commitid "$GITHUB_SHA" \
           -target_commitid "$BASE_SHA" \
-          -target_branch "$TARGET_BRANCH" \
+          -target_branch "$GITHUB_BASE_REF" \
           -results_status "./results-status.txt" \
           -results_evidence "./gitsecure-bom-results.json" \
           -toolchainid "${TOOLCHAIN_ID}" \
