@@ -436,3 +436,155 @@ jobs:
             echo "Error posting comment to pull request"
             exit 1
         fi
+
+
+  cra-bom:
+    name: cra-bom
+    runs-on: ubuntu-latest
+    needs: cra-discovery
+    container: icr.io/continuous-delivery/cra-bom:release.1497
+    environment: production
+    outputs:
+      cra-bom-result: ${{ steps.bom.outputs.cra-bom-result }}    
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        set -e
+        
+    - name: bom
+      id: bom
+      continue-on-error: false
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+        PR_NUMBER: ${{ github.event.number }}
+        BASE_SHA:  ${{ github.event.pull_request.base.sha }}
+        TARGET_BRANCH: $GITHUB_BASE_REF       
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        
+      run: |
+        set -x
+
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+
+        uiUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.controlcenter')
+        if [ -z "$uiUrl" -o "$uiUrl" = "null" ]; then
+          echo "Error fetching the ui url."
+          exit 1
+        fi
+
+        touch results-status.txt
+        
+        echo "BASE_SHA $BASE_SHA"
+        echo "TARGET_BRANCH $TARGET_BRANCH"
+        echo "GITHUB_HEAD_REF $GITHUB_HEAD_REF"
+        echo "GITHUB_REF $GITHUB_REF"
+
+        /gitsecure/bom-task \
+          -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          -gitbranch "$GITHUB_REF" \
+          -rigserviceapi ${gitsecureUrl} \
+          -ui_url ${uiUrl} \
+          -pr "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER" \
+          -runid "$GITHUB_RUN_ID" \
+          -commitid "$GITHUB_SHA" \
+          -target_commitid "$BASE_SHA" \
+          -target_branch "$TARGET_BRANCH" \
+          -results_status "./results-status.txt" \
+          -results_evidence "./gitsecure-bom-results.json" \
+          -toolchainid "${TOOLCHAIN_ID}" \
+          -comment_md "./gitsecure-bom-comment.md"
+
+        ls -la
+        RESULT=$(cat results-status.txt)
+        echo "RESULT=$RESULT"
+
+        cat gitsecure-bom-results.json
+        cat gitsecure-bom-comment.md
+        echo '::set-output name=cra-bom-result::$RESULT'
+        
+        if [ $RESULT != 'success' ]; then
+          echo "Scan failed."
+          exit 1
+        fi
+        
+    - name: Upload results
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: bom_comment_md
+        path: gitsecure-bom-comment.md
+        
+  cra-com-comment:
+    name: cra-com-comment
+    if: always()
+    runs-on: ubuntu-latest
+    needs: cra-bom
+    container: icr.io/continuous-delivery/cra-comm-editor:release.1519
+    environment: production
+    steps:
+    - name: Download results
+      uses: actions/download-artifact@v2
+      with:
+        name: bom_comment_md
+        
+    - name: Add comment
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+        PR_NUMBER: ${{ github.event.number }}
+        
+      run: |
+        set -x +e
+        COMMENT_FP="./gitsecure-bom-comment.md"
+        
+        /usr/local/bin/comm-editor \
+            -repo-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            -pr-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER" \
+            -token "$TOKEN" \
+            -comment-fp "$COMMENT_FP" \
+            -project-id "" \
+            -scm-type "github"
+        COMM_RESULT=$?
+        if [ "$COMM_RESULT" != "0" ]; then
+            echo "Error posting comment to pull request"
+            exit 1
+        fi        
