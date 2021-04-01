@@ -1,1 +1,1 @@
-build trigger 2
+build trigger 12
