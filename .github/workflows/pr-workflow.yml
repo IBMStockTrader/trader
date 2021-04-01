@@ -28,7 +28,9 @@ env:
   DEPLOYMENT_NAME: trader
   CLUSTER_NAMESPACE: trader-gha-test
   EVIDENCE_DIR: evidence-repo
-  
+  TOOLCHAIN_REGION: us-south   
+  TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
+  REGION_ID: dal08  
 
 jobs:
   cra-discovery:
@@ -75,9 +77,6 @@ jobs:
     - name: discovery
       continue-on-error: false
       env:
-        TOOLCHAIN_REGION: us-south   
-        TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
-        REGION_ID: dal08
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
         COMMITTED_AT: ${{ steps.author-date.outputs.result }}
@@ -179,9 +178,6 @@ jobs:
       id: remediation
       continue-on-error: true
       env:
-        TOOLCHAIN_REGION: us-south   
-        TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
-        REGION_ID: dal08
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
         COMMITTED_AT: ${{ steps.author-date.outputs.result }}
@@ -298,3 +294,107 @@ jobs:
             echo "Error posting comment to pull request"
             exit 1
         fi
+
+  cra-cis-check:
+    name: cra-cis-check
+    runs-on: ubuntu-latest
+    needs: cra-discovery
+    container: icr.io/continuous-delivery/cra-cis:release.1567
+    environment: production
+    outputs:
+      cra-cis-check-result: ${{ steps.cis.outputs.cra-cis-check-result }}    
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        set -e
+        
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: cis
+      id: cis
+      continue-on-error: true
+      env:
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        
+      run: |
+        set -x
+
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+
+        vcuratorUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.vcurator')
+
+        if [ -z "$vcuratorUrl" -o "$vcuratorUrl" = "null" ]; then
+          echo "Error fetching the vcurator url."
+          exit 1
+        fi
+        
+        RESULT=""
+        
+        /usr/local/bin/deploy-analytic \
+          -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          -gitbranch "$GITHUB_REF" \
+          -repodir $REPO_DIR_PATH \
+          -apiservice "${gitsecureUrl}" \
+          -runid "$GITHUB_RUN_ID" \
+          -commitid "$GITHUB_SHA" \
+          -results_status "${RESULT}" \
+          -results_evidence "./gitsecure-cis-results.json" \
+          -toolchainid "${TOOLCHAIN_ID}" \
+          -comment_md "./gitsecure-cis-comment.md"
+    
+        
+        ls -la
+        #RESULT=$(cat results-status.txt)
+        echo "RESULT=$RESULT"
+
+        cat gitsecure-cis-results.json
+        cat gitsecure-cis-comment.md
+        echo '::set-output name=cra-cis-check-result::$RESULT'
+        
+        if [ $RESULT != 'success' ]; then
+          echo "Scan failed."
+          exit 1
+        fi
+
