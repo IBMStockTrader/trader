@@ -442,7 +442,7 @@ jobs:
 
         cat gitsecure-vulnerability-results.json
         cat vulnerability-comment.md
-        echo '::set-output name=cra-vulnerability-scan-result::$(RESULT)'
+        echo "::set-output name=cra-vulnerability-scan-result::$(RESULT)"
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
@@ -549,7 +549,7 @@ jobs:
 
         cat gitsecure-cis-results.json
         cat gitsecure-cis-comment.md
-        echo '::set-output name=cra-cis-check-result::$(RESULT)'
+        echo "::set-output name=cra-cis-check-result::$(RESULT)"
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
@@ -675,7 +675,7 @@ jobs:
 
         cat gitsecure-bom-results.json
         cat gitsecure-bom-comment.md
-        echo '::set-output name=cra-bom-result::$(RESULT)'
+        echo "::set-output name=cra-bom-result::$(RESULT)"
         
         if [ $RESULT != 'success' ]; then
           echo "Scan failed."
@@ -744,8 +744,8 @@ jobs:
       run: |
         cd $EVIDENCE_DIR
         git add .
-        git config --global user.name 'GH Actions workflow'
-        git config --global user.email 'workflow@users.noreply.github.com'
+        git config --global user.name 'GH Actions'
+        git config --global user.email 'gasgithub@users.noreply.github.com'
         git commit -am "Publish evidence"
         git push https://$USERNAME:$REPO_KEY@github.com/gasgithub/trader-evidence   
     
