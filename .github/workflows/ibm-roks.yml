@@ -256,7 +256,7 @@ jobs:
 
         if [[ "${VA_STATUS}" == "OK" ]]; then
           echo "VA - No Issues in the image"
-          echo '::set-output name=scan-status::sucess'
+          echo '::set-output name=scan-status::success'
           exit 0
         elif [[ $(cat va-result.json | jq -r '.[].vulnerabilities | length') -gt 0 ]]; then
           echo "VA Failure: $(cat va-result.json | jq -r '.[].vulnerabilities | length') vulnerabilities found in the image"
@@ -266,7 +266,7 @@ jobs:
         elif [[ $(cat va-result.json | jq -r '.[].configuration_issues | length') -gt 0 ]]; then
           echo "VA Warning - $(cat va-result.json | jq -r '.[].configuration_issues | length') configuration issues found in the image"
           cat va-result.json | jq -r '.[].configuration_issues'
-          echo '::set-output name=scan-status::sucess'
+          echo '::set-output name=scan-status::success'
           exit 0
         else
           echo "VA Warning: non-OK status from Vulnerability Advisor ${VA_STATUS}"
