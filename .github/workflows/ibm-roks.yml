@@ -30,12 +30,12 @@ env:
   ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
   REGISTRY_HOSTNAME: us.icr.io
   IMAGE_NAME: trader-gha-test
-  IKS_CLUSTER: gas-cluster3
+  IKS_CLUSTER: ${{ secrets.IKS_CLUSTER }}
   DEPLOYMENT_NAME: trader
   CLUSTER_NAMESPACE: trader-gha-test
   EVIDENCE_DIR: evidence-repo
   TOOLCHAIN_REGION: us-south   
-  TOOLCHAIN_ID: 286e3b40-5099-4d87-9f12-57d2e425c64b
+  TOOLCHAIN_ID: ${{ secrets.TOOLCHAIN_ID }}
   REGION_ID: dal08  
 
 jobs:
