@@ -62,11 +62,13 @@
             <version>8.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- disable jaeger to pass security scan
         <dependency>
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-client</artifactId>
             <version>0.34.0</version>
-        </dependency>
+        </dependency> 
+         -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
