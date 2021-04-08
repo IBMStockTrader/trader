@@ -109,12 +109,13 @@
             <version>2.3.2</version>
             <scope>test</scope>
         </dependency>
-            <!-- Fixing security issues -->       
+            <!-- Fixing security issues  - no fix for   libthrift 
        <dependency>
            <groupId>org.apache.thrift</groupId>
            <artifactId>libthrift</artifactId>
            <version>0.13.0</version>
        </dependency>
+     -->            
        <dependency>
            <groupId>org.apache.httpcomponents</groupId>
            <artifactId>httpclient</artifactId>
