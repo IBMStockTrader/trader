@@ -229,7 +229,7 @@ public class Summary extends HttpServlet {
 					} else if (action.equals(RETRIEVE)) {
 						response.sendRedirect("viewPortfolio?owner="+owner); //send control to the ViewPortfolio servlet
 					} else if (action.equals(UPDATE)) {
-						response.sendRedirect("addStock?owner="+owner); //send control to the AddStock servlet
+						response.sendRedirect("addStock?owner="+owner+"&source=summary"); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
 						brokerClient.deleteBroker("Bearer "+getJWT(), owner);
