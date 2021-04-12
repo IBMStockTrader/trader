@@ -394,16 +394,16 @@ public class Summary extends HttpServlet {
 					.withEndpointConfiguration(new EndpointConfiguration(endpointUrl, location))
 					.withPathStyleAccessEnabled(true)
 					.withClientConfiguration(clientConfig)
-					.build(); //what about credentials?
+					.build();
 
 				s3Bucket = System.getenv("S3_BUCKET");
 				if (!s3.doesBucketExistV2(s3Bucket)) {
-					logger.info("Creating S3 bucket");
+					logger.info("Creating S3 bucket: "+s3Bucket);
 					s3.createBucket(s3Bucket);
 				}
 			}
 
-			logger.info("Putting object in S3 bucket for "+key);
+			logger.fine("Putting object in S3 bucket for "+key);
 			s3.putObject(s3Bucket, key, document.toString());
 		} catch (Throwable t) {
 			logException(t);
