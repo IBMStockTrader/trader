@@ -156,7 +156,7 @@ public class AddStock extends HttpServlet {
 			}
 		}
 
-		if (source.equalsIgnoreCase("viewPortfolio")) source += "&owner="+owner;
+		if (source.equalsIgnoreCase("viewPortfolio")) source += "?owner="+owner;
 		response.sendRedirect(source);
 	}
 
