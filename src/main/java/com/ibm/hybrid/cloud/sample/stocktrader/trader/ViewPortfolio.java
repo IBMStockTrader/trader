@@ -63,6 +63,7 @@ public class ViewPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final double ERROR = -1;
 	private static final String ERROR_STRING = "Error";
+	private static final String TRADE_STOCK = "Buy/Sell Stock";
 	private static final String FEEDBACK = "Submit Feedback";
 	private static Logger logger = Logger.getLogger(ViewPortfolio.class.getName());
 	private NumberFormat currency = null;
@@ -178,6 +179,7 @@ public class ViewPortfolio extends HttpServlet {
 		writer.append("      </table>");
 		writer.append("      <br/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"OK\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Buy/Sell Stock\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit Feedback\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
@@ -196,7 +198,9 @@ public class ViewPortfolio extends HttpServlet {
 		String submit = request.getParameter("submit");
 
 		if (submit != null) {
-			if (submit.equals(FEEDBACK)) {
+			if (submit.equals(TRADE_STOCK)) {
+				response.sendRedirect("addStock?owner="+owner+"&source=viewPortfolio"); //send control to the AddStock servlet
+			} else if (submit.equals(FEEDBACK)) {
 				response.sendRedirect("feedback?owner="+owner); //send control to the Feedback servlet
 			} else {
 				response.sendRedirect("summary"); //send control to the Summary servlet

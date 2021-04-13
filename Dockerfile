@@ -18,8 +18,6 @@ FROM openliberty/open-liberty:kernel-slim-java11-openj9-ubi
 USER root
 
 COPY --chown=1001:0 src/main/liberty/config /config
-#Workaround for https://github.com/OpenLiberty/ci.docker/issues/244
-RUN touch /config/server.xml
 
 # This script will add the requested XML snippets to enable Liberty features and grow image to be fit-for-purpose using featureUtility. 
 # Only available in 'kernel-slim'. The 'full' tag already includes all features for convenience.
