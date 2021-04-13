@@ -173,6 +173,8 @@
                         <war.name>${liberty.var.app.context.root}</war.name>
                         <JWT_AUDIENCE>stock</JWT_AUDIENCE>
                         <JWT_ISSUER>trader</JWT_ISSUER>
+                        <AUTH_TYPE>basic</AUTH_TYPE>
+                        <TEST_MODE>true</TEST_MODE>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>            
