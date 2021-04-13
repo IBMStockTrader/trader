@@ -126,6 +126,10 @@ public class Broker {
         return stocks;
     }
 
+    public void setStocks(JsonObject newStocks) {
+        stocks = newStocks;
+    }
+
     public void addStock(Stock newStock) {
         if (newStock != null) {
             String symbol = newStock.getSymbol();
@@ -179,13 +183,15 @@ public class Broker {
                +", \"sentiment\": \""+sentiment+"\", \"stocks\": "+(stocks!=null?getStocksJSON():"{}")+"}";
     }
 
-    public String getStocksJSON() {
+    private String getStocksJSON() {
         StringBuffer json = new StringBuffer();
         Iterator<String> keys = stocks.keySet().iterator();
 
         boolean first = true;
         while (keys.hasNext()) {
-            if (!first) {
+            if (first) {
+                json.append("{");
+            } else {
                 json.append(", ");
                 first = false;
             }
@@ -202,10 +208,10 @@ public class Broker {
             number = stock.getJsonNumber("commission");
             double commission = (number != null) ? number.doubleValue() : ERROR;
             
-            json.append("\"key\": {\"symbol\": \""+symbol+"\", \"shares\": "+shares+", \"price\": "+currency.format(price)
+            json.append("\""+key+"\": {\"symbol\": \""+symbol+"\", \"shares\": "+shares+", \"price\": "+currency.format(price)
                 +", \"date\": \""+date+"\", \"total\": "+currency.format(totalValue)+", \"commission\": "+currency.format(commission)+"}");
         }
 
-        return json.toString();
+        return json.append("}").toString();
     }
 }

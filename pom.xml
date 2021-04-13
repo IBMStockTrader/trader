@@ -52,7 +52,7 @@
         <dependency>
             <groupId>org.eclipse.microprofile</groupId>
             <artifactId>microprofile</artifactId>
-            <version>3.3</version>
+            <version>4.0.1</version>
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
@@ -62,18 +62,35 @@
             <version>8.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- disable jaeger to pass security scan
+        <!-- disable jaeger to pass security scan -->
         <dependency>
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-client</artifactId>
-            <version>0.34.0</version>
-        </dependency> 
-         -->
+            <version>1.5.0</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.25</version>
+            <version>1.7.30</version>
         </dependency>
+        <dependency>
+            <groupId>com.ibm.websphere.appserver.api</groupId>
+            <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
+            <version>1.0.50</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.websphere.appserver.api</groupId>
+            <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
+            <version>1.2.50</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.cos</groupId>
+            <artifactId>ibm-cos-java-sdk-s3</artifactId>
+            <version>2.9.1</version>
+        </dependency>
+        <!-- Dependencies only used in tests -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -87,50 +104,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.ibm.websphere.appserver.api</groupId>
-            <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
-            <version>1.0.49</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm.websphere.appserver.api</groupId>
-            <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
-            <version>1.2.49</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ibm.cos</groupId>
-            <artifactId>ibm-cos-java-sdk-s3</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-        <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>2.3.2</version>
             <scope>test</scope>
         </dependency>
-            <!-- Fixing security issues  - no fix for   libthrift 
-       <dependency>
-           <groupId>org.apache.thrift</groupId>
-           <artifactId>libthrift</artifactId>
-           <version>0.13.0</version>
-       </dependency>
-     -->            
-       <dependency>
-           <groupId>org.apache.httpcomponents</groupId>
-           <artifactId>httpclient</artifactId>
-           <version>4.5.13</version>
-       </dependency> 
-       <dependency>
-           <groupId>commons-codec</groupId>
-           <artifactId>commons-codec</artifactId>
-           <version>1.15</version>
-       </dependency>           
-       <dependency>
-           <groupId>com.fasterxml.jackson.dataformat</groupId>
-           <artifactId>jackson-dataformat-cbor</artifactId>
-           <version>2.11.4</version>
-       </dependency>              
     </dependencies>
 
     <build>

@@ -56,6 +56,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @RequestScoped
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
+	private static final String BUY = "Buy";
+	private static final String SELL = "Sell";
+	private static final String SUBMIT = "Submit";
+
 	private static Logger logger = Logger.getLogger(AddStock.class.getName());
 
 	private NumberFormat currency = null;
@@ -113,9 +117,14 @@ public class AddStock extends HttpServlet {
 		writer.append("          <td><b>Number of Shares:</b></td>");
 		writer.append("          <td><input type=\"text\" name=\"shares\"></td>");
 		writer.append("        </tr>");
+		writer.append("        <tr>");
+		writer.append("          <td><input type=\"radio\" name=\"action\" value=\""+BUY+"\" checked> Buy</td>");
+		writer.append("          <td><input type=\"radio\" name=\"action\" value=\""+SELL+"\"> Sell</td>");
+		writer.append("        </tr>");
 		writer.append("      </table>");
 		writer.append("      <br/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Cancel\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
@@ -132,14 +141,23 @@ public class AddStock extends HttpServlet {
 		String owner = request.getParameter("owner");
 		String symbol = request.getParameter("symbol");
 		String shareString = request.getParameter("shares");
+		String action = request.getParameter("action");
+		String source = request.getParameter("source");
+		if (source == null) source = "summary";
 
-		if ((shareString!=null) && !shareString.equals("")) {
-			int shares = Integer.parseInt(shareString);
-			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-			brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
+		String submit = request.getParameter("submit");
+		if ((submit!=null) && submit.equals(SUBMIT)) { //don't do if they chose Cancel
+			if ((shareString!=null) && !shareString.equals("")) {
+				int shares = Integer.parseInt(shareString);
+				if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
+
+				//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
+				brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
+			}
 		}
 
-		response.sendRedirect("summary");
+		if (source.equalsIgnoreCase("viewPortfolio")) source += "?owner="+owner;
+		response.sendRedirect(source);
 	}
 
 	private String getCommission(HttpServletRequest request, String owner) {
