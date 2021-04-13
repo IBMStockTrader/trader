@@ -58,6 +58,7 @@ public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String BUY = "Buy";
 	private static final String SELL = "Sell";
+	private static final String SUBMIT = "Submit";
 
 	private static Logger logger = Logger.getLogger(AddStock.class.getName());
 
@@ -117,12 +118,13 @@ public class AddStock extends HttpServlet {
 		writer.append("          <td><input type=\"text\" name=\"shares\"></td>");
 		writer.append("        </tr>");
 		writer.append("        <tr>");
-		writer.append("          <input type=\"radio\" name=\"action\" value=\""+BUY+"\" checked> Buy<br>");
-		writer.append("          <input type=\"radio\" name=\"action\" value=\""+SELL+"\"> Sell<br>");
+		writer.append("          <td><input type=\"radio\" name=\"action\" value=\""+BUY+"\" checked> Buy</td>");
+		writer.append("          <td><input type=\"radio\" name=\"action\" value=\""+SELL+"\"> Sell</td>");
 		writer.append("        </tr>");
 		writer.append("      </table>");
 		writer.append("      <br/>");
 		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
+		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Cancel\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
 		writer.append("    </form>");
 		writer.append("    <br/>");
 		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
@@ -143,12 +145,15 @@ public class AddStock extends HttpServlet {
 		String source = request.getParameter("source");
 		if (source == null) source = "summary";
 
-		if ((shareString!=null) && !shareString.equals("")) {
-			int shares = Integer.parseInt(shareString);
-			if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
-			
-			//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-			brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
+		String submit = request.getParameter("submit");
+		if ((submit!=null) && submit.equals(SUBMIT)) { //don't do if they chose Cancel
+			if ((shareString!=null) && !shareString.equals("")) {
+				int shares = Integer.parseInt(shareString);
+				if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
+
+				//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
+				brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
+			}
 		}
 
 		if (source.equalsIgnoreCase("viewPortfolio")) source += "&owner="+owner;
