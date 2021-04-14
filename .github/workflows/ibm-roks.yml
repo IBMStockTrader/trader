@@ -110,7 +110,7 @@ jobs:
     container: icr.io/continuous-delivery/cra-discovery:release.1571
     environment: production
     steps:
-    - name: check git
+    - name: Update git
       run: |
         set -x +e
         uname -a
@@ -601,7 +601,7 @@ jobs:
         
         echo "Home is $HOME"
         
-        #ls -la /github/home/
+
         
         sudo mkdir /github/home/.bluemix
         sudo chown -R $CURRENT_USER:$CURRENT_USER /github/home/.bluemix
@@ -702,7 +702,7 @@ jobs:
     - name: Checkout evidence repo
       uses: actions/checkout@v2
       with:
-        repository: 'gasgithub/trader-evidence'
+        repository: ${{secrets.EVIDENCE_REPO}}
         path: ${{ env.EVIDENCE_DIR }}
         token: ${{secrets.PUSH_TOKEN}}
         
@@ -743,14 +743,15 @@ jobs:
     - name: Commit report
       env:
         REPO_KEY: ${{secrets.PUSH_TOKEN}}
+        EVIDENCE_REPO: ${{secrets.EVIDENCE_REPO}}
         USERNAME: github-actions[bot]    
       run: |
         cd $EVIDENCE_DIR
         git add .
         git config --global user.name 'GH Actions'
-        git config --global user.email 'gasgithub@users.noreply.github.com'
+        git config --global user.email 'github-actions@users.noreply.github.com'
         git commit -am "Publish evidence"
-        git push https://$USERNAME:$REPO_KEY@github.com/gasgithub/trader-evidence   
+        git push https://$USERNAME:$REPO_KEY@github.com/$EVIDENCE_REPO   
     
 
       
