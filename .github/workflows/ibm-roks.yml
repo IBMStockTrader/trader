@@ -733,12 +733,23 @@ jobs:
         echo "cra-bom: ${{needs.cra-bom.outputs.cra-bom-result}}"
         echo "cra-bom2: ${{needs.cra-bom.outputs.bom-result}}"
         
+        SCAN_DATE=$(date -u +'%FT%T.%3NZ')
+        echo "date: $SCAN_DATE"
+        
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .date) |= "$SCAN_DATE"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .date) |= "$SCAN_DATE"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .result) |= "${{needs.cra-vulnerability-scan.outputs.cra-vulnerability-scan-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .date) |= "$SCAN_DATE"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_cis_check") | .result) |= "${{needs.cra-cis-check.outputs.cra-cis-check-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_cis_check") | .date) |= "$SCAN_DATE"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_bom_check") | .result) |= "${{needs.cra-bom.outputs.bom-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_bom_check") | .date) |= "$SCAN_DATE"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
     - name: Commit report
       env:
