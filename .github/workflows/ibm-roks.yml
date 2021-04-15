@@ -240,6 +240,12 @@ jobs:
           fi
           sleep 60
         done
+        
+        if [[ $retry -eq 0  ]]; then
+          echo "Scanning failed"
+          echo "::set-output name=scan-status::failure"
+          exit 1         
+        fi        
 
 
         echo "Saving results to va-result.json"
@@ -737,13 +743,13 @@ jobs:
         echo "date: $SCAN_DATE"
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
-        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .date) |= \"env.SCAN_DATE\"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.cloud.image_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .result) |= "${{needs.cra-vulnerability-scan.outputs.cra-vulnerability-scan-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
-        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .date) |= "'"$SCAN_DATE"'"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
 
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_cis_check") | .result) |= "${{needs.cra-cis-check.outputs.cra-cis-check-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_cis_check\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
