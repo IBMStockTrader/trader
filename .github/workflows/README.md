@@ -41,10 +41,12 @@ Workflow is using [IBM Code Risk Analyzer](https://www.ibm.com/cloud/blog/announ
 - your Kubernetes deployment files based on industry standards and community best practices
 - generates a Bill-of-Materials (BoM) accounting for all the dependencies and their sources for your application
 
-Result form the analysis are added as pull request comments allowing to make jugement decision whether or not change can be merged to the master branch.
+Result from the analysis are added as pull request comments allowing to make judgment decision whether change can be merged to the master branch.
+
+![PR analysis](pr-analysis.png)
 
 ## Build and Deploy to ROKS workflow
-This workflow is triggered when change is commited to the master branch (either directly or via megre of the pull request).
+This workflow is triggered when change is committed to the master branch (either directly or via merge of the pull request).
 ![Build workflow](build-workflow.png)
 Primary function of this workflow is to build and deploy service, in addition it runs VA scan, CRA checks and publishes evidences of these steps to the 'evidence repo'.
 
@@ -57,6 +59,16 @@ Steps in the workflow:
 - deploy application to OCP cluster
 
 # Detailed setup guide
+This section contains all required steps to configure and run above workflows.
+
+## Fork trader repo
+Fork trader repository to your github account.
+
+## Create repo for evidences
+Create new repository where the evidences will be stored. This repo will be read by the SCC integration tool during security scans.
+When creating, initialize repo with README file.
+
+
 TBD
 
 ## Configuration parmeters
