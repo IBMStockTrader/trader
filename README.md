@@ -38,7 +38,7 @@ browser's address bar.  Or in a Kubernetes environment, you'd replace `localhost
 This is version 1 of the *Stock Trader* UI, implemented in **Java**, and is deliberately simplistic.  See the
 **tradr** sibling repository for an alternate, more professional-looking version, implemented in **JavaScript** and **Vue**.
 
- ### Prerequisites for ICP Deployment
+ ### Prerequisites for Deployment
  This project requires two secrets: `jwt` and `oidc`.  You create these secrets by running:
   ```bash
   kubectl create secret generic jwt -n stock-trader --from-literal=audience=stock-trader --from-literal=issuer=http://stock-trader.ibm.com
