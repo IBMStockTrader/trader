@@ -744,7 +744,7 @@ jobs:
         echo "date: $SCAN_DATE"
         echo "chain_crn: $TOOLCHAIN_CRN"
         
-        echo "$( jq ".toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq ".toolchain_crn |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
