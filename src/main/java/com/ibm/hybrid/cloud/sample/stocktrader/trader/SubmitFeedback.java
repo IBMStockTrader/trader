@@ -130,7 +130,7 @@ public class SubmitFeedback extends HttpServlet {
 
 	private String getJWT() {
 		String token;
-		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
 			token = PropagationHelper.getIdToken().getAccessToken();
 			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
 		} else {
