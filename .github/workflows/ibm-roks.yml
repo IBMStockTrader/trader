@@ -378,7 +378,6 @@ jobs:
     
     - name: remediation
       id: remediation
-      continue-on-error: true
       env:
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
@@ -483,7 +482,6 @@ jobs:
 
     - name: cis
       id: cis
-      continue-on-error: false
       env:
         DIRECTORY_NAME: .
         PIPELINE_DEBUG: 1
@@ -586,7 +584,6 @@ jobs:
         
     - name: bom
       id: bom
-      continue-on-error: false
       env:
         TOKEN: ${{ secrets.GITHUB_TOKEN }}    
         PR_NUMBER: ${{ github.event.number }}
@@ -695,6 +692,7 @@ jobs:
     name: Publish evidence to evidence repo
     runs-on: ubuntu-latest
     needs: [setup-build-publish-deploy, va-scan, cra-vulnerability-scan, cra-cis-check, cra-bom]
+    if: always()    
     steps:
     # Checkout repo   
     - name: Checkout
