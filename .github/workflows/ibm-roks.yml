@@ -36,6 +36,7 @@ env:
   EVIDENCE_DIR: evidence-repo
   TOOLCHAIN_REGION: us-south   
   TOOLCHAIN_ID: ${{ secrets.TOOLCHAIN_ID }}
+  TOOLCHAIN_CRN: ${{ secrets.TOOLCHAIN_CRN }}  
   REGION_ID: dal08  
 
 jobs:
@@ -741,21 +742,29 @@ jobs:
         
         export SCAN_DATE=$(date -u +'%FT%T.%3NZ')
         echo "date: $SCAN_DATE"
+        echo "chain_crn: $TOOLCHAIN_CRN"
+        
+        echo "$( jq ".toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.cloud.image_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.cloud.image_vulnerability_scan\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .result) |= "${{needs.cra-vulnerability-scan.outputs.cra-vulnerability-scan-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_vulnerability_scan\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
 
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_cis_check") | .result) |= "${{needs.cra-cis-check.outputs.cra-cis-check-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_cis_check\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_cis_check\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
 
         echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_bom_check") | .result) |= "${{needs.cra-bom.outputs.bom-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
         echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_bom_check\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_bom_check\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
     
     - name: Commit report
       env:
