@@ -179,7 +179,7 @@ public class Summary extends HttpServlet {
 			}
 				writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
 			if (editor) {
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (add stock)<br>");
+				writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (buy/sell stock)<br>");
 				writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
 			}
 			writer.append("      <br/>");
@@ -367,7 +367,7 @@ public class Summary extends HttpServlet {
 
 	private String getJWT() {
 		String token;
-		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
 			token = PropagationHelper.getIdToken().getAccessToken();
 			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
 		} else {
