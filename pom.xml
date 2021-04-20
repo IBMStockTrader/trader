@@ -42,10 +42,12 @@
         <!-- Liberty configuration -->
         <liberty.var.default.http.port>9080</liberty.var.default.http.port>
         <liberty.var.default.https.port>9443</liberty.var.default.https.port>
-        <liberty.var.project.name>${project.artifactId}</liberty.var.project.name>    
+        <liberty.var.project.name>${project.artifactId}</liberty.var.project.name>
         <liberty.var.app.context.root>${project.artifactId}</liberty.var.app.context.root>
-        <liberty.env.JWT_AUDIENCE>stock</liberty.env.JWT_AUDIENCE>  
-        <liberty.env.JWT_ISSUER>trader</liberty.env.JWT_ISSUER>                    
+        <liberty.env.TEST_MODE>true</liberty.env.TEST_MODE>
+        <liberty.env.AUTH_TYPE>basic</liberty.env.AUTH_TYPE>
+        <liberty.env.JWT_AUDIENCE>stock</liberty.env.JWT_AUDIENCE>
+        <liberty.env.JWT_ISSUER>trader</liberty.env.JWT_ISSUER>
     </properties>
 
     <dependencies>
@@ -174,6 +176,8 @@
                         <war.name>${liberty.var.app.context.root}</war.name>
                         <JWT_AUDIENCE>stock</JWT_AUDIENCE>
                         <JWT_ISSUER>trader</JWT_ISSUER>
+                        <AUTH_TYPE>basic</AUTH_TYPE>
+                        <TEST_MODE>true</TEST_MODE>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>            

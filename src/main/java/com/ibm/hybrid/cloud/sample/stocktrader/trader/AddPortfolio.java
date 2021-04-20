@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2019 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class AddPortfolio extends HttpServlet {
 
 	private String getJWT() {
 		String token;
-		if("bearer".equals(PropagationHelper.getAccessTokenType())) {
+		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
 			token = PropagationHelper.getIdToken().getAccessToken();
 			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
 		} else {
