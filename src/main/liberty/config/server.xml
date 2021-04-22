@@ -18,6 +18,7 @@
         <feature>appSecurity-2.0</feature>
         <feature>monitor-1.0</feature>
         <feature>jwtSso-1.0</feature>
+        <feature>transportSecurity-1.0</feature>
         <feature>openidConnectClient-1.0</feature> <!-- Needed by PropagationHelper utility -->
 <!--    <feature>logstashCollector-1.0</feature> -->
     </featureManager>
