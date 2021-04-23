@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 
 //CDI 1.2
 import javax.inject.Inject;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 //JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
 import javax.json.JsonObject;
@@ -58,7 +58,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  */
 @WebServlet(description = "View Portfolio servlet", urlPatterns = { "/viewPortfolio" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
-@RequestScoped
+@ApplicationScoped
 public class ViewPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final double ERROR = -1;
