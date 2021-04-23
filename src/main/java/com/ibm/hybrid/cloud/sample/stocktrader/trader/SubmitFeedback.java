@@ -28,7 +28,7 @@ import java.net.URLEncoder;
 
 //CDI 1.2
 import javax.inject.Inject;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 //JSON-P 1.0 (JSR 353).  The replaces my old usage of IBM's JSON4J (com.ibm.json.java.JSONObject)
 import javax.json.Json;
@@ -56,7 +56,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  */
 @WebServlet(description = "Submit Feedback servlet", urlPatterns = { "/feedback" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
-@RequestScoped
+@ApplicationScoped
 public class SubmitFeedback extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String SUBMIT = "Submit";
