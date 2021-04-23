@@ -43,7 +43,7 @@ import java.util.logging.Level;
 
 //CDI 2.0
 import javax.inject.Inject;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 //Servlet 4.0
 import javax.servlet.ServletException;
@@ -79,7 +79,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  */
 @WebServlet(description = "Broker summary servlet", urlPatterns = { "/summary" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader", "StockViewer" } ))
-@RequestScoped
+@ApplicationScoped
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String EDITOR   = "StockTrader";
