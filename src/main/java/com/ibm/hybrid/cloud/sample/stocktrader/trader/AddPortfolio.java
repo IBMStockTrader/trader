@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 //CDI 1.2
 import javax.inject.Inject;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 
 //Servlet 3.1
 import javax.servlet.ServletException;
@@ -47,7 +47,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  */
 @WebServlet(description = "Add Portfolio servlet", urlPatterns = { "/addPortfolio" })
 @ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" } ))
-@RequestScoped
+@ApplicationScoped
 public class AddPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static Logger logger = Logger.getLogger(AddPortfolio.class.getName());
