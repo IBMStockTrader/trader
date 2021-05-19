@@ -311,7 +311,7 @@ public class Summary extends HttpServlet {
 		raunak.setTotal(98765.43);
 		raunak.setLoyalty("Silver");
 		Broker greg = new Broker("Greg");
-		greg.setTotal(98765.43);
+		greg.setTotal(123456.78);
 		greg.setLoyalty("Gold");
 		Broker eric = new Broker("Eric");
 		eric.setTotal(1234567.89);
