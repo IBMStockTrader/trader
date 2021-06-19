@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "date": "2021-03-15T13:36:04Z",
+  "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+  "pipeline_id": "mypipeline_1",
+  "pipeline_run_id": "mypipeline_run_1",
+  "evidences": [
+    {
+      "evidence_type_id": "com.ibm.code_vulnerability_scan",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:31:38.996Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [
+        {
+          "url": "https://cloud.ibm.com",
+          "hash": null
+        }
+      ],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    },
+    {
+      "evidence_type_id": "com.ibm.code_bom_check",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:31:48.781Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    },
+    {
+      "evidence_type_id": "com.ibm.code_cis_check",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:31:45.556Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    },
+    {
+      "evidence_type_id": "com.ibm.unit_tests",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:31:32.191Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    },
+    {
+      "evidence_type_id": "com.ibm.cloud.image_vulnerability_scan",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:31:55.496Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    },
+    {
+      "evidence_type_id": "com.ibm.acceptance_tests",
+      "evidence_type_version": "1.0.0",
+      "date": "2021-03-15T13:35:06.530Z",
+      "result": "success",
+      "pipeline_id": "mypipeline_1",
+      "pipeline_run_id": "mypipeline_run_1",
+      "issues": [],
+      "artifacts": [],
+      "toolchain_crn": "crn:v1:bluemix:public:toolchain:us-south:a/b71ac2564ef0b98f1032d189795994dc:286e3b40-5099-4d87-9f12-57d2e425c64b::",
+      "log": []
+    }
+  ]
+}

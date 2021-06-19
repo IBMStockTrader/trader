@@ -1,0 +1,782 @@
+# This workflow will build a docker container, publish it to IBM Container Registry, and deploy it to IKS when a release is created
+#
+# To configure this workflow:
+#
+# 1. Ensure that your repository contains a Dockerfile
+# 2. Setup secrets in your repository by going to settings: Create ICR_NAMESPACE and IBM_CLOUD_API_KEY
+# 3. Change the values for the IBM_CLOUD_REGION, REGISTRY_HOSTNAME, IMAGE_NAME, IKS_CLUSTER, DEPLOYMENT_NAME, and PORT
+
+name: Build and Deploy to ROKS
+
+# https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows
+on: 
+  push:
+    branches:
+      - master 
+    paths-ignore:
+    - '.github/**'      
+    # Edit to the branch(es) you want to build and deploy on each push.
+    # branches: [ $default-branch ]
+   
+  
+  # release:
+  #  types: [created]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+  IBM_CLOUD_REGION: us-south
+  ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
+  REGISTRY_HOSTNAME: us.icr.io
+  IMAGE_NAME: trader-gha-test
+  IKS_CLUSTER: ${{ secrets.IKS_CLUSTER }}
+  DEPLOYMENT_NAME: trader
+  CLUSTER_NAMESPACE: trader-gha-test
+  EVIDENCE_DIR: evidence-repo
+  TOOLCHAIN_REGION: us-south   
+  TOOLCHAIN_ID: ${{ secrets.TOOLCHAIN_ID }}
+  TOOLCHAIN_CRN: ${{ secrets.TOOLCHAIN_CRN }}  
+  REGION_ID: dal08  
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish
+    runs-on: ubuntu-latest
+    outputs:
+      image-registry-path: ${{ steps.push-to-icr.outputs.image-registry-path }}
+      unit-test-result: ${{ steps.unit-test.outputs.unit-test-result }}
+    environment: production
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Download and Install IBM Cloud CLI
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        ibmcloud --version
+        ibmcloud config --check-version=false
+        ibmcloud plugin install -f kubernetes-service
+        ibmcloud plugin install -f container-registry
+
+    # Authenticate with IBM Cloud CLI
+    - name: Authenticate with IBM Cloud CLI
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+
+    # Setup java
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+
+    # Build and package app
+    - name: Build and package app
+      id: unit-test
+      run: |
+        mvn clean verify
+        cat target/failsafe-reports/failsafe-summary.xml
+        grep -q "<failures>0</failures>" target/failsafe-reports/failsafe-summary.xml
+        code=$?
+        echo "ret: $code"
+        if [[ $code -eq 0  ]]; then
+          echo "success"
+          echo '::set-output name=unit-test-result::success'
+        else
+          echo "failed"
+          echo '::set-output name=unit-test-result::failed'
+        fi
+     
+    # Build the Docker image
+    - name: Build with Docker
+      run: |
+        docker build -t "$REGISTRY_HOSTNAME"/"$ICR_NAMESPACE"/"$IMAGE_NAME":"$GITHUB_SHA" \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" .
+
+    # Push the image to IBM Container Registry
+    - name: Push the image to ICR
+      id: push-to-icr
+      run: |
+        docker push $REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
+        echo '::set-output name=image-registry-path::$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA' 
+
+  cra-discovery:
+    name: CRA discovery
+    runs-on: ubuntu-latest
+    container: icr.io/continuous-delivery/cra-discovery:release.1571
+    environment: production
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Get timestamp
+      uses: actions/github-script@v3.1.0
+      id: author-date
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const commit_details = await github.git.getCommit({owner: context.repo.owner, repo: context.repo.repo, commit_sha: context.sha});
+          return commit_details.data.author.date
+      
+    - name: Check timestamp
+      run: echo $COMMITTED_AT
+      env:
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
+      
+    - name: discovery
+      continue-on-error: false    
+      env:
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
+        
+      run: |
+        set -x
+        pwd
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+         
+        echo "Repo URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+        echo "Branch: $GITHUB_REF"
+        echo "Commit id: $GITHUB_SHA"
+        
+         
+        /usr/local/bin/discovery \
+          -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          -gitbranch "$GITHUB_REF" \
+          -repodir $REPO_DIR_PATH  \
+          -rigapi "${gitsecureUrl}" \
+          -commitid "$GITHUB_SHA" \
+          -commitTimestamp "$COMMITTED_AT" \
+          -toolchainid "${TOOLCHAIN_ID}"
+
+  
+  va-scan:
+    name: Vulnarability advisor scan
+    runs-on: ubuntu-latest
+    needs: setup-build-publish-deploy
+    outputs:
+      va-scan-status: ${{ steps.va-scan.outputs.scan-status }}    
+    steps:
+    # Download and Install IBM Cloud CLI
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        ibmcloud --version
+        ibmcloud config --check-version=false
+        ibmcloud plugin install -f kubernetes-service
+        ibmcloud plugin install -f container-registry
+
+    # Authenticate with IBM Cloud CLI
+    - name: Authenticate with IBM Cloud CLI
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+
+    - name: VA scan
+      id: va-scan
+      continue-on-error: true
+      run: |
+        set -x
+        echo "Job output: ${{needs.setup-build-publish-deploy.outputs.image-registry-path}}"
+        IMAGE_URL=${{needs.setup-build-publish-deploy.outputs.image-registry-path}}
+        echo "Getting the VA status of ${IMAGE_URL}"
+        set +e
+
+        for ITER in {1..10}
+        do
+          echo "Trying again to see if scan is done"
+          ibmcloud cr va ${IMAGE_URL} --output json | grep -i "Try again later"
+          retry=$?
+          if [[ $retry -ne 0  ]]; then
+            break;
+          fi
+          sleep 60
+        done
+        
+        if [[ $retry -eq 0  ]]; then
+          echo "Scanning failed"
+          echo "::set-output name=scan-status::failure"
+          exit 1         
+        fi        
+
+
+        echo "Saving results to va-result.json"
+
+        ibmcloud cr va ${IMAGE_URL} --output json > va-result.json
+        
+        cat va-result.json
+
+        VA_STATUS=$(cat va-result.json | jq -r '.[].status')
+
+        set -e
+        echo "VA scan status: ${VA_STATUS}"
+        echo "::set-output name=scan-status::${VA_STATUS}"
+
+        if [[ "${VA_STATUS}" == "OK" ]]; then
+          echo "VA - No Issues in the image"
+          echo "::set-output name=scan-status::success"
+          exit 0
+        elif [[ $(cat va-result.json | jq -r '.[].vulnerabilities | length') -gt 0 ]]; then
+          echo "VA Failure: $(cat va-result.json | jq -r '.[].vulnerabilities | length') vulnerabilities found in the image"
+          cat va-result.json | jq -r '.[].vulnerabilities'
+          echo "::set-output name=scan-status::failure"
+          exit 1
+        elif [[ $(cat va-result.json | jq -r '.[].configuration_issues | length') -gt 0 ]]; then
+          echo "VA Warning - $(cat va-result.json | jq -r '.[].configuration_issues | length') configuration issues found in the image"
+          cat va-result.json | jq -r '.[].configuration_issues'
+          echo "::set-output name=scan-status::success"
+          exit 0
+        else
+          echo "VA Warning: non-OK status from Vulnerability Advisor ${VA_STATUS}"
+          cat va-result.json | jq -r '.[]'
+          echo "::set-output name=scan-status::failure"
+        fi        
+  deploy-to-ocp:
+    name: Deploy to OpenShift cluster
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy, va-scan]
+    steps:
+    # Checkout repo   
+    - name: Checkout
+      uses: actions/checkout@v2    
+    # Download and Install IBM Cloud CLI
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        ibmcloud --version
+        ibmcloud config --check-version=false
+        ibmcloud plugin install -f kubernetes-service
+        ibmcloud plugin install -f container-registry
+
+    # Authenticate with IBM Cloud CLI
+    - name: Authenticate with IBM Cloud CLI
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+        
+    # Install oc    
+    - name: Install oc
+      uses: redhat-actions/oc-installer@v1
+      with:
+        oc_version: '4.5'        
+
+    # Deploy the Docker image to the IKS cluster
+    - name: Deploy to IKS
+      run: |
+        ibmcloud ks cluster ls
+        ibmcloud ks cluster config --cluster $IKS_CLUSTER
+        kubectl config current-context
+        oc login -u apikey -p $IBM_CLOUD_API_KEY
+    
+        echo "Configuring cluster namespace"
+        if kubectl get namespace ${CLUSTER_NAMESPACE}; then
+          echo -e "Namespace ${CLUSTER_NAMESPACE} found."
+        else
+          kubectl create namespace ${CLUSTER_NAMESPACE}
+          echo -e "Namespace ${CLUSTER_NAMESPACE} created."
+        fi
+        oc project ${CLUSTER_NAMESPACE}
+    
+        oc apply -f manifests/deploy-openshift.yaml
+        oc set image deployment/$DEPLOYMENT_NAME trader=${{needs.setup-build-publish-deploy.outputs.image-registry-path}} --record
+        oc rollout status deployment/$DEPLOYMENT_NAME
+        
+    #         kubectl create deployment $DEPLOYMENT_NAME --image=$REGISTRY_HOSTNAME/$ICR_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA --dry-run -o yaml > deployment.yaml
+    #    kubectl create service loadbalancer $DEPLOYMENT_NAME --tcp=80:$PORT --dry-run -o yaml > service.yaml
+    #    kubectl apply -f service.yaml
+    #    kubectl get services -o wide
+
+
+  cra-vulnerability-scan:
+    name: cra-vulnerability-scan
+    runs-on: ubuntu-latest
+    needs: cra-discovery
+    container: icr.io/continuous-delivery/cra-vulnerability:release.1561
+    environment: production
+    outputs:
+      cra-vulnerability-scan-result: ${{ steps.remediation.outputs.cra-vulnerability-scan-result }}    
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        set -e
+        
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Get timestamp
+      uses: actions/github-script@v3.1.0
+      id: author-date
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const commit_details = await github.git.getCommit({owner: context.repo.owner, repo: context.repo.repo, commit_sha: context.sha});
+          return commit_details.data.author.date
+      
+    - name: Check timestamp
+      run: echo $COMMITTED_AT
+      env:
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
+
+    
+    - name: remediation
+      id: remediation
+      env:
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        COMMITTED_AT: ${{ steps.author-date.outputs.result }}
+        
+      run: |
+        set -x
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        ls -la
+        ls -la $REPO_DIR_PATH
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+
+        vcuratorUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.vcurator')
+
+        if [ -z "$vcuratorUrl" -o "$vcuratorUrl" = "null" ]; then
+          echo "Error fetching the vcurator url."
+          exit 1
+        fi
+        
+        touch results-status.txt
+                    
+        /gitsecure/vulnerability-task \
+            -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            -gitbranch "$GITHUB_REF" \
+            -rigserviceapi "${gitsecureUrl}" \
+            -runid "$GITHUB_RUN_ID" \
+            -commitid "$GITHUB_SHA" \
+            -security_advisory_svc "${vcuratorUrl}" \
+            -results_status "./results-status.txt" \
+            -results_evidence "./gitsecure-vulnerability-results.json" \
+            -toolchainid "${TOOLCHAIN_ID}" \
+            -comment_md "./vulnerability-comment.md"        
+        
+        ls -la
+        export RESULT=$(cat results-status.txt)
+        echo "RESULT=$RESULT"
+
+        cat gitsecure-vulnerability-results.json
+        cat vulnerability-comment.md
+        echo "::set-output name=cra-vulnerability-scan-result::${RESULT}"
+        
+        if [ $RESULT != 'success' ]; then
+          echo "Scan failed."
+          exit 1
+        fi
+
+
+  cra-cis-check:
+    name: cra-cis-check
+    runs-on: ubuntu-latest
+    needs: cra-discovery
+    container: icr.io/continuous-delivery/cra-cis:release.1567
+    environment: production
+    outputs:
+      cra-cis-check-result: ${{ steps.cis.outputs.cra-cis-check-result }}    
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        set -e
+        
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: cis
+      id: cis
+      env:
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        
+      run: |
+        set -x
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        
+        whoami
+        
+        echo "Home is $HOME"
+        
+        ls -la /github/home/        
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        
+        ls -la /github/home/
+        ls -la /github/home/.bluemix
+        
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+
+        
+        touch results-status.txt
+        
+        /usr/local/bin/deploy-analytic \
+          -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          -gitbranch "$GITHUB_REF" \
+          -repodir $REPO_DIR_PATH \
+          -apiservice "${gitsecureUrl}" \
+          -runid "$GITHUB_RUN_ID" \
+          -commitid "$GITHUB_SHA" \
+          -results_status "./results-status.txt" \
+          -results_evidence "./gitsecure-cis-results.json" \
+          -toolchainid "${TOOLCHAIN_ID}" \
+          -comment_md "./gitsecure-cis-comment.md"
+    
+        
+        ls -la
+        RESULT=$(cat results-status.txt)
+        echo "RESULT=$RESULT"
+
+        cat gitsecure-cis-results.json
+        cat gitsecure-cis-comment.md
+        echo "::set-output name=cra-cis-check-result::${RESULT}"
+        
+        if [ $RESULT != 'success' ]; then
+          echo "Scan failed."
+          exit 1
+        fi
+
+  cra-bom:
+    name: cra-bom
+    runs-on: ubuntu-latest
+    needs: cra-discovery
+    container: icr.io/continuous-delivery/cra-bom:release.1497
+    environment: production
+    outputs:
+      cra-bom-result: ${{ steps.bom.outputs.cra-bom-result }}
+      bom-result: ${{ steps.bom.outputs.bom-result }}
+    steps:
+    - name: Update git
+      run: |
+        set -x +e
+        uname -a
+        git --version
+        add-apt-repository ppa:git-core/ppa -y
+        apt-get update
+        apt-get install git -y
+        git --version
+        set -e
+        
+    - name: bom
+      id: bom
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}    
+        PR_NUMBER: ${{ github.event.number }}
+        BASE_SHA:  ${{ github.event.pull_request.base.sha }}
+        TARGET_BRANCH: $GITHUB_BASE_REF       
+        DIRECTORY_NAME: .
+        PIPELINE_DEBUG: 1
+        
+      run: |
+        #set -x 
+        API_ENDPOINT="https://cloud.ibm.com"
+        OTC_BROKER_BASE_URL="https://otcbroker.devopsinsights.cloud.ibm.com"    
+        
+        REPO_DIR_PATH="$GITHUB_WORKSPACE"
+        
+        whoami
+        
+        CURRENT_USER=$(whoami)
+        
+        echo "Home is $HOME"
+        
+
+        
+        sudo mkdir /github/home/.bluemix
+        sudo chown -R $CURRENT_USER:$CURRENT_USER /github/home/.bluemix
+        
+        echo "Fetching users's token"
+        ibmcloud config --check-version false
+        ibmcloud login -a $API_ENDPOINT -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        export IBM_CLOUD_BEARER=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token' | awk '{ print $2 }')
+ 
+        echo "Fetching service urls for user's data"
+        HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" \
+            -X GET "${OTC_BROKER_BASE_URL}/globalauth/toolchainids/${TOOLCHAIN_ID}" \
+            --header "Authorization: Bearer ${IBM_CLOUD_BEARER}")
+        HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        if [ "$HTTP_STATUS" -eq 401 -o "$HTTP_STATUS" -eq 403 ]; then
+          echo ""
+          echo "Error authenticating user for toolchain_id: ${TOOLCHAIN_ID}"
+          echo "Please verify the Devops Insights card has been added to your toolchain and the api-key has access."
+          exit 1
+        fi
+        if [ "$HTTP_STATUS" -ne 200 ]; then
+          echo ""
+          echo "Error! Please try again."
+          exit 1
+        fi
+        HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+        gitsecureUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.gitsecure')
+        if [ -z "$gitsecureUrl" -o "$gitsecureUrl" = "null" ]; then
+          echo ""
+          echo "Error IBM Code Risk Analyzer is not supported in ${REGION_ID}"
+          exit 1
+        fi
+
+        uiUrl=$(echo ${HTTP_BODY} | jq -r '.service_urls.controlcenter')
+        if [ -z "$uiUrl" -o "$uiUrl" = "null" ]; then
+          echo "Error fetching the ui url."
+          exit 1
+        fi
+        
+        echo "Current dir: $(pwd)"
+        echo "changing permissions for $(pwd)"
+        
+        sudo chown -R $CURRENT_USER:$CURRENT_USER $(pwd)
+
+        touch results-status.txt
+        
+        echo "BASE_SHA $BASE_SHA"
+        echo "TARGET_BRANCH $TARGET_BRANCH"
+        echo "GITHUB_BASE_REF $GITHUB_BASE_REF"
+        echo "GITHUB_HEAD_REF $GITHUB_HEAD_REF"
+        echo "GITHUB_REF $GITHUB_REF"
+
+        /gitsecure/bom-task \
+          -giturl "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          -gitbranch "$GITHUB_REF" \
+          -rigserviceapi ${gitsecureUrl} \
+          -ui_url ${uiUrl} \
+          -pr "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/pull/$PR_NUMBER" \
+          -runid "$GITHUB_RUN_ID" \
+          -commitid "$GITHUB_SHA" \
+          -target_commitid "$BASE_SHA" \
+          -target_branch "$GITHUB_BASE_REF" \
+          -results_status "./results-status.txt" \
+          -results_evidence "./gitsecure-bom-results.json" \
+          -toolchainid "${TOOLCHAIN_ID}" \
+          -comment_md "./gitsecure-bom-comment.md"
+
+        ls -la
+        export RESULT=$(cat results-status.txt)
+        echo "RESULT=$RESULT"
+
+        cat gitsecure-bom-results.json
+        cat gitsecure-bom-comment.md
+        echo "::set-output name=cra-bom-result::success"
+        echo "::set-output name=bom-result::${RESULT}"
+        
+        if [ $RESULT != 'success' ]; then
+          echo "Scan failed."
+          echo "::set-output name=cra-bom-result::failed"
+          exit 1
+        fi
+        
+  publish-evidence:
+    name: Publish evidence to evidence repo
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy, va-scan, cra-vulnerability-scan, cra-cis-check, cra-bom]
+    if: always()    
+    steps:
+    # Checkout repo   
+    - name: Checkout
+      uses: actions/checkout@v2    
+      
+    - run: |
+        pwd
+        ls -la
+        
+      
+    # Checkout evidence repo   
+    - name: Checkout evidence repo
+      uses: actions/checkout@v2
+      with:
+        repository: ${{secrets.EVIDENCE_REPO}}
+        path: ${{ env.EVIDENCE_DIR }}
+        token: ${{secrets.PUSH_TOKEN}}
+        
+    - run: |
+        pwd
+        ls -la
+    
+    # Create new folder
+    - name: Create evidence
+      run: |
+        set -x
+        set +e
+        cd $EVIDENCE_DIR
+        
+        NEW_UUID2=$(cat /proc/sys/kernel/random/uuid)
+        echo "GEN UUID=$NEW_UUID2"
+        set -e
+        
+        mkdir -p raw/cd/$NEW_UUID2
+        cd ..
+        
+        cp evidence-template/summary.json $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        echo "unit test: ${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"
+        echo "vascan test: ${{needs.va-scan.outputs.va-scan-status}}"
+        echo "cra-vulnerability: ${{needs.cra-vulnerability-scan.outputs.cra-vulnerability-scan-result}}"
+        echo "cra-cis-check: ${{needs.cra-cis-check.outputs.cra-cis-check-result}}"
+        echo "cra-bom: ${{needs.cra-bom.outputs.cra-bom-result}}"
+        echo "cra-bom2: ${{needs.cra-bom.outputs.bom-result}}"
+        
+        export SCAN_DATE=$(date -u +'%FT%T.%3NZ')
+        echo "date: $SCAN_DATE"
+        echo "chain_crn: $TOOLCHAIN_CRN"
+        
+        echo "$( jq ".toolchain_crn |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.unit_tests") | .result) |= "${{needs.setup-build-publish-deploy.outputs.unit-test-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.unit_tests\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.cloud.image_vulnerability_scan") | .result) |= "${{needs.va-scan.outputs.va-scan-status}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.cloud.image_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.cloud.image_vulnerability_scan\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_vulnerability_scan") | .result) |= "${{needs.cra-vulnerability-scan.outputs.cra-vulnerability-scan-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_vulnerability_scan\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_vulnerability_scan\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_cis_check") | .result) |= "${{needs.cra-cis-check.outputs.cra-cis-check-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_cis_check\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_cis_check\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+
+        echo "$( jq '(.evidences[] | select(.evidence_type_id == "com.ibm.code_bom_check") | .result) |= "${{needs.cra-bom.outputs.bom-result}}"' $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_bom_check\") | .date) |= \"$SCAN_DATE\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+        echo "$( jq "(.evidences[] | select(.evidence_type_id == \"com.ibm.code_bom_check\") | .toolchain_crn) |= \"$TOOLCHAIN_CRN\"" $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json )" > $EVIDENCE_DIR/raw/cd/$NEW_UUID2/summary.json
+    
+    - name: Commit report
+      env:
+        REPO_KEY: ${{secrets.PUSH_TOKEN}}
+        EVIDENCE_REPO: ${{secrets.EVIDENCE_REPO}}
+        USERNAME: github-actions[bot]    
+      run: |
+        cd $EVIDENCE_DIR
+        git add .
+        git config --global user.name 'GH Actions'
+        git config --global user.email 'github-actions@users.noreply.github.com'
+        git commit -am "Publish evidence"
+        git push https://$USERNAME:$REPO_KEY@github.com/$EVIDENCE_REPO   
+    
+
+      
+      
