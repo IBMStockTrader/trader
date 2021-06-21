@@ -44,6 +44,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -93,101 +94,29 @@ public class ViewPortfolio extends HttpServlet {
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
 		Broker broker = brokerClient.getBroker("Bearer "+getJWT(), owner);
 
-		double overallTotal = 0.0;
-		String loyaltyLevel = null;
-		double balance = 0.0;
-		double commissions = 0.0;
-		int free = 0;
-		String sentiment = null;
 		JsonObject stocks = null;
 		String returnOnInvestment = "Unknown";
 
 		try {
-			overallTotal = broker.getTotal();
-			loyaltyLevel = broker.getLoyalty();
-			balance = broker.getBalance();
-			commissions = broker.getCommissions();
-			free = broker.getFree();
-			sentiment = broker.getSentiment();
 			stocks = broker.getStocks();
+			//request.setAttribute("rows", getTableRows(stocks));			
+			request.setAttribute("broker", broker);
 		} catch (NullPointerException npe) {
 			logException(npe);
 		}
 
 		try {
 			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+getJWT(), owner);
+			request.setAttribute("returnOnInvestment", returnOnInvestment);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);
 			logException(t);
 		}
 
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <br/>");
-		writer.append("    <br/>");
-		writer.append("    <form method=\"post\"/>");
-		writer.append("      Stock Portfolio for <b>"+owner+"</b>: <br/>");
-		writer.append("      <br/>");
-		writer.append("      <table border=\"1\" cellpadding=\"5\">");
-		writer.append("        <tr>");
-		writer.append("          <th>Symbol</th>");
-		writer.append("          <th>Shares</th>");
-		writer.append("          <th>Price</th>");
-		writer.append("          <th>Date Quoted</th>");
-		writer.append("          <th>Total</th>");
-		writer.append("          <th>Commission</th>");
-		writer.append("        </tr>");
-		writer.append(getTableRows(stocks));
-		writer.append("      </table>");
-		writer.append("      <br/>");
-		writer.append("      <table>");
-		writer.append("        <tr>");
-		writer.append("          <td>Total Portfolio Value:</td>");
-		writer.append("          <td><b>$"+currency.format(overallTotal)+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Loyalty Level:</td>");
-		writer.append("          <td><b>"+loyaltyLevel+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Account Balance:</td>");
-		writer.append("          <td><b>$"+currency.format(balance)+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Total Commissions Paid:</td>");
-		writer.append("          <td><b>$"+currency.format(commissions)+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Free Trades Available:</td>");
-		writer.append("          <td><b>"+free+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Sentiment:</td>");
-		writer.append("          <td><b>"+sentiment+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td>Return On Investment:</td>");
-		writer.append("          <td><b>"+returnOnInvestment+"</b></td>");
-		writer.append("        </tr>");
-		writer.append("      </table>");
-		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"OK\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Buy/Sell Stock\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit Feedback\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("    </form>");
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+
+
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/viewPortfolio.jsp");
+        dispatcher.forward(request, response);			
 	}
 
 	/**
@@ -235,14 +164,7 @@ public class ViewPortfolio extends HttpServlet {
 					formattedCommission = ERROR_STRING;
 				}
 
-				rows.append("        <tr>");
-				rows.append("          <td>"+symbol+"</td>");
-				rows.append("          <td>"+shares+"</td>");
-				rows.append("          <td>"+formattedPrice+"</td>");
-				rows.append("          <td>"+date+"</td>");
-				rows.append("          <td>"+formattedTotal+"</td>");
-				rows.append("          <td>"+formattedCommission+"</td>");
-				rows.append("        </tr>");
+
 			}
 		}
 
