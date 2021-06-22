@@ -90,7 +90,7 @@ static {
 		    </tr>
 		    <tr>
 		      <td>Loyalty Level:</td>
-		      <td><b>${broker.loyaltyLevel}</b></td>
+		      <td><b>${broker.loyalty}</b></td>
 		    </tr>
 		    <tr>
 		      <td>Account Balance:</td>

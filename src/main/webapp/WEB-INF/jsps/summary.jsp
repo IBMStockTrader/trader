@@ -50,7 +50,6 @@ static {
        </tr>
 <%
 Broker[] brokers = (Broker[])request.getAttribute("brokers");
-System.out.println("broekers: " + brokers);
 for (int index=0; index<brokers.length; index++) { 
   Broker broker = brokers[index];
   %>
