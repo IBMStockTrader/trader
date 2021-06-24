@@ -33,12 +33,12 @@ static {
       %>
 		  <table border="1" cellpadding="5">
 		    <tr>
-		      <th>Symbol</th>
-		      <th>Shares</th>
-		      <th>Price</th>
-		      <th>Date Quoted</th>
-		      <th>Total</th>
-		      <th>Commission</th>
+		      <th scope="col">Symbol</th>
+		      <th scope="col">Shares</th>
+		      <th scope="col">Price</th>
+		      <th scope="col">Date Quoted</th>
+		      <th scope="col">Total</th>
+		      <th scope="col">Commission</th>
         </tr>
         ${rows}
         <%
@@ -85,31 +85,31 @@ static {
 		  <br/>
 		  <table>
 		    <tr>
-		      <td>Total Portfolio Value:</td>
+		      <th scope="row">Portfolio Value:</th>
 		      <td><b>$<%=currency.format(broker.getTotal())%></b></td>
 		    </tr>
 		    <tr>
-		      <td>Loyalty Level:</td>
+		      <th scope="row">Loyalty Level:</th>
 		      <td><b>${broker.loyalty}</b></td>
 		    </tr>
 		    <tr>
-		      <td>Account Balance:</td>
+		      <th scope="row">Account Balance:</th>
 		      <td><b>$<%=currency.format(broker.getBalance())%></b></td>
 		    </tr>
 		    <tr>
-		      <td>Total Commissions Paid:</td>
+		      <th scope="row">Total Commissions Paid:</th>
 		      <td><b>$<%=currency.format(broker.getCommissions())%></b></td>
 		    </tr>
 		    <tr>
-		      <td>Free Trades Available:</td>
+		      <th scope="row">Free Trades Available:</th>
 		      <td><b>${broker.free}</b></td>
 		    </tr>
 		    <tr>
-		      <td>Sentiment:</td>
+		      <th scope="row">Sentiment:</th>
 		      <td><b>${broker.sentiment}</b></td>
 		    </tr>
 		    <tr>
-		      <td>Return On Investment:</td>
+		      <th scope="row">Return On Investment:</th>
 		      <td><b>${returnOnInvestment}</b></td>
 		    </tr>
 		  </table>

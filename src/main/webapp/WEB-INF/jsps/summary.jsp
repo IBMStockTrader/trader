@@ -43,10 +43,10 @@ static {
     <br/>
     <table border="1" cellpadding="5">
        <tr>
-       <th></th>
-       <th>Owner</th>
-       <th>Total</th>
-       <th>Loyalty Level</th>
+       <th scope="col"></th>
+       <th scope="col">Owner</th>
+       <th scope="col">Total</th>
+       <th scope="col">Loyalty Level</th>
        </tr>
 <%
 Broker[] brokers = (Broker[])request.getAttribute("brokers");

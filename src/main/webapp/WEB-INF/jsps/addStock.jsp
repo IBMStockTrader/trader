@@ -12,22 +12,22 @@
 		<form method="post"/>
 		  <table>
 		    <tr>
-		      <td><b>Owner:</b></td>
+		      <th scope="row"><b>Owner:</b></th>
 		      <td>${param.owner}</td>
 		    </tr>
 		    <tr>
-		      <td><b>Commission:</b></td>
+		      <th scope="row"><b>Commission:</b></td>
 		      <td>${commission}</td>
 		    </tr>
 		    <tr>
-		      <td><b>Stock Symbol:</b></td>
+		      <th scope="row"><b>Stock Symbol:</b></td>
 		      <td><input type="text" name="symbol"></td>
 		    </tr>
 		    <tr>
-		      <td><b>Number of Shares:</b></td>
+		      <th scope="row"><b>Number of Shares:</b></td>
 		      <td><input type="text" name="shares"></td>
 		    </tr>
-		    <tr>
+		    <tr role="presentation">
 		      <td><input type="radio" name="action" value="Buy" checked> Buy</td>
 		      <td><input type="radio" name="action" value="Sell"> Sell</td>
 		    </tr>
