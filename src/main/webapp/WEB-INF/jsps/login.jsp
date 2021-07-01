@@ -8,7 +8,7 @@
   <body>
     <img src="header.jpg" width="534" height="200" alt="header image"/>
     <p/>
-    Login to StockTrader My Demo
+    Login to StockTrader Demo Playback
     <form method="post"/>
       <table>
         <tr>
