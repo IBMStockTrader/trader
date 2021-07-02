@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.RequestDispatcher;
 
 //mpConfig 1.3
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -145,64 +146,23 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 		String rows = null;
 
 		try {
 			rows = getTableRows(request);
+			request.setAttribute("rows", rows);
 		} catch (Throwable t) {
 			logException(t);
 			message = t.getMessage();
 			error = true;
+			request.setAttribute("message", message);
+			request.setAttribute("error", error);
 		}
 
-		boolean editor = request.isUserInRole(EDITOR);
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <br/>");
-		writer.append("    <br/>");
-		if (error) {
-			writer.append("    Error communicating with the Broker microservice: \""+message+"\"");
-			writer.append("    <p/>");
-			writer.append("    Please consult the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.");
-			writer.append("    <p/>");
-		} else {
-			writer.append("    <form method=\"post\"/>");
-			if (editor) {
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+CREATE+"\"> Create a new portfolio<br>");
-			}
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+RETRIEVE+"\" checked> Retrieve selected portfolio<br>");
-			if (editor) {
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+UPDATE+"\"> Update selected portfolio (buy/sell stock)<br>");
-				writer.append("      <input type=\"radio\" name=\"action\" value=\""+DELETE+"\"> Delete selected portfolio<br>");
-			}
-			writer.append("      <br/>");
-			writer.append("      <table border=\"1\" cellpadding=\"5\">");
-			writer.append("        <tr>");
-			writer.append("          <th></th>");
-			writer.append("          <th>Owner</th>");
-			writer.append("          <th>Total</th>");
-			writer.append("          <th>Loyalty Level</th>");
-			writer.append("        </tr>");
-			writer.append(rows);
-			writer.append("      </table>");
-			writer.append("      <br/>");
-			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-			writer.append("      <input type=\"submit\" name=\"submit\" value=\"Log Out\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-			writer.append("    </form>");
-		}
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/summary.jsp");
+        dispatcher.forward(request, response);
+
 	}
 
 	/**
@@ -259,6 +219,9 @@ public class Summary extends HttpServlet {
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
 		Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+getJWT());
+		
+		// set brokers for JSP
+		request.setAttribute("brokers", brokers);
 
 		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
 		metricRegistry.remove("portfolio_value");
@@ -281,18 +244,7 @@ public class Summary extends HttpServlet {
 				else unknown++;
 			}
 
-			rows.append("        <tr>");
-			rows.append("          <td><input type=\"radio\" name=\"owner\" value=\""+owner+"\"");
-			if (index == 0) {
-				rows.append(" checked");
-			}
-			rows.append("></td>");
-
-			rows.append("          <td>"+owner+"</td>");
-			rows.append("          <td>$"+currency.format(total)+"</td>");
-			rows.append("          <td>"+loyaltyLevel+"</td>");
-			rows.append("        </tr>");
-		}
+    	}
 
 		return rows.toString();
 	}

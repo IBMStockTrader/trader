@@ -29,6 +29,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 
 /**
  * Servlet implementation class DisplayMessage
@@ -44,28 +45,12 @@ public class DisplayMessage extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String encodedMessage = request.getParameter("message");
+		if(encodedMessage == null) encodedMessage = "";
 		String message = URLDecoder.decode(encodedMessage, "UTF-8");
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <p/>");
-		writer.append("    "+message);
-		writer.append("    <p/>");
-		writer.append("    <form method=\"post\"/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"OK\" style=\"font-family: sans-serif; font-size: 16px;\" />");
-		writer.append("    </form>");
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+		request.setAttribute("message", message);
+
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/message.jsp");
+        dispatcher.forward(request, response);			
 	}
 
 	/**

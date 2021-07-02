@@ -34,6 +34,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -60,29 +61,8 @@ public class AddPortfolio extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <p/>");
-		writer.append("    <i>This account will receive a free <b>$50</b> balance for commissions!</i>");
-		writer.append("    <p/>");
-		writer.append("    <form method=\"post\"/>");
-		writer.append("      Owner: <input type=\"text\" name=\"owner\"><br/>");
-		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\"/>");
-		writer.append("    </form>");
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/addPortfolio.jsp");
+		dispatcher.forward(request, response);
 	}
 
 	/**

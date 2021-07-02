@@ -19,10 +19,10 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 //Servlet 3.1
 import javax.servlet.ServletException;
@@ -31,6 +31,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 
 /**
  * Servlet implementation class Login
@@ -44,36 +45,8 @@ public class Login extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <p/>");
-		writer.append("    <form method=\"post\"/>");
-		writer.append("      <table>");
-		writer.append("        <tr>");
-		writer.append("          <td><b>Username:</b></th>");
-		writer.append("          <td><input type=\"text\" name=\"id\"></td>");
-		writer.append("        </tr>");
-		writer.append("        <tr>");
-		writer.append("          <td><b>Password:</b></th>");
-		writer.append("          <td><input type=\"password\" name=\"password\"></td>");
-		writer.append("        </tr>");
-		writer.append("      </table>");
-		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Submit\" style=\"font-family: sans-serif; font-size: 16px;\">");
-		writer.append("    </form>");
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/login.jsp");
+        dispatcher.forward(request, response);
 	}
 
 	/**

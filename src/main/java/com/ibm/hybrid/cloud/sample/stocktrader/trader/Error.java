@@ -25,6 +25,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.RequestDispatcher;
 
 /**
  * Servlet implementation class Error
@@ -36,29 +37,8 @@ public class Error extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Writer writer = response.getWriter();
-		writer.append("<!DOCTYPE html>");
-		writer.append("<html>");
-		writer.append("  <head>");
-		writer.append("    <title>Stock Trader</title>");
-		writer.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-		writer.append("  </head>");
-		writer.append("  <body>");
-		writer.append("    <img src=\"header.jpg\" width=\"534\" height=\"200\"/>");
-		writer.append("    <br/>");
-		writer.append("    <br/>");
-		writer.append("    <form method=\"post\"/>");
-		writer.append("      An error occurred during login.  Please try again.");
-		writer.append("      <br/>");
-		writer.append("      <br/>");
-		writer.append("      <input type=\"submit\" name=\"submit\" value=\"Try again\" style=\"font-family: sans-serif; font-size: 16px;\">");
-		writer.append("    </form>");
-		writer.append("    <br/>");
-		writer.append("    <a href=\"https://github.com/IBMStockTrader/\">");
-		writer.append("      <img src=\"footer.jpg\"/>");
-		writer.append("    </a>");
-		writer.append("  </body>");
-		writer.append("</html>");
+		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/error.jsp");
+		dispatcher.forward(request, response);
 	}
 
 	/**
