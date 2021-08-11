@@ -2,13 +2,13 @@
 <!DOCTYPE html >
 <html lang="en">
   <head>
-    <title>Stock Trader</title>
+    <title>IBM Stock Trader</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body>
     <img src="header.jpg" width="534" height="200" alt="header image"/>
     <p/>
-    Login to StockTrader Demo Playback
+    Login to IBM Stock Trader
     <form method="post"/>
       <table>
         <tr>
