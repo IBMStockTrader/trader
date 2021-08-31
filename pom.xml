@@ -138,6 +138,9 @@
                         <goal>test-start</goal>
                         <goal>deploy</goal>
                     </goals>
+                    <configuration>
+                        <looseApplication>false</looseApplication>
+                    </configuration>                    
                   </execution>
                   <execution>
                     <id>install-feature</id>
@@ -150,7 +153,9 @@
                   <execution>
                     <id>stop-server</id>
                     <phase>post-integration-test</phase>
-                    <goals> <goal>test-stop</goal> </goals>
+                    <goals> 
+                        <goal>test-stop</goal> 
+                    </goals>
                   </execution>
                     </executions>
                     <configuration>
