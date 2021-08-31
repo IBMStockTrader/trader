@@ -129,7 +129,7 @@
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
-                <version>3.3.4</version>
+                <version>3.4</version>
                 <executions>
                 <execution>
                     <id>start-server</id>
@@ -188,7 +188,7 @@
             </plugin>            
         </plugins>
     </build>
-    <!-- Profile needed for microclimate to build this properly -->
+    <!-- Profile needed for microclimate to build this properly 
     <profiles>
         <profile>
             <id>microclimate</id>
@@ -201,7 +201,6 @@
             <build>
                 <directory>${microclimateOutputDir}</directory>
                 <plugins>
-                    <!-- Enablement of liberty-maven plugin in microclimate -->
                     <plugin>
                         <groupId>net.wasdev.wlp.maven.plugins</groupId>
                         <artifactId>liberty-maven-plugin</artifactId>
@@ -228,4 +227,5 @@
             </build>
         </profile>
     </profiles>
+    -->
 </project>

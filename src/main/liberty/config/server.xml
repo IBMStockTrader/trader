@@ -21,7 +21,7 @@
         <feature>transportSecurity-1.0</feature>
         <feature>openidConnectClient-1.0</feature> <!-- Needed by PropagationHelper utility -->
 <!--    <feature>logstashCollector-1.0</feature> -->
-        <feature>jsp-2.3</feature> <!-- temp workaround for issue in latest liberty microp and oauth incompatibilities -->
+        <!--<feature>jsp-2.3</feature>  temp workaround for issue in latest liberty microp and oauth incompatibilities -->
     </featureManager>
 
     <variable name="AUTH_TYPE"  defaultValue="basic"/>
