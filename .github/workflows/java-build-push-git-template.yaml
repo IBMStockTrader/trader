@@ -122,10 +122,10 @@ jobs:
         echo "print yq version"
         yq --version
         # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.repository "${APP_IMAGE}"
-        yq e '.spec.trader.image.repository = $APP_IMAGE' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+        yq e '.spec.trader.image.repository = \"$APP_IMAGE\"' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
 
         # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.tag "${VERSION}"
-         yq e '.spec.trader.image.tag = $VERSION' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+         yq e '.spec.trader.image.tag = \"$VERSION\"' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
 
         cat "${GITOPS_DIR}/stocktrader-cr.yaml"          
 
