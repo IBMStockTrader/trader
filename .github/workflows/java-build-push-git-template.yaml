@@ -31,6 +31,10 @@ env:
   
   GITHUB_SHA: ${{ github.sha }}
   
+  GITOPS_REPO: https://github.com/stocktrader-ops/stocktrader-gitops
+  GITOPS_DIR: application
+  GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+  
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish
@@ -83,3 +87,48 @@ jobs:
         docker login -u="$REGISTRY_USER" -p="$REGISTRY_PASSWORD" "$REGISTRY"
         docker push $REGISTRY/$REGISTRY_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
         echo '::set-output name=image-registry-path::$REGISTRY_HOSTNAME/$REGISTRY_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA' 
+
+  update-gitops-repo:
+    name: Publish image updates to gitops repo
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy]
+    
+    # Checkout gitops repo   
+    - name: Checkout evidence repo
+      uses: actions/checkout@v2
+      with:
+        repository: ${{env.GITOPS_REPO}}
+        path: ${{ env.GITOPS_DIR }}
+        token: ${{secrets.GITOPS_TOKEN}}
+        
+    # Update application
+    - name: Upate application
+      run: |
+        set -x
+        set +e
+        ls -la
+        
+        ## update manifests to new image and tag
+        APP_IMAGE="$REGISTRY_HOSTNAME/$REGISTRY_NAMESPACE/$IMAGE_NAME"
+        VERSION="$GITHUB_SHA"
+        echo "image-registry-path: ${{needs.setup-build-publish-deploy.image-registry-path}}"
+        echo "${APP_IMAGE}"
+        echo "${VERSION}"
+
+        echo "print yq version"
+        yq --version
+        yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.repository "${APP_IMAGE}"
+
+        yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.tag "${VERSION}"
+
+        cat "${GITOPS_DIR}/stocktrader-cr.yaml"          
+
+        if [[ $(git status -s | wc -l) -eq 0 ]]; then
+          echo "No changes"
+          exit 0
+        fi
+        git add "${GITOPS_DIR}/"
+        git commit -m "Updates ${APP_NAME} to ${VERSION}"
+        git push -v        
+        
+        
