@@ -92,9 +92,10 @@ jobs:
     name: Publish image updates to gitops repo
     runs-on: ubuntu-latest
     needs: [setup-build-publish-deploy]
+    steps:
     
     # Checkout gitops repo   
-    - name: Checkout evidence repo
+    - name: Checkout gitops repo
       uses: actions/checkout@v2
       with:
         repository: ${{env.GITOPS_REPO}}
