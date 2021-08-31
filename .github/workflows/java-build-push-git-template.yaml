@@ -31,7 +31,7 @@ env:
   
   GITHUB_SHA: ${{ github.sha }}
   
-  GITOPS_REPO: https://github.com/stocktrader-ops/stocktrader-gitops
+  GITOPS_REPO: stocktrader-ops/stocktrader-gitops
   GITOPS_DIR: application
   GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
   
