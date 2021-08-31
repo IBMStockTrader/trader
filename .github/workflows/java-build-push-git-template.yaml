@@ -113,7 +113,7 @@ jobs:
         cd gitops
         
         ## update manifests to new image and tag
-        APP_IMAGE="$REGISTRY_HOSTNAME/$REGISTRY_NAMESPACE/$IMAGE_NAME"
+        APP_IMAGE="$REGISTRY/$REGISTRY_NAMESPACE/$IMAGE_NAME"
         VERSION="$GITHUB_SHA"
         echo "image-registry-path: ${{needs.setup-build-publish-deploy.image-registry-path}}"
         echo "${APP_IMAGE}"
