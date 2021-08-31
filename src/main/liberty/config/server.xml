@@ -15,6 +15,7 @@
     <!-- Enable features -->
     <featureManager>
         <feature>microProfile-4.0</feature>
+        <feature>jsp-2.3</feature>
         <feature>appSecurity-2.0</feature>
         <feature>monitor-1.0</feature>
         <feature>jwtSso-1.0</feature>
