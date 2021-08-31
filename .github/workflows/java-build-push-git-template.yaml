@@ -33,6 +33,7 @@ env:
   
   GITOPS_REPO: stocktrader-ops/stocktrader-gitops
   GITOPS_DIR: application
+  GITOPS_USERNAME: ${{ secrets.GITOPS_USERNAME }}
   GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
   
 jobs:
@@ -121,10 +122,10 @@ jobs:
         echo "print yq version"
         yq --version
         # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.repository "${APP_IMAGE}"
-        yq e '.spec.trader.image.repository = "${APP_IMAGE}"' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+        yq e '.spec.trader.image.repository = $APP_IMAGE' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
 
         # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.tag "${VERSION}"
-         yq e '.spec.trader.image.tag = "${VERSION}"' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+         yq e '.spec.trader.image.tag = $VERSION' -i "${GITOPS_DIR}/stocktrader-cr.yaml"
 
         cat "${GITOPS_DIR}/stocktrader-cr.yaml"          
 
@@ -133,7 +134,9 @@ jobs:
           exit 0
         fi
         git add "${GITOPS_DIR}/"
-        git commit -m "Updates ${APP_NAME} to ${VERSION}"
-        git push -v        
+        git config --global user.name 'GH Actions'
+        git config --global user.email 'github-actions@users.noreply.github.com'        
+        git commit -am "Updates ${APP_NAME} to ${VERSION}"   
+        git push https://$GITOPS_USERNAME:$GITOPS_TOKEN@github.com/$EVIDENCE_REPO 
         
         
