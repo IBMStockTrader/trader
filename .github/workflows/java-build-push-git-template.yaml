@@ -1,0 +1,142 @@
+# This workflow will:
+# - build a maven Java application
+# - create a docker container
+# - publish it to Quay
+# - commit updates to gitops repo
+#
+### Before you begin:
+# - Have write access to a container image registry such as quay.io or Dockerhub.
+# - Have access to your gitops repo.
+
+# Name of the workflow
+name: Build, Push, Gitops
+
+on: 
+  push:
+    branches:
+      - master 
+    paths-ignore:
+    - '.github/**'   
+    
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  # EDIT secrets with with your registry, registry path, and apikey
+  REGISTRY: quay.io
+  REGISTRY_NAMESPACE: gas_stocktrader
+  # EDIT with your registry username.
+  REGISTRY_USER: gas_stocktrader+quaytrader
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+  IMAGE_NAME: trader
+  
+  GITHUB_SHA: ${{ github.sha }}
+  
+  GITOPS_REPO: stocktrader-ops/stocktrader-gitops
+  GITOPS_DIR: application
+  GITOPS_USERNAME: ${{ secrets.GITOPS_USERNAME }}
+  GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+  
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish
+    runs-on: ubuntu-latest
+    outputs:
+      image-registry-path: ${{ steps.push-to-registry.outputs.image-registry-path }}
+      unit-test-result: ${{ steps.unit-test.outputs.unit-test-result }}
+    environment: production
+    steps:
+
+    # Checkout app repo
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+
+    # Setup java
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8      
+  
+    # Build and package app
+    - name: Build and package app
+      id: unit-test
+      run: |
+        mvn clean verify
+        cat target/failsafe-reports/failsafe-summary.xml
+        grep -q "<failures>0</failures>" target/failsafe-reports/failsafe-summary.xml
+        code=$?
+        echo "ret: $code"
+        if [[ $code -eq 0  ]]; then
+          echo "success"
+          echo '::set-output name=unit-test-result::success'
+        else
+          echo "failed"
+          echo '::set-output name=unit-test-result::failed'
+        fi
+
+    # Build the Docker image
+    - name: Build with Docker
+      run: |
+        docker build -t "$REGISTRY"/"$REGISTRY_NAMESPACE"/"$IMAGE_NAME":"$GITHUB_SHA" \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" \
+          --build-arg GITHUB_REF="$GITHUB_REF" .
+
+    # Push the image to Image Registry
+    - name: Push the image to Registry
+      id: push-to-registry
+      run: |
+        docker login -u="$REGISTRY_USER" -p="$REGISTRY_PASSWORD" "$REGISTRY"
+        docker push $REGISTRY/$REGISTRY_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA
+        echo '::set-output name=image-registry-path::$REGISTRY_HOSTNAME/$REGISTRY_NAMESPACE/$IMAGE_NAME:$GITHUB_SHA' 
+
+  update-gitops-repo:
+    name: Publish image updates to gitops repo
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy]
+    steps:
+    
+    # Checkout gitops repo   
+    - name: Checkout gitops repo
+      uses: actions/checkout@v2
+      with:
+        repository: ${{env.GITOPS_REPO}}
+        path: gitops
+        token: ${{secrets.GITOPS_TOKEN}}
+        
+    # Update application
+    - name: Upate application
+      run: |
+        set -x
+        set +e
+        ls -la
+        ls -la gitops
+        cd gitops
+        
+        ## update manifests to new image and tag
+        APP_IMAGE="$REGISTRY/$REGISTRY_NAMESPACE/$IMAGE_NAME"
+        VERSION="$GITHUB_SHA"
+        echo "image-registry-path: ${{needs.setup-build-publish-deploy.image-registry-path}}"
+        echo "${APP_IMAGE}"
+        echo "${VERSION}"
+
+        echo "print yq version"
+        yq --version
+        # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.repository "${APP_IMAGE}"
+        yq e ".spec.trader.image.repository = \"$APP_IMAGE\"" -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+
+        # yq w -i "${GITOPS_DIR}/stocktrader-cr.yaml" spec.trader.image.tag "${VERSION}"
+         yq e ".spec.trader.image.tag = \"$VERSION\"" -i "${GITOPS_DIR}/stocktrader-cr.yaml"
+
+        cat "${GITOPS_DIR}/stocktrader-cr.yaml"          
+
+        if [[ $(git status -s | wc -l) -eq 0 ]]; then
+          echo "No changes"
+          exit 0
+        fi
+        git add "${GITOPS_DIR}/"
+        git config --global user.name 'GH Actions'
+        git config --global user.email 'github-actions@users.noreply.github.com'        
+        git commit -am "Updates ${APP_NAME} to ${VERSION}"   
+        git push https://$GITOPS_USERNAME:$GITOPS_TOKEN@github.com/$GITOPS_REPO 
+        
+        

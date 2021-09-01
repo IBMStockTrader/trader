@@ -56,7 +56,7 @@ for (int index=0; index<brokers.length; index++) {
   <tr>
     <td><input type="radio" name="owner" value="<%=broker.getOwner()%>" <%= ((index ==0)?" checked ": " ") %>></td>
     <td><%=broker.getOwner()%></td>
-    <td><%=currency.format(broker.getTotal())%></td>
+    <td>$<%=currency.format(broker.getTotal())%></td>
     <td><%=broker.getLoyalty()%></td>
   </tr>
 <% } %>
