@@ -23,9 +23,9 @@ on:
 env:
   # EDIT secrets with with your registry, registry path, and apikey
   REGISTRY: quay.io
-  REGISTRY_NAMESPACE: gas_stocktrader
+  REGISTRY_NAMESPACE:  ${{ secrets.REGISTRY_NAMESPACE }}
   # EDIT with your registry username.
-  REGISTRY_USER: gas_stocktrader+quaytrader
+  REGISTRY_USER: ${{ secrets.REGISTRY_USER }}
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   IMAGE_NAME: trader
   
