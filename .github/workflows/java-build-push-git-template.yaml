@@ -55,8 +55,8 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v1
       with:
-        java-version: 8      
-  
+        java-version: 17
+
     # Build and package app
     - name: Build and package app
       id: unit-test
