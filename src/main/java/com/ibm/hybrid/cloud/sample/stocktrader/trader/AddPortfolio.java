@@ -19,14 +19,13 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.logging.Logger;
 
 //CDI 1.2
 import javax.inject.Inject;
 import javax.enterprise.context.ApplicationScoped;
 
-//Servlet 3.1
+//Servlet 4.0
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HttpConstraint;
 import javax.servlet.annotation.ServletSecurity;
@@ -38,7 +37,6 @@ import javax.servlet.RequestDispatcher;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -52,10 +50,20 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 public class AddPortfolio extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static Logger logger = Logger.getLogger(AddPortfolio.class.getName());
+	private static Utilities utilities = null;
 
 	private @Inject @RestClient BrokerClient brokerClient;
 
 	private @Inject JsonWebToken jwt;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public AddPortfolio() {
+		super();
+
+		if (utilities == null) utilities = new Utilities(logger);
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -75,7 +83,7 @@ public class AddPortfolio extends HttpServlet {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			brokerClient.createBroker("Bearer "+getJWT(), owner);
+			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt), owner);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
@@ -86,17 +94,5 @@ public class AddPortfolio extends HttpServlet {
 			//send control to the Display Message servlet
 			response.sendRedirect("message?message="+message);
 		}
-	}
-
-	private String getJWT() {
-		String token;
-		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
-			token = PropagationHelper.getIdToken().getAccessToken();
-			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
-		} else {
-			token = jwt.getRawToken();
-			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
-		}
-		return token;
 	}
 }
