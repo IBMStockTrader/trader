@@ -1,5 +1,5 @@
 /*
-       Copyright 2019 IBM Corp All Rights Reserved
+       Copyright 2019-2022 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader.health;
 
-//Standard I/O classes
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities;
 
 //Logging (JSR 47)
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 2.0
@@ -41,6 +38,12 @@ public class ReadinessProbe implements HealthCheck {
     private static Logger logger = Logger.getLogger(ReadinessProbe.class.getName());
     private static String jwtAudience = System.getenv("JWT_AUDIENCE");
     private static String jwtIssuer = System.getenv("JWT_ISSUER");
+	private static Utilities utilities = null;
+
+	public ReadinessProbe() {
+		if (utilities == null) utilities = new Utilities(logger);
+	}
+ 
 
 	//mpHealth probe
 	public HealthCheckResponse call() {
@@ -63,21 +66,10 @@ public class ReadinessProbe implements HealthCheck {
 			response = builder.build(); 
 		} catch (Throwable t) {
 			logger.warning("Exception occurred during health check: "+t.getMessage());
-			logException(t);
+			utilities.logException(t);
 			throw t;
 		}
 
 		return response;
-	}
-
-	private static void logException(Throwable t) {
-		logger.warning(t.getClass().getName()+": "+t.getMessage());
-
-		//only log the stack trace if the level has been set to at least INFO
-		if (logger.isLoggable(Level.INFO)) {
-			StringWriter writer = new StringWriter();
-			t.printStackTrace(new PrintWriter(writer));
-			logger.info(writer.toString());
-		}
 	}
 }

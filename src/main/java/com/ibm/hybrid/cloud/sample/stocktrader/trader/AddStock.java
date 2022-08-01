@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2021 IBM Corp All Rights Reserved
+       Copyright 2017-2022 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,12 +20,8 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 1.2
@@ -44,7 +40,6 @@ import javax.servlet.RequestDispatcher;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -57,16 +52,15 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @ApplicationScoped
 public class AddStock extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-	private static final String BUY = "Buy";
 	private static final String SELL = "Sell";
 	private static final String SUBMIT = "Submit";
 
 	private static Logger logger = Logger.getLogger(AddStock.class.getName());
 
-	private NumberFormat currency = null;
+	private static Utilities utilities = null;
+	private static NumberFormat currency = null;
 
 	private @Inject @RestClient BrokerClient brokerClient;
-
 	private @Inject JsonWebToken jwt;
 
 	/**
@@ -75,10 +69,14 @@ public class AddStock extends HttpServlet {
 	public AddStock() {
 		super();
 
-		currency = NumberFormat.getNumberInstance();
-		currency.setMinimumFractionDigits(2);
-		currency.setMaximumFractionDigits(2);
-		currency.setRoundingMode(RoundingMode.HALF_UP);
+		if (utilities == null) {
+			currency = NumberFormat.getNumberInstance();
+			currency.setMinimumFractionDigits(2);
+			currency.setMaximumFractionDigits(2);
+			currency.setRoundingMode(RoundingMode.HALF_UP);
+
+			utilities = new Utilities(logger);
+		}
 	}
 
 	/**
@@ -113,7 +111,7 @@ public class AddStock extends HttpServlet {
 				if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
 
 				//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-				brokerClient.updateBroker("Bearer "+getJWT(), owner, symbol, shares);
+				brokerClient.updateBroker("Bearer "+utilities.getJWT(jwt), owner, symbol, shares);
 			}
 		}
 
@@ -126,36 +124,13 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			Broker broker = brokerClient.getBroker("Bearer "+getJWT(), owner);
+			Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt), owner);
 			double commission = broker.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
 		} catch (Throwable t) {
-			logException(t);
+			utilities.logException(t);
 		}
 		return formattedCommission;
-	}
-
-	private void logException(Throwable t) {
-		logger.warning(t.getClass().getName()+": "+t.getMessage());
-
-		//only log the stack trace if the level has been set to at least FINE
-		if (logger.isLoggable(Level.FINE)) {
-			StringWriter writer = new StringWriter();
-			t.printStackTrace(new PrintWriter(writer));
-			logger.fine(writer.toString());
-		}
-	}
-
-	private String getJWT() {
-		String token;
-		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
-			token = PropagationHelper.getIdToken().getAccessToken();
-			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
-		} else {
-			token = jwt.getRawToken();
-			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
-		}
-		return token;
 	}
 }

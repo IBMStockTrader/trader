@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2021 IBM Corp All Rights Reserved
+       Copyright 2017-2022 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,13 +20,9 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Iterator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 1.2
@@ -48,7 +44,6 @@ import javax.servlet.RequestDispatcher;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -66,8 +61,11 @@ public class ViewPortfolio extends HttpServlet {
 	private static final String ERROR_STRING = "Error";
 	private static final String TRADE_STOCK = "Buy/Sell Stock";
 	private static final String FEEDBACK = "Submit Feedback";
+
 	private static Logger logger = Logger.getLogger(ViewPortfolio.class.getName());
-	private NumberFormat currency = null;
+
+	private static Utilities utilities = null;
+	private static NumberFormat currency = null;
 
 	private @Inject @RestClient BrokerClient brokerClient;
 
@@ -79,10 +77,14 @@ public class ViewPortfolio extends HttpServlet {
 	public ViewPortfolio() {
 		super();
 
-		currency = NumberFormat.getNumberInstance();
-		currency.setMinimumFractionDigits(2);
-		currency.setMaximumFractionDigits(2);
-		currency.setRoundingMode(RoundingMode.HALF_UP);
+		if (utilities == null) {
+			currency = NumberFormat.getNumberInstance();
+			currency.setMinimumFractionDigits(2);
+			currency.setMaximumFractionDigits(2);
+			currency.setRoundingMode(RoundingMode.HALF_UP);
+
+			utilities = new Utilities(logger);
+		}
 	}
 
 	/**
@@ -92,7 +94,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		Broker broker = brokerClient.getBroker("Bearer "+getJWT(), owner);
+		Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt), owner);
 
 		JsonObject stocks = null;
 		String returnOnInvestment = "Unknown";
@@ -102,18 +104,16 @@ public class ViewPortfolio extends HttpServlet {
 			//request.setAttribute("rows", getTableRows(stocks));			
 			request.setAttribute("broker", broker);
 		} catch (NullPointerException npe) {
-			logException(npe);
+			utilities.logException(npe);
 		}
 
 		try {
-			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+getJWT(), owner);
+			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+utilities.getJWT(jwt), owner);
 			request.setAttribute("returnOnInvestment", returnOnInvestment);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);
-			logException(t);
+			utilities.logException(t);
 		}
-
-
 
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/viewPortfolio.jsp");
         dispatcher.forward(request, response);			
@@ -169,28 +169,5 @@ public class ViewPortfolio extends HttpServlet {
 		}
 
 		return rows.toString();
-	}
-
-	private void logException(Throwable t) {
-		logger.warning(t.getClass().getName()+": "+t.getMessage());
-
-		//only log the stack trace if the level has been set to at least FINE
-		if (logger.isLoggable(Level.FINE)) {
-			StringWriter writer = new StringWriter();
-			t.printStackTrace(new PrintWriter(writer));
-			logger.fine(writer.toString());
-		}
-	}
-
-	private String getJWT() {
-		String token;
-		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
-			token = PropagationHelper.getIdToken().getAccessToken();
-			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
-		} else {
-			token = jwt.getRawToken();
-			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
-		}
-		return token;
 	}
 }

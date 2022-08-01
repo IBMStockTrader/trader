@@ -1,5 +1,5 @@
 /*
-       Copyright 2017-2021 IBM Corp All Rights Reserved
+       Copyright 2017-2022 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,27 +19,11 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
-import com.ibm.cloud.objectstorage.ClientConfiguration;
-import com.ibm.cloud.objectstorage.auth.AWSCredentials;
-import com.ibm.cloud.objectstorage.auth.AWSStaticCredentialsProvider;
-import com.ibm.cloud.objectstorage.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.ibm.cloud.objectstorage.oauth.BasicIBMOAuthCredentials;
-
-//AWS S3 (wrapper for IBM Cloud Object Storage buckets)
-import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
-import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
-
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.util.HashMap;
 
 //JSR 47 Logging
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
 //CDI 2.0
 import javax.inject.Inject;
@@ -59,6 +43,9 @@ import javax.servlet.RequestDispatcher;
 //mpConfig 1.3
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+//mpJWT 1.0
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 //mpMetrics 2.0
 import org.eclipse.microprofile.metrics.annotation.Gauge;
 import org.eclipse.microprofile.metrics.Metadata;
@@ -66,10 +53,6 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.Tag;
-
-//mpJWT 1.0
-import org.eclipse.microprofile.jwt.JsonWebToken;
-import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -83,7 +66,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 @ApplicationScoped
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
-	private static final String EDITOR   = "StockTrader";
 	private static final String LOGOUT   = "Log Out";
 	private static final String CREATE   = "create";
 	private static final String RETRIEVE = "retrieve";
@@ -99,7 +81,7 @@ public class Summary extends HttpServlet {
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
 	private static HashMap<String, Double> totals = new HashMap<String, Double>();
 	private static HashMap<String, org.eclipse.microprofile.metrics.Gauge> gauges = new HashMap<String, org.eclipse.microprofile.metrics.Gauge>();
-	private NumberFormat currency = null;
+	private static Utilities utilities = null;
 	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
 	private @Inject @ConfigProperty(name = "TEST_MODE", defaultValue = "false") boolean testMode;
@@ -111,35 +93,13 @@ public class Summary extends HttpServlet {
 	public static boolean error = false;
 	public static String message = null;
 
-	private static boolean useS3 = false;
-	private static AmazonS3 s3 = null;
-	private static String s3Bucket = null;
-
-	// Override Broker Client URL if config map is configured to provide URL
-	static {
-		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
-		logger.info("useS3: "+useS3);
-
-		String mpUrlPropName = BrokerClient.class.getName() + "/mp-rest/url";
-		String brokerURL = System.getenv("BROKER_URL");
-		if ((brokerURL != null) && !brokerURL.isEmpty()) {
-			logger.info("Using Broker URL from config map: " + brokerURL);
-			System.setProperty(mpUrlPropName, brokerURL);
-		} else {
-			logger.info("Broker URL not found from env var from config map, so defaulting to value in jvm.options: " + System.getProperty(mpUrlPropName));
-		}
-	}
-
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public Summary() {
 		super();
 
-		currency = NumberFormat.getNumberInstance();
-		currency.setMinimumFractionDigits(2);
-		currency.setMaximumFractionDigits(2);
-		currency.setRoundingMode(RoundingMode.HALF_UP);
+		if (utilities == null) utilities = new Utilities(logger);
 	}
 
 	/**
@@ -153,7 +113,7 @@ public class Summary extends HttpServlet {
 			rows = getTableRows(request);
 			request.setAttribute("rows", rows);
 		} catch (Throwable t) {
-			logException(t);
+			utilities.logException(t);
 			message = t.getMessage();
 			error = true;
 			request.setAttribute("message", message);
@@ -192,7 +152,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner+"&source=summary"); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						brokerClient.deleteBroker("Bearer "+getJWT(), owner);
+						brokerClient.deleteBroker("Bearer "+utilities.getJWT(jwt), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -218,7 +178,7 @@ public class Summary extends HttpServlet {
 		}
 
 //		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+getJWT());
+		Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt));
 		
 		// set brokers for JSP
 		request.setAttribute("brokers", brokers);
@@ -229,7 +189,7 @@ public class Summary extends HttpServlet {
 			Broker broker = brokers[index];
 			String owner = broker.getOwner();
 
-			if (useS3) logToS3(owner, broker);
+			utilities.logToS3(owner, broker);
 
 			double total = broker.getTotal();
 			String loyaltyLevel = broker.getLoyalty();
@@ -315,61 +275,5 @@ public class Summary extends HttpServlet {
 	@Gauge(name="broker_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
 	public int getUnknown() {
 		return unknown;
-	}
-
-	private String getJWT() {
-		String token;
-		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
-			token = PropagationHelper.getIdToken().getAccessToken();
-			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
-		} else {
-			token = jwt.getRawToken();
-			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
-		}
-		return token;
-	}
-
-	private void logToS3(String key, Object document) {
-		try {
-			if (s3 == null) {
-				logger.info("Initializing S3");
-				String region = System.getenv("S3_REGION");
-				String apiKey = System.getenv("S3_API_KEY");
-				String serviceInstanceId = System.getenv("S3_SERVICE_INSTANCE_ID");
-				String endpointUrl = System.getenv("S3_ENDPOINT_URL");
-				String location = System.getenv("S3_LOCATION");
-
-				AWSCredentials credentials = new BasicIBMOAuthCredentials(apiKey, serviceInstanceId);
-				ClientConfiguration clientConfig = new ClientConfiguration().withRequestTimeout(5000).withTcpKeepAlive(true);
-				s3 = AmazonS3ClientBuilder.standard()
-					.withCredentials(new AWSStaticCredentialsProvider(credentials))
-					.withEndpointConfiguration(new EndpointConfiguration(endpointUrl, location))
-					.withPathStyleAccessEnabled(true)
-					.withClientConfiguration(clientConfig)
-					.build();
-
-				s3Bucket = System.getenv("S3_BUCKET");
-				if (!s3.doesBucketExistV2(s3Bucket)) {
-					logger.info("Creating S3 bucket: "+s3Bucket);
-					s3.createBucket(s3Bucket);
-				}
-			}
-
-			logger.fine("Putting object in S3 bucket for "+key);
-			s3.putObject(s3Bucket, key, document.toString());
-		} catch (Throwable t) {
-			logException(t);
-		}
-	}
-
-	static void logException(Throwable t) {
-		logger.warning(t.getClass().getName()+": "+t.getMessage());
-
-		//only log the stack trace if the level has been set to at least INFO
-		if (logger.isLoggable(Level.INFO)) {
-			StringWriter writer = new StringWriter();
-			t.printStackTrace(new PrintWriter(writer));
-			logger.info(writer.toString());
-		}
 	}
 }

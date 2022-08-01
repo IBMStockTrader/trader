@@ -1,5 +1,5 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2022 IBM Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,14 +17,10 @@
 package com.ibm.hybrid.cloud.sample.stocktrader.trader;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-//Servlet 3.1
+//Servlet 4.0
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
@@ -40,6 +36,16 @@ import javax.servlet.RequestDispatcher;
 public class Login extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static Logger logger = Logger.getLogger(Login.class.getName());
+	private static Utilities utilities = null;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public Login() {
+		super();
+
+		if (utilities == null) utilities = new Utilities(logger);
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -68,23 +74,12 @@ public class Login extends HttpServlet {
 			success = true;
 			logger.info("Successfully logged in user: "+id);
 		} catch (Throwable t) {
-			logException(t);
+			utilities.logException(t);
 		}
 
 		String url = "error";
 		if (success) url = "summary";
 
 		response.sendRedirect(url);
-	}
-
-	private void logException(Throwable t) {
-		logger.warning(t.getClass().getName()+": "+t.getMessage());
-
-		//only log the stack trace if the level has been set to at least FINE
-		if (logger.isLoggable(Level.FINE)) {
-			StringWriter writer = new StringWriter();
-			t.printStackTrace(new PrintWriter(writer));
-			logger.fine(writer.toString());
-		}
 	}
 }
