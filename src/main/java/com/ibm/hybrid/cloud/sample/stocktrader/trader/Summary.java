@@ -20,7 +20,6 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.client.BrokerClient;
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 //JSR 47 Logging
 import java.util.logging.Logger;
@@ -46,14 +45,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-//mpMetrics 2.0
-import org.eclipse.microprofile.metrics.annotation.Gauge;
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.Tag;
-
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -71,23 +62,12 @@ public class Summary extends HttpServlet {
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
 	private static final String DELETE   = "delete";
-	private static final String BASIC    = "basic";
-	private static final String BRONZE   = "bronze";
-	private static final String SILVER   = "silver";
-	private static final String GOLD     = "gold";
-	private static final String PLATINUM = "platinum";
-	private static final String UNKNOWN  = "unknown";
-	private static final String DOLLARS  = "USD";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
-	private static HashMap<String, Double> totals = new HashMap<String, Double>();
-	private static HashMap<String, org.eclipse.microprofile.metrics.Gauge> gauges = new HashMap<String, org.eclipse.microprofile.metrics.Gauge>();
 	private static Utilities utilities = null;
-	private int basic=0, bronze=0, silver=0, gold=0, platinum=0, unknown=0; //loyalty level counts
 
 	private @Inject @ConfigProperty(name = "TEST_MODE", defaultValue = "false") boolean testMode;
 	private @Inject @RestClient BrokerClient brokerClient;
 	private @Inject JsonWebToken jwt;
-	private @Inject MetricRegistry metricRegistry;
 
 	//used in the liveness probe
 	public static boolean error = false;
@@ -106,12 +86,20 @@ public class Summary extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (brokerClient==null) {
+			throw new NullPointerException("Injection of BrokerClient failed!");
+		}
 
-		String rows = null;
+		if (jwt==null) {
+			throw new NullPointerException("Injection of JWT failed!");
+		}
 
 		try {
-			rows = getTableRows(request);
-			request.setAttribute("rows", rows);
+//			JsonArray portfolios = PortfolioServices.getPortfolios(request);
+			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt));
+
+			// set brokers for JSP
+			request.setAttribute("brokers", brokers);
 		} catch (Throwable t) {
 			utilities.logException(t);
 			message = t.getMessage();
@@ -121,8 +109,7 @@ public class Summary extends HttpServlet {
 		}
 
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/summary.jsp");
-        dispatcher.forward(request, response);
-
+		dispatcher.forward(request, response);
 	}
 
 	/**
@@ -166,49 +153,6 @@ public class Summary extends HttpServlet {
 		}
 	}
 
-	private String getTableRows(HttpServletRequest request) {
-		StringBuffer rows = new StringBuffer();
-
-		if (brokerClient==null) {
-			throw new NullPointerException("Injection of BrokerClient failed!");
-		}
-
-		if (jwt==null) {
-			throw new NullPointerException("Injection of JWT failed!");
-		}
-
-//		JsonArray portfolios = PortfolioServices.getPortfolios(request);
-		Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt));
-		
-		// set brokers for JSP
-		request.setAttribute("brokers", brokers);
-
-		basic=0; bronze=0; silver=0; gold=0; platinum=0; unknown=0; //reset loyalty level counts
-		metricRegistry.remove("portfolio_value");
-		for (int index=0; index<brokers.length; index++) {
-			Broker broker = brokers[index];
-			String owner = broker.getOwner();
-
-			utilities.logToS3(owner, broker);
-
-			double total = broker.getTotal();
-			String loyaltyLevel = broker.getLoyalty();
-
-			setBrokerMetric(owner, total);
-			if (loyaltyLevel!=null) {
-				if (loyaltyLevel.equalsIgnoreCase(BASIC)) basic++;
-				else if (loyaltyLevel.equalsIgnoreCase(BRONZE)) bronze++;
-				else if (loyaltyLevel.equalsIgnoreCase(SILVER)) silver++;
-				else if (loyaltyLevel.equalsIgnoreCase(GOLD)) gold++;
-				else if (loyaltyLevel.equalsIgnoreCase(PLATINUM)) platinum++;
-				else unknown++;
-			}
-
-    	}
-
-		return rows.toString();
-	}
-
 	Broker[] getHardcodedBrokers() {
 		Broker john = new Broker("John");
 		john.setTotal(1234.56);
@@ -230,50 +174,5 @@ public class Summary extends HttpServlet {
 		eric.setLoyalty("Platinum");
 		Broker[] brokers = { john, karri, ryan, raunak, greg, eric };
 		return brokers;
-	}
-
-	void setBrokerMetric(String owner, double total) {
-		totals.put(owner, total);
-		if (gauges.get(owner)==null) try { //gauge not yet registered for this portfolio
-			org.eclipse.microprofile.metrics.Gauge<Double> gauge = () -> { return totals.get(owner); };
-
-			Metadata metadata = Metadata.builder().withName("broker_value").withType(MetricType.GAUGE).withUnit(DOLLARS).build();
-
-			metricRegistry.register(metadata, gauge, new Tag("owner", owner)); //registry injected via CDI
-
-			gauges.put(owner, gauge);
-		} catch (Throwable t) {
-			logger.warning(t.getMessage());
-		}
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=basic", displayName="Basic", unit=MetricUnits.NONE)
-	public int getBasic() {
-		return basic;
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=bronze", displayName="Bronze", unit=MetricUnits.NONE)
-	public int getBronze() {
-		return bronze;
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=silver", displayName="Silver", unit=MetricUnits.NONE)
-	public int getSilver() {
-		return silver;
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=gold", displayName="Gold", unit=MetricUnits.NONE)
-	public int getGold() {
-		return gold;
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=platinum", displayName="Platinum", unit=MetricUnits.NONE)
-	public int getPlatinum() {
-		return platinum;
-	}
-
-	@Gauge(name="broker_loyalty", tags="level=unknown", displayName="Unknown", unit=MetricUnits.NONE)
-	public int getUnknown() {
-		return unknown;
 	}
 }
