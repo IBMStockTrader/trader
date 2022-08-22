@@ -113,7 +113,7 @@ public class Utilities {
 		}
 	}
 
-	public void logException(Throwable t) {
+	public static void logException(Throwable t) {
 		logger.warning(t.getClass().getName()+": "+t.getMessage());
 
 		//only log the stack trace if the level has been set to at least INFO
