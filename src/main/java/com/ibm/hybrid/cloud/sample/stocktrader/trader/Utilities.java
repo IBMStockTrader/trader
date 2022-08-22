@@ -67,7 +67,7 @@ public class Utilities {
 		logger = callerLogger;
 	}
 
-    String getJWT(JsonWebToken jwt) {
+	String getJWT(JsonWebToken jwt) {
 		String token;
 		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
 			token = PropagationHelper.getIdToken().getAccessToken();
@@ -79,10 +79,11 @@ public class Utilities {
 		return token;
 	}
 
-	void logToS3(String key, Object document) {
+	public static void logToS3(String key, Object document) {
 		if (useS3) try {
 			if (s3 == null) {
 				logger.info("Initializing S3");
+				//Using System.getenv because can't use CDI injection of ConfigProperty from a static method
 				String region = System.getenv("S3_REGION");
 				String apiKey = System.getenv("S3_API_KEY");
 				String serviceInstanceId = System.getenv("S3_SERVICE_INSTANCE_ID");
