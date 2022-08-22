@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" session="false" 
-import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
+import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
 
 <%!
 static NumberFormat currency = NumberFormat.getNumberInstance();
@@ -52,10 +52,12 @@ static {
 Broker[] brokers = (Broker[])request.getAttribute("brokers");
 for (int index=0; index<brokers.length; index++) { 
   Broker broker = brokers[index];
+  String owner = broker.getOwner();
+  Utilities.logToS3(owner, broker);
   %>
   <tr>
-    <td><input type="radio" name="owner" value="<%=broker.getOwner()%>" <%= ((index ==0)?" checked ": " ") %>></td>
-    <td><%=broker.getOwner()%></td>
+    <td><input type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
+    <td><%=owner%></td>
     <td>$<%=currency.format(broker.getTotal())%></td>
     <td><%=broker.getLoyalty()%></td>
   </tr>
