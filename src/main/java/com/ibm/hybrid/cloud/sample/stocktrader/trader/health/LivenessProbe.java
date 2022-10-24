@@ -54,7 +54,7 @@ public class LivenessProbe implements HealthCheck {
 		try {
 			HealthCheckResponseBuilder builder = HealthCheckResponse.named("Trader");
 
-			if (Summary.error) { //can't run without these env vars
+			if (Summary.IS_FAILED.get()) { //can't run without these env vars
 				builder = builder.down();
 				message = Summary.message;
 				logger.warning("Returning NOT live!");

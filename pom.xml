@@ -63,6 +63,12 @@
             <version>8.0.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Used for health checking math -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
         <!-- disable jaeger to pass security scan -->
         <dependency>
             <groupId>io.jaegertracing</groupId>
