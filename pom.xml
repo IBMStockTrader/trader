@@ -28,7 +28,7 @@
 <!--    <parent>
         <groupId>io.openliberty.tools</groupId>
         <artifactId>liberty-maven-app-parent</artifactId>
-        <version>3.6</version>
+        <version>3.7.1</version>
     </parent>
 -->
     <properties>
@@ -67,29 +67,29 @@
         <dependency>
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-client</artifactId>
-            <version>1.8.0</version>
+            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.36</version>
+            <version>2.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oidc</artifactId>
-            <version>1.0.67</version>
+            <version>1.0.71</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ibm.websphere.appserver.api</groupId>
             <artifactId>com.ibm.websphere.appserver.api.oauth</artifactId>
-            <version>1.2.67</version>
+            <version>1.2.71</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ibm.cos</groupId>
             <artifactId>ibm-cos-java-sdk-s3</artifactId>
-            <version>2.12.0</version>
+            <version>2.12.1</version>
         </dependency>
         <!-- Dependencies only used in tests -->
         <dependency>
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -137,7 +137,7 @@
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.7.1</version>
                 <executions>
                 <execution>
                     <id>start-server</id>
@@ -173,7 +173,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.0.0-M6</version>
                 <executions>
                   <execution>
                     <goals>
@@ -196,44 +196,4 @@
             </plugin>            
         </plugins>
     </build>
-    <!-- Profile needed for microclimate to build this properly 
-    <profiles>
-        <profile>
-            <id>microclimate</id>
-            <activation>
-                <property>
-                    <name>libertyEnv</name>
-                    <value>microclimate</value>
-                </property>
-            </activation>
-            <build>
-                <directory>${microclimateOutputDir}</directory>
-                <plugins>
-                    <plugin>
-                        <groupId>net.wasdev.wlp.maven.plugins</groupId>
-                        <artifactId>liberty-maven-plugin</artifactId>
-                        <version>2.4.2</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <looseApplication>true</looseApplication>
-                            <appsDirectory>apps</appsDirectory>
-                            <installDirectory>/opt/ibm/wlp</installDirectory>
-                            <userDirectory>${project.build.directory}/liberty/wlp/usr</userDirectory>
-                            <configDirectory>${basedir}/src/main/liberty/config</configDirectory>
-                            <packageFile>${package.file}</packageFile>
-                            <include>${packaging.type}</include>
-                            <bootstrapProperties>
-                                <default.http.port>${testServerHttpPort}</default.http.port>
-                                <default.https.port>${testServerHttpsPort}</default.https.port>
-                                <app.location>${project.artifactId}-${project.version}.war</app.location>
-                                <server.start.wait.time>90</server.start.wait.time>
-                            </bootstrapProperties>
-                            <installAppPackages>project</installAppPackages>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    -->
 </project>
