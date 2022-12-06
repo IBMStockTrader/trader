@@ -15,7 +15,7 @@
 # If building locally, you have to complete a maven build first, before running the Docker build
 
 # FROM openliberty/open-liberty:21.0.0.9-kernel-slim-java11-openj9-ubi
-FROM openliberty/open-liberty:22.0.0.6-full-java17-openj9-ubi
+FROM openliberty/open-liberty:22.0.0.12-full-java17-openj9-ubi
 USER root
 
 COPY --chown=1001:0 src/main/liberty/config /config
