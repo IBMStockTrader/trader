@@ -22,6 +22,11 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 import java.io.IOException;
 
 //JSR 47 Logging
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 //CDI 2.0
@@ -48,6 +53,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 //mpRestClient 1.0
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 /**
  * Servlet implementation class Summary
@@ -73,12 +79,19 @@ public class Summary extends HttpServlet {
 	public static boolean error = false;
 	public static String message = null;
 
+	// New liveness probe by @rtclauss
+	private static SynchronizedDescriptiveStatistics last1kCalls;
+	public static AtomicBoolean IS_FAILED = new AtomicBoolean(false);
+	private static final double FAILURE_THRESHOLD = 0.85;
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public Summary() {
 		super();
-
+		if(last1kCalls==null){
+			last1kCalls = new SynchronizedDescriptiveStatistics(1000);
+		}
 		if (utilities == null) utilities = new Utilities(logger);
 	}
 
@@ -100,12 +113,23 @@ public class Summary extends HttpServlet {
 
 			// set brokers for JSP
 			request.setAttribute("brokers", brokers);
+			last1kCalls.addValue(1.0);
 		} catch (Throwable t) {
 			utilities.logException(t);
 			message = t.getMessage();
 			error = true;
 			request.setAttribute("message", message);
 			request.setAttribute("error", error);
+			last1kCalls.addValue(0.0);
+		} finally {
+			var mean = last1kCalls.getMean();
+			logger.finest("Is failing calc mean: "+ mean);
+			if (mean < FAILURE_THRESHOLD) {
+				logger.warning("Trader is failing liveness threshold");
+				IS_FAILED.set(true);
+			} else {
+				IS_FAILED.set(false);
+			}
 		}
 
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/WEB-INF/jsps/summary.jsp");
