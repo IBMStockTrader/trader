@@ -50,6 +50,15 @@ static {
        </tr>
 <%
 Broker[] brokers = (Broker[])request.getAttribute("brokers");
+
+if(brokers == null) {
+%>
+  Error communicating with the Broker microservice: ${message}
+  <p/>
+  Please consult the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.
+  <p/>
+<% } %>
+
 for (int index=0; index<brokers.length; index++) { 
   Broker broker = brokers[index];
   String owner = broker.getOwner();
