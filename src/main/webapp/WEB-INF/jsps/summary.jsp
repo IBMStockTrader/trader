@@ -57,19 +57,20 @@ if(brokers == null) {
   <p/>
   Please consult the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.
   <p/>
-<% } else { %>
+<% 
+} else {
 
-for (int index=0; index<brokers.length; index++) { 
-  Broker broker = brokers[index];
-  String owner = broker.getOwner();
-  Utilities.logToS3(owner, broker);
-  %>
-  <tr>
-    <td><input type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
-    <td><%=owner%></td>
-    <td>$<%=currency.format(broker.getTotal())%></td>
-    <td><%=broker.getLoyalty()%></td>
-  </tr>
+  for (int index=0; index<brokers.length; index++) { 
+    Broker broker = brokers[index];
+    String owner = broker.getOwner();
+    Utilities.logToS3(owner, broker);
+%>
+    <tr>
+      <td><input type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
+      <td><%=owner%></td>
+      <td>$<%=currency.format(broker.getTotal())%></td>
+      <td><%=broker.getLoyalty()%></td>
+    </tr>
 <% 
   } 
 }
