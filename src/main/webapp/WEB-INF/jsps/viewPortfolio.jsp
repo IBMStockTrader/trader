@@ -97,6 +97,10 @@ static {
 		      <td><b>$<%=currency.format(broker.getBalance())%></b></td>
 		    </tr>
 		    <tr>
+		      <th scope="row">Cash Account Balance:</th>
+		      <td><b><%=broker.getCashAccountCurrency()%> <%=currency.format(broker.getCashAccountBalance())%></b></td>
+		    </tr>
+		    <tr>
 		      <th scope="row">Total Commissions Paid:</th>
 		      <td><b>$<%=currency.format(broker.getCommissions())%></b></td>
 		    </tr>
