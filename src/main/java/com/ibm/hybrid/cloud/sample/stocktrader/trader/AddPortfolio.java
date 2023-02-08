@@ -78,12 +78,14 @@ public class AddPortfolio extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
+		double balance = request.getParameter("balance");
+		String currency = request.getParameter("currency");
 
 		if ((owner!=null) && !owner.equals("")) try {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt), owner);
+			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt), owner, balance, currency);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
