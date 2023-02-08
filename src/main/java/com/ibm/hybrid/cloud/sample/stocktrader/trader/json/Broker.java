@@ -1,5 +1,7 @@
 /*
-       Copyright 2017-2021 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp, All Rights Reserved
+       Copyright 2023 Kyndryl, All Rights Reserved
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -34,6 +36,8 @@ public class Broker {
     private int free;
     private String sentiment;
     private double nextCommission;
+    private double cashAccountBalance;
+    private String cashAccountCurrency;
     private JsonObject stocks;
     private NumberFormat currency = null;
     private static double ERROR = -1.0;
@@ -120,6 +124,22 @@ public class Broker {
 
     public void setNextCommission(double newNextCommission) {
         nextCommission = newNextCommission;
+    }
+
+    public double getCashAccountBalance() {
+        return cashAccountBalance;
+    }
+
+    public void setCashAccountBalance(double newCashAccountBalance) {
+        cashAccountBalance = newCashAccountBalance;
+    }
+
+    public String getCashAccountCurrency() {
+        return cashAccountCurrency;
+    }
+
+    public void setCashAccountCurrency(String newCashAccountCurrency) {
+        cashAccountCurrency = newCashAccountCurrency;
     }
 
     public JsonObject getStocks() {
