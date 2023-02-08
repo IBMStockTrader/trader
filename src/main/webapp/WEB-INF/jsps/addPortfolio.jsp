@@ -13,6 +13,10 @@
     <form method="post"/>
       Owner: <input type="text" name="owner"><br/>
       <br/>
+      Cash Account initial balance: <input type="number" name="balance"><br/>
+      <br/>
+      Cash Account currency: <input type="text" name="currency"><br/>
+      <br/>
       <input type="submit" name="submit" value="Submit" style="font-family: sans-serif; font-size: 16px;"/>
     </form>      
     <br/>
