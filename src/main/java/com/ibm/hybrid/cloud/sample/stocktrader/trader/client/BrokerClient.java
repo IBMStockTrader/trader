@@ -49,7 +49,7 @@ public interface BrokerClient {
 	@POST
 	@Path("/{owner}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Broker createBroker(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
+	public Broker createBroker(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner, @QueryParam("balance") double balance, @QueryParam("currency") String currency);
 
 	@GET
 	@Path("/{owner}")
