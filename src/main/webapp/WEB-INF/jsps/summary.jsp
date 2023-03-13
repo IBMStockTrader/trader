@@ -50,18 +50,31 @@ static {
        </tr>
 <%
 Broker[] brokers = (Broker[])request.getAttribute("brokers");
-for (int index=0; index<brokers.length; index++) { 
-  Broker broker = brokers[index];
-  String owner = broker.getOwner();
-  Utilities.logToS3(owner, broker);
-  %>
-  <tr>
-    <td><input type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
-    <td><%=owner%></td>
-    <td>$<%=currency.format(broker.getTotal())%></td>
-    <td><%=broker.getLoyalty()%></td>
-  </tr>
-<% } %>
+
+if(brokers == null) {
+%>
+  Error communicating with the Broker microservice: ${message}
+  <p/>
+  Please consult the <i>trader</i>, <i>broker</i> and <i>portfolio</i> pod logs for more details, or ask your administator for help.
+  <p/>
+<% 
+} else {
+
+  for (int index=0; index<brokers.length; index++) { 
+    Broker broker = brokers[index];
+    String owner = broker.getOwner();
+    Utilities.logToS3(owner, broker);
+%>
+    <tr>
+      <td><input type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
+      <td><%=owner%></td>
+      <td>$<%=currency.format(broker.getTotal())%></td>
+      <td><%=broker.getLoyalty()%></td>
+    </tr>
+<% 
+  } 
+}
+%>
     </table>
     <br/>
     <input type="submit" name="submit" value="Submit" style="font-family: sans-serif; font-size: 16px;"/>
