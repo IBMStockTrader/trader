@@ -78,7 +78,7 @@ public class AddPortfolio extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
-		double balance = request.getParameter("balance");
+		double balance = Double.parseDouble(request.getParameter("balance"));
 		String currency = request.getParameter("currency");
 
 		if ((owner!=null) && !owner.equals("")) try {
