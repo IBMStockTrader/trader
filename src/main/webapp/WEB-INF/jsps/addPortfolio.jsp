@@ -13,7 +13,7 @@
     <form method="post"/>
     <table border="0" cellpadding="5">
       <tr><td>Owner:</td><td><input type="text" name="owner"></td></tr>
-      <tr><td>Cash Account initial balance:</td><td><input type="number" name="balance" value="10000.00"></td></tr>
+      <tr><td>Cash Account initial balance:</td><td><input type="number" name="balance" step="0.01" min="0" value="10000.00"></td></tr>
       <tr><td>Cash Account currency:</td><td><select name="currency">
         <option value="AUD">Australian Dollar</option>
         <option value="BGN">Bulgarian Lev</option>
