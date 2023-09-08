@@ -29,7 +29,8 @@ import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
 import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
 
 //Having to use a proprietary WebSphere Liberty class here - ugh!
-import com.ibm.websphere.security.openidconnect.PropagationHelper;
+//Stopped doing this - see https://github.com/OpenLiberty/open-liberty/issues/11225
+//import com.ibm.websphere.security.openidconnect.PropagationHelper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -38,6 +39,7 @@ import java.util.logging.Logger;
 
 //Servlet 4.0
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -46,12 +48,21 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 public class Utilities {
 	private static Logger logger = Logger.getLogger(Utilities.class.getName());
 
+	public static boolean useOIDC = false;
 	private static boolean useS3 = false;
 	private static AmazonS3 s3 = null;
 	private static String s3Bucket = null;
 
+	private static final String JWT  = "jwt";
+	private static final String OIDC = "oidc";
+
+
 	// Override Broker Client URL if config map is configured to provide URL
 	static {
+		String authType = System.getenv("AUTH_TYPE");
+		logger.info("authType: "+authType);
+		useOIDC = OIDC.equals(authType);
+
 		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
 		logger.info("useS3: "+useS3);
 
@@ -71,10 +82,25 @@ public class Utilities {
 	}
 
 	String getJWT(JsonWebToken jwt, HttpServletRequest request) {
-		String token;
-		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
-			token = PropagationHelper.getIdToken().getAccessToken();
-			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		String token = null;
+
+//  The below gets the JWT issued by Liberty itself (via the jwtSSO feature), not the JWT from your OIDC provider (such as KeyCloak)
+//  See https://github.com/OpenLiberty/open-liberty/issues/11225 for details
+//		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
+//			token = PropagationHelper.getIdToken().getAccessToken();
+//			logger.fine("Retrieved JWT provided through oidcClientConnect feature");
+		if (useOIDC) {
+			HttpSession session = request.getSession(); //When multiple Trader pods exist, need to enable distributed session support
+			if (session!=null) {
+				token = (String) session.getAttribute(JWT); //Summary.doGet puts this here when redirected to after KeyCloak login
+				if (token!= null) {
+					logger.fine("Retrieved JWT from the session");
+				} else {
+					logger.warning("Unable to retrieve JWT from the session");
+				}
+			} else {
+				logger.warning("Session was null");
+			}
 		} else {
 			token = jwt.getRawToken();
 			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");

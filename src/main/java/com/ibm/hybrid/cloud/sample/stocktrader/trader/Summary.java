@@ -23,10 +23,12 @@ import java.io.IOException;
 
 //JSR 47 Logging
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 2.0
@@ -68,6 +70,9 @@ public class Summary extends HttpServlet {
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
 	private static final String DELETE   = "delete";
+	private static final String POST     = "post";
+	private static final String TOKEN    = "access_token";
+	private static final String JWT      = "jwt";
 	private static Logger logger = Logger.getLogger(Summary.class.getName());
 	private static Utilities utilities = null;
 
@@ -103,11 +108,34 @@ public class Summary extends HttpServlet {
 			throw new NullPointerException("Injection of BrokerClient failed!");
 		}
 
-		if (jwt==null) {
-			throw new NullPointerException("Injection of JWT failed!");
-		}
-
 		try {
+			if (Utilities.useOIDC) {
+				String method = request.getMethod();
+				//normally goGet gets called via a GET, but on redirect from a successful login against an OIDC provider (like KeyCloak),
+				//we will get called via a POST, with a form param containing the JWT issued by the OIDC provider, which we'll stash in the session
+				//TODO: Consider using a cookie instead of the session, since if there are multiple Trader pods, we'd need distributed session support enabled
+				//(or some kind of "sticky session" support to get a given browser always routed to the same pod (though that isn't highly available, of course),
+				//such as https://docs.aws.amazon.com/elasticloadbalancing/latest/application/sticky-sessions.html)
+				if (POST.equalsIgnoreCase(method)) {
+					String token = request.getParameter(TOKEN);
+					HttpSession session = request.getSession();
+					if (session!=null) {
+						logger.info("Placing JWT in the http session");
+						session.setAttribute(JWT, token);
+						if (logger.isLoggable(Level.FINE)) {
+							logger.fine(TOKEN+" = "+token);
+							Base64.Decoder decoder = Base64.getUrlDecoder();
+							String[] parts = accessToken.split("\\.");
+							String header = new String(decoder.decode(parts[0]));
+							String payload = new String(decoder.decode(parts[1]));
+							logger.fine("access token header = "+header);
+							logger.fine("access token body = "+payload);
+						}
+					}
+				}
+			} else {
+				if (jwt==null) throw new NullPointerException("Injection of JWT failed!");
+			}
 //			JsonArray portfolios = PortfolioServices.getPortfolios(request);
 			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request));
 

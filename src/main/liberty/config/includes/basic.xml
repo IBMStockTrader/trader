@@ -11,6 +11,11 @@
    limitations under the License.
 -->
 <server>
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jwtSso-1.0</feature>
+    </featureManager>
+
     <variable name="JWT_AUDIENCE" defaultValue="stock-trader"/>
     <variable name="JWT_ISSUER" defaultValue="http://stock-trader.ibm.com"/>
 
@@ -21,11 +26,13 @@
     <basicRegistry id="basic" realm="BasicRegistry">
         <user name="admin" password="admin"/>
         <user name="stock" password="trader"/>
+        <user name="john.alcorn@kyndryl.com" password="traderPwd"/>
         <user name="debug" password="debug"/>
         <user name="read"  password="only"/>
         <user name="other" password="other"/>
         <group name="StockTrader">
             <member name="stock"/>
+            <member name="john.alcorn@kyndryl.com"/>
             <member name="debug"/>
         </group>
         <group name="StockViewer">
