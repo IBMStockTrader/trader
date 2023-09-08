@@ -125,7 +125,7 @@ public class Summary extends HttpServlet {
 						if (logger.isLoggable(Level.FINE)) {
 							logger.fine(TOKEN+" = "+token);
 							Base64.Decoder decoder = Base64.getUrlDecoder();
-							String[] parts = accessToken.split("\\.");
+							String[] parts = token.split("\\.");
 							String header = new String(decoder.decode(parts[0]));
 							String payload = new String(decoder.decode(parts[1]));
 							logger.fine("access token header = "+header);
