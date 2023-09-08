@@ -94,7 +94,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt), owner);
+		Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt, request), owner);
 
 		JsonObject stocks = null;
 		String returnOnInvestment = "Unknown";
@@ -108,7 +108,7 @@ public class ViewPortfolio extends HttpServlet {
 		}
 
 		try {
-			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+utilities.getJWT(jwt), owner);
+			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+utilities.getJWT(jwt, request), owner);
 			request.setAttribute("returnOnInvestment", returnOnInvestment);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);

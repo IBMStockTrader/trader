@@ -98,7 +98,7 @@ public class SubmitFeedback extends HttpServlet {
 
 					logger.info("Calling broker/"+owner+"/feedback with following JSON: "+input.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					Feedback result = brokerClient.submitFeedback("Bearer "+utilities.getJWT(jwt), owner, input);
+					Feedback result = brokerClient.submitFeedback("Bearer "+utilities.getJWT(jwt, request), owner, input);
 
 					logger.info("broker/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
 					String message = result!=null ? result.getMessage() : "null";

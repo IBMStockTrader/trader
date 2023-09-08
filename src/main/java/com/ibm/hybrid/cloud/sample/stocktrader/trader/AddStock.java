@@ -111,7 +111,7 @@ public class AddStock extends HttpServlet {
 				if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
 
 				//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-				brokerClient.updateBroker("Bearer "+utilities.getJWT(jwt), owner, symbol, shares);
+				brokerClient.updateBroker("Bearer "+utilities.getJWT(jwt, request), owner, symbol, shares);
 			}
 		}
 
@@ -124,7 +124,7 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt), owner);
+			Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt, request), owner);
 			double commission = broker.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);

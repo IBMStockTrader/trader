@@ -1,5 +1,5 @@
 /*
-       Copyright 2022 IBM Corp All Rights Reserved
+       Copyright 2022 Kyndryl Corp All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//Servlet 4.0
+import javax.servlet.http.HttpServletRequest;
+
 //mpJWT 1.0
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -67,7 +70,7 @@ public class Utilities {
 		logger = callerLogger;
 	}
 
-	String getJWT(JsonWebToken jwt) {
+	String getJWT(JsonWebToken jwt, HttpServletRequest request) {
 		String token;
 		if ("Bearer".equals(PropagationHelper.getAccessTokenType())) {
 			token = PropagationHelper.getIdToken().getAccessToken();

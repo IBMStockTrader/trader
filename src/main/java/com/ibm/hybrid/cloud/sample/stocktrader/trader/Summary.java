@@ -109,7 +109,7 @@ public class Summary extends HttpServlet {
 
 		try {
 //			JsonArray portfolios = PortfolioServices.getPortfolios(request);
-			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt));
+			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request));
 
 			// set brokers for JSP
 			request.setAttribute("brokers", brokers);
@@ -163,7 +163,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner+"&source=summary"); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						brokerClient.deleteBroker("Bearer "+utilities.getJWT(jwt), owner);
+						brokerClient.deleteBroker("Bearer "+utilities.getJWT(jwt, request), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet

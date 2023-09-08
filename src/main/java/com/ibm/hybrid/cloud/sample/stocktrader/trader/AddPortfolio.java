@@ -85,7 +85,7 @@ public class AddPortfolio extends HttpServlet {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt), owner, balance, currency);
+			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt, request), owner, balance, currency);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
