@@ -1,5 +1,6 @@
 /*
-       Copyright 2019-2022 IBM Corp All Rights Reserved
+       Copyright 2019-2021 IBM Corp All Rights Reserved
+       Copyright 2022-2024 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,7 +24,7 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities;
 import java.util.logging.Logger;
 
 //CDI 2.0
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import com.ibm.hybrid.cloud.sample.stocktrader.trader.Summary;
 

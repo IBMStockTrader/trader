@@ -1,5 +1,6 @@
 /*
-       Copyright 2017 IBM Corp All Rights Reserved
+       Copyright 2017-2021 IBM Corp, All Rights Reserved
+       Copyright 2022-2024 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,20 +19,20 @@ package com.ibm.hybrid.cloud.sample.stocktrader.trader.test;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.Test;
 
 public class HealthEndpointIT {
 
     private String port = System.getProperty("http.port");
-    private String warContext = System.getProperty("war.name");
+//  private String warContext = System.getProperty("war.name");
     private String liveUrl = "http://localhost:" + port + "/health/live";
     private String readyUrl = "http://localhost:" + port + "/health/ready";
-    private String url = "http://localhost:" + port;
+//  private String url = "http://localhost:" + port;
     private static final int MAX_RETRY_COUNT = 5;
     private static final int SLEEP_TIMEOUT = 3000;
 
