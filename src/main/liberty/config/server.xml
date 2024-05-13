@@ -1,6 +1,6 @@
 <!--
        Copyright 2017-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2023 Kyndryl, All Rights Reserved
+       Copyright 2022-2024 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 <server description="Trader UI server">
     <!-- Enable features -->
     <featureManager>
-        <feature>microProfile-4.1</feature>
-        <feature>jsp-2.3</feature>
+        <feature>microProfile-6.1</feature>
+        <feature>pages-3.1</feature>
     </featureManager>
 
     <variable name="AUTH_TYPE"  defaultValue="basic"/>
