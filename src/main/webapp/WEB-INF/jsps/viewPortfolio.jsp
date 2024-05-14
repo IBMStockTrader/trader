@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" session="false" 
-import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*,javax.json.*,java.util.*"%>
+import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*,jakarta.json.*,java.util.*"%>
 
 <%!
 static NumberFormat currency = NumberFormat.getNumberInstance();
