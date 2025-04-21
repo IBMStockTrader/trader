@@ -1,6 +1,6 @@
 /*
        Copyright 2017-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class ViewPortfolio extends HttpServlet {
 		String owner = request.getParameter("owner");
 
 		//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-		Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt, request), owner);
+		Broker broker = brokerClient.getBroker(utilities.getAuthHeader(jwt, request), owner);
 
 		JsonObject stocks = null;
 		String returnOnInvestment = "Unknown";
@@ -109,7 +109,7 @@ public class ViewPortfolio extends HttpServlet {
 		}
 
 		try {
-			returnOnInvestment = brokerClient.getReturnOnInvestment("Bearer "+utilities.getJWT(jwt, request), owner);
+			returnOnInvestment = brokerClient.getReturnOnInvestment(utilities.getAuthHeader(jwt, request), owner);
 			request.setAttribute("returnOnInvestment", returnOnInvestment);
 		} catch (Throwable t) {
 			logger.info("Unable to obtain return on investment for "+owner);
