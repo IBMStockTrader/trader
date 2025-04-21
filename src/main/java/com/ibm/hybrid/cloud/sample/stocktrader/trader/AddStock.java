@@ -1,6 +1,6 @@
 /*
        Copyright 2019-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class AddStock extends HttpServlet {
 				if (action.equalsIgnoreCase(SELL)) shares *= -1; //selling means buying a negative number of shares
 
 				//PortfolioServices.updatePortfolio(request, owner, symbol, shares);
-				brokerClient.updateBroker("Bearer "+utilities.getJWT(jwt, request), owner, symbol, shares);
+				brokerClient.updateBroker(utilities.getAuthHeader(jwt, request), owner, symbol, shares);
 			}
 		}
 
@@ -125,7 +125,7 @@ public class AddStock extends HttpServlet {
 		try {
 			logger.info("Getting commission");
 			//JsonObject portfolio = PortfolioServices.getPortfolio(request, owner);
-			Broker broker = brokerClient.getBroker("Bearer "+utilities.getJWT(jwt, request), owner);
+			Broker broker = brokerClient.getBroker(utilities.getAuthHeader(jwt, request), owner);
 			double commission = broker.getNextCommission();
 			if (commission!=0.0) formattedCommission = "$"+currency.format(commission);
 			logger.info("Got commission: "+formattedCommission);
