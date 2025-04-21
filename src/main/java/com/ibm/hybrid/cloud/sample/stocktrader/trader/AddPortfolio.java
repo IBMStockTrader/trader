@@ -1,6 +1,6 @@
 /*
        Copyright 2017-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class AddPortfolio extends HttpServlet {
 			logger.info("Redirecting to Summary servlet.");
 
 			//PortfolioServices.createPortfolio(request, owner);
-			brokerClient.createBroker("Bearer "+utilities.getJWT(jwt, request), owner, balance, currency);
+			brokerClient.createBroker(utilities.getAuthHeader(jwt, request), owner, balance, currency);
 
 			response.sendRedirect("summary"); //send control to the Summary servlet
 		} catch (Throwable t) {
