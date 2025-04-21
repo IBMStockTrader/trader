@@ -1,6 +1,6 @@
 /*
        Copyright 2017-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class SubmitFeedback extends HttpServlet {
 
 					logger.info("Calling broker/"+owner+"/feedback with following JSON: "+input.toString());
 					//JsonObject result = PortfolioServices.submitFeedback(request, owner, text);
-					Feedback result = brokerClient.submitFeedback("Bearer "+utilities.getJWT(jwt, request), owner, input);
+					Feedback result = brokerClient.submitFeedback(utilities.getAuthHeader(jwt, request), owner, input);
 
 					logger.info("broker/"+owner+"/feedback returned the following JSON: "+result!=null ? result.toString() : "null");
 					String message = result!=null ? result.getMessage() : "null";
