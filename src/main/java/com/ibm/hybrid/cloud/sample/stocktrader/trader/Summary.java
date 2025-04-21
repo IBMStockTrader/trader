@@ -138,7 +138,7 @@ public class Summary extends HttpServlet {
 				if (jwt==null) throw new NullPointerException("Injection of JWT failed!");
 			}
 //			JsonArray portfolios = PortfolioServices.getPortfolios(request);
-			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request));
+			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers(utilities.getAuthHeader(jwt, request));
 
 			// set brokers for JSP
 			request.setAttribute("brokers", brokers);
@@ -192,7 +192,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner+"&source=summary"); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						brokerClient.deleteBroker("Bearer "+utilities.getJWT(jwt, request), owner);
+						brokerClient.deleteBroker(utilities.getAuthHeader(jwt, request), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
