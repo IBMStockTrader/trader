@@ -26,7 +26,7 @@
 			<url-pattern>/</url-pattern>
 			<url-pattern>/header.jpg</url-pattern>
 			<url-pattern>/footer.jpg</url-pattern>
-                        <url-pattern>/health</url-pattern>
+			<url-pattern>/health</url-pattern>
 		</web-resource-collection>
     </security-constraint>
 </web-app>
