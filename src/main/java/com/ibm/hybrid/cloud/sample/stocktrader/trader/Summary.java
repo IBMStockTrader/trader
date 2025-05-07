@@ -23,16 +23,14 @@ import com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Broker;
 import java.io.IOException;
 
 //JSR 47 Logging
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 //CDI 2.0
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -67,6 +65,8 @@ import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatisti
 public class Summary extends HttpServlet {
 	private static final long serialVersionUID = 4815162342L;
 	private static final String LOGOUT   = "Log Out";
+	private static final String PREVIOUS   = "Previous";
+	private static final String NEXT   = "Next";
 	private static final String CREATE   = "create";
 	private static final String RETRIEVE = "retrieve";
 	private static final String UPDATE   = "update";
@@ -104,6 +104,7 @@ public class Summary extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@WithSpan
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (brokerClient==null) {
 			throw new NullPointerException("Injection of BrokerClient failed!");
@@ -138,7 +139,18 @@ public class Summary extends HttpServlet {
 				if (jwt==null) throw new NullPointerException("Injection of JWT failed!");
 			}
 //			JsonArray portfolios = PortfolioServices.getPortfolios(request);
-			Broker[] brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request));
+			logger.fine("Calling brokerClient.getBrokers");
+
+			HttpSession session = request.getSession();
+			if(session.getAttribute("page")==null){
+				session.setAttribute("page", 1);
+			}
+			Integer page = (Integer) session.getAttribute("page");
+			// NOTE: you need to include the JWT here because we're calling from a Servlet, not a JAX-RS resource
+			// JWT is only propagate if a REST Service calls a REST Client.
+			List<Broker> brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request), page, 10);
+			brokers.sort((b1, b2)->
+					b1.getOwner().compareToIgnoreCase(b2.getOwner()));
 
 			// set brokers for JSP
 			request.setAttribute("brokers", brokers);
@@ -168,21 +180,41 @@ public class Summary extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@WithSpan
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String submit = request.getParameter("submit");
+		HttpSession session = request.getSession();
+
+		Integer pageNumber = (Integer)session.getAttribute("page");
+		logger.fine("Page number is set to: "+ pageNumber);
+		if(pageNumber == null || pageNumber <= 0){
+			logger.severe("Invalid page number. Setting to Page 1.");
+			pageNumber = 1;
+			session.setAttribute("page", pageNumber);
+			doGet(request, response);
+		}
 
 		if (submit != null) {
 			if (submit.equals(LOGOUT)) {
 				request.logout();
-
-				HttpSession session = request.getSession();
-				if (session != null) session.invalidate();
-
+				// Need to retrieve the session before it is invalidated.
+				session = request.getSession();
+				try {
+					if (session != null) session.invalidate();
+				} catch(IllegalStateException ise){
+					logger.fine("Session was invalidated as part of logout.");
+				}
 				response.sendRedirect("login");
+			} else if(submit.equals(PREVIOUS)){
+				session.setAttribute("page",pageNumber-1);
+				doGet(request, response);
+			} else if(submit.equals(NEXT)){
+				session.setAttribute("page",pageNumber+1);
+				doGet(request, response);
 			} else {
 				String action = request.getParameter("action");
 				String owner = request.getParameter("owner");
-
+				logger.fine("Action is: " + action);
 				if (action != null) {
 					if (action.equals(CREATE)) {
 						response.sendRedirect("addPortfolio"); //send control to the AddPortfolio servlet
@@ -192,7 +224,7 @@ public class Summary extends HttpServlet {
 						response.sendRedirect("addStock?owner="+owner+"&source=summary"); //send control to the AddStock servlet
 					} else if (action.equals(DELETE)) {
 //						PortfolioServices.deletePortfolio(request, owner);
-						brokerClient.deleteBroker("Bearer "+utilities.getJWT(jwt, request), owner);
+						brokerClient.deleteBroker("Bearer " + utilities.getJWT(jwt, request), owner);
 						doGet(request, response); //refresh the Summary servlet
 					} else {
 						doGet(request, response); //something went wrong - just refresh the Summary servlet
@@ -206,7 +238,7 @@ public class Summary extends HttpServlet {
 		}
 	}
 
-	Broker[] getHardcodedBrokers() {
+	List<Broker> getHardcodedBrokers() {
 		Broker john = new Broker("John");
 		john.setTotal(1234.56);
 		john.setLoyalty("Basic");
@@ -225,7 +257,7 @@ public class Summary extends HttpServlet {
 		Broker eric = new Broker("Eric");
 		eric.setTotal(1234567.89);
 		eric.setLoyalty("Platinum");
-		Broker[] brokers = { john, karri, ryan, raunak, greg, eric };
+		List<Broker> brokers = Arrays.asList(john, karri, ryan, raunak, greg, eric);
 		return brokers;
 	}
 }
