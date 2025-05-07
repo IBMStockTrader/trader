@@ -59,6 +59,14 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <!-- this ships as part of MP 6.1 on OpenLiberty -->
+            <groupId>org.eclipse.microprofile.telemetry</groupId>
+            <artifactId>microprofile-telemetry-api</artifactId>
+            <type>pom</type>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-web-api</artifactId>
             <version>10.0.0</version>
