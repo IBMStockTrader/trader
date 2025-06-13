@@ -24,7 +24,6 @@
 #    - AZURE_SUBSCRIPTION_ID: Azure subscription ID
 #    - GITOPS_TOKEN: GitHub PAT with write access to your GitOps repo
 #    - GITOPS_USERNAME: Your GitHub username
-#    - ACR_LOGIN_SERVER: e.g., <acr-name>.azurecr.io
 #
 # 5. Set the following environment variables as needed:
 #    - GITOPS_REPO: <your-github-username>/<your-gitops-repo>
