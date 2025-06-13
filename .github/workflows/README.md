@@ -36,6 +36,39 @@ GITOPS_TOKEN - token for gitops repo
 
 For sample gitops repo and workflow that is used to deploy app check - https://github.com/stocktrader-ops/stocktrader-gitops
 
+## Azure Workflow
+We also have an Azure-specific workflow defined in [build-test-push-azure-acr.yml](build-test-push-azure-acr.yml) that:
+- Builds the application using Maven
+- Pushes the Docker image to Azure Container Registry (ACR)
+- Updates the GitOps repository with the new image tag for AKS deployment
+
+### Required Azure Setup
+1. Create an Azure Container Registry (ACR)
+2. Set up AKS cluster with StockTrader operator
+3. Fork or create a GitOps repo for deployment manifests
+
+### Required Azure Secrets
+The following secrets need to be configured in your GitHub repository:
+```
+AZURE_CLIENT_ID - Azure App Registration or Managed Identity client ID
+AZURE_TENANT_ID - Azure tenant ID
+AZURE_SUBSCRIPTION_ID - Azure subscription ID
+GITOPS_TOKEN - GitHub PAT with write access to your GitOps repo
+GITOPS_USERNAME - Your GitHub username
+ACR_LOGIN_SERVER - Your ACR login server (e.g., <acr-name>.azurecr.io)
+```
+
+### Environment Variables
+The workflow uses these environment variables:
+```
+ACR_NAME - Your Azure Container Registry name
+GITOPS_REPO - Your GitOps repository (format: username/repo)
+GITOPS_DIR - Directory containing deployment manifests
+IMAGE_NAME - Name of your Docker image
+APP_NAME - Name of your application
+IMAGE_TAG - Image tag (defaults to GitHub commit SHA)
+```
+
 ## Disable other workflows
 As this repo contains also CRA related workflows, disable them, or remove completely, if you are only interested in basic functionality.
 

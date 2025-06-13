@@ -1,0 +1,172 @@
+# =====================================================================================================
+# GitHub Actions Workflow: Build, Push to Azure ACR, and Update GitOps for AKS Deployment
+# -----------------------------------------------------------------------------------------------------
+# This workflow automates the CI/CD process for a microservice (e.g., trader) in the StockTrader app.
+# It builds a Docker image, pushes it to Azure Container Registry (ACR), and updates the GitOps repo
+# with the new image tag, which then triggers deployment to Azure Kubernetes Service (AKS).
+#
+# -----------------------------------
+# SETUP INSTRUCTIONS (REQUIRED STEPS)
+# -----------------------------------
+# 1. Create an Azure Container Registry (ACR) for your images:
+#    az acr create --name <acr-name> --resource-group <resource-group> --sku Basic
+#    Set the ACR_NAME env variable below to your registry's name.
+#
+# 2. Set up your AKS cluster and ensure the StockTrader operator is installed.
+#    Make sure your target namespace and required secrets (e.g., cjot-credentials) exist in AKS.
+#
+# 3. Fork or create a GitOps repo to hold your deployment manifests (YAML files).
+#    Set GITOPS_REPO and GITOPS_DIR below accordingly.
+#
+# 4. Store the following as GitHub repository secrets:
+#    - AZURE_CLIENT_ID: Azure App Registration or Managed Identity client ID
+#    - AZURE_TENANT_ID: Azure tenant ID
+#    - AZURE_SUBSCRIPTION_ID: Azure subscription ID
+#    - GITOPS_TOKEN: GitHub PAT with write access to your GitOps repo
+#    - GITOPS_USERNAME: Your GitHub username
+#
+# 5. Set the following environment variables as needed:
+#    - GITOPS_REPO: <your-github-username>/<your-gitops-repo>
+#    - GITOPS_DIR: application
+#    - IMAGE_NAME: trader
+#    - APP_NAME: trader
+#    - IMAGE_TAG: ${{ github.sha }}
+#
+# 6. This workflow expects the GitOps repo to contain a manifest file (e.g., stocktrader-azure-aks-cr.yml)
+#    with image.repository and image.tag fields for the service being updated.
+# =====================================================================================================
+
+name: Build, Push to Azure ACR, Gitops
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+  release:
+    types: [created]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  ACR_NAME: kyncjot
+  GITOPS_REPO: IBMStockTrader/stocktrader-gitops
+  GITOPS_DIR: application
+  IMAGE_NAME: trader
+  APP_NAME: trader
+  IMAGE_TAG: ${{ github.sha }}
+  GITOPS_USERNAME: ${{ secrets.GITOPS_USERNAME }}
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    # ---------------------------------------------------------------------------------
+    # Step 1: Checkout the source code for the microservice from the current repository.
+    # This ensures the workflow operates on the latest code for the build and Docker image.
+    # ---------------------------------------------------------------------------------
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # ---------------------------------------------------------------------------------
+    # Step 2: Set up Java 17 for Maven build. Adjust the version if your app requires a different JDK.
+    # ---------------------------------------------------------------------------------
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+
+    # ---------------------------------------------------------------------------------
+    # Step 3: Build and package the Java application using Maven.
+    # This produces the JAR/WAR file to be included in the Docker image.
+    # ---------------------------------------------------------------------------------
+    - name: Build and package app
+      run: mvn clean package
+
+    # ---------------------------------------------------------------------------------
+    # Step 4: Authenticate to Azure using OIDC and the provided secrets.
+    # This step is required for all subsequent Azure CLI and ACR operations.
+    # ---------------------------------------------------------------------------------
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        enable-AzPSSession: true
+
+    # ---------------------------------------------------------------------------------
+    # Step 5: Log in to Azure Container Registry (ACR) using the Azure CLI.
+    # This allows Docker to push images to your private registry.
+    # ---------------------------------------------------------------------------------
+    - name: Azure ACR Login
+      run: az acr login --name $ACR_NAME
+
+    # ---------------------------------------------------------------------------------
+    # Step 6: Build the Docker image for the microservice and push it to ACR.
+    # - Tags the image with both the commit SHA and 'latest'.
+    # - Uses build args for traceability.
+    # - Pushes both tags to ACR.
+    # ---------------------------------------------------------------------------------
+    - name: Build and Push Docker Image to ACR
+      run: |
+        ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer --output tsv)
+        docker build -t $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+          --build-arg GITHUB_SHA="$GITHUB_SHA" .
+        docker push $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        docker tag $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:latest
+        docker push $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:latest
+
+  update-gitops-repo:
+    name: Publish image updates to gitops repo
+    runs-on: ubuntu-latest
+    needs: [setup-build-publish-deploy]
+    steps:
+      # ---------------------------------------------------------------------------------
+      # Step 1: Checkout the GitOps repository containing the deployment manifests.
+      # Uses a GitHub PAT for authentication to allow pushing changes.
+      # ---------------------------------------------------------------------------------
+      - name: Checkout gitops repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.GITOPS_REPO }}
+          path: gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
+
+      # ---------------------------------------------------------------------------------
+      # Step 2: Update the application manifest (YAML) with the new image repository and tag.
+      # - Uses yq to update the .spec.trader.image.repository and .spec.trader.image.tag fields.
+      # - Only commits and pushes if there are actual changes.
+      # - The commit message includes the app name and new version (SHA).
+      # ---------------------------------------------------------------------------------
+      - name: Update application
+        run: |
+          set -x
+          set +e
+          ls -la
+          ls -la gitops
+          cd gitops
+          echo "print yq version"
+          yq --version
+          APP_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}"
+          VERSION="${{ github.sha }}"
+          APP_NAME="${{ env.APP_NAME }}"
+          yq e ".spec.trader.image.repository = \"$APP_IMAGE\"" -i "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
+          yq e ".spec.trader.image.tag = \"$VERSION\"" -i "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
+          cat "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
+          if [[ $(git status -s | wc -l) -eq 0 ]]; then
+            echo "No changes"
+            exit 0
+          fi
+          git add "${GITOPS_DIR}/"
+          git config --global user.name 'GH Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          git commit -am "Updates ${APP_NAME} to ${VERSION}"
+          git push https://$GITOPS_USERNAME:$GITOPS_TOKEN@github.com/$GITOPS_REPO 
