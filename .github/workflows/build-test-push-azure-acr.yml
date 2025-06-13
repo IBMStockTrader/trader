@@ -55,7 +55,7 @@ permissions:
 env:
   GITHUB_SHA: ${{ github.sha }}
   ACR_NAME: kyncjot
-  GITOPS_REPO: anandDev77/stocktrader-gitops
+  GITOPS_REPO: IBMStockTrader/stocktrader-gitops
   GITOPS_DIR: application
   IMAGE_NAME: trader
   APP_NAME: trader
@@ -90,16 +90,6 @@ jobs:
     # ---------------------------------------------------------------------------------
     - name: Build and package app
       run: mvn clean package
-
-    # Check that login.jsp is present in the WAR file
-    - name: Check WAR for login.jsp
-      run: |
-        unzip -l target/TraderUI.war | grep login.jsp
-
-    # Print the contents of login.jsp from the WAR file
-    - name: Print login.jsp from WAR
-      run: |
-        unzip -p target/TraderUI.war WEB-INF/jsps/login.jsp
 
     # ---------------------------------------------------------------------------------
     # Step 4: Authenticate to Azure using OIDC and the provided secrets.
