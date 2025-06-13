@@ -33,7 +33,7 @@
 #    - APP_NAME: trader
 #    - IMAGE_TAG: ${{ github.sha }}
 #
-# 6. This workflow expects the GitOps repo to contain a manifest file (e.g., stocktrader-azure-eks-cr.yml)
+# 6. This workflow expects the GitOps repo to contain a manifest file (e.g., stocktrader-azure-aks-cr.yml)
 #    with image.repository and image.tag fields for the service being updated.
 # =====================================================================================================
 
@@ -169,9 +169,9 @@ jobs:
           APP_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}"
           VERSION="${{ github.sha }}"
           APP_NAME="${{ env.APP_NAME }}"
-          yq e ".spec.trader.image.repository = \"$APP_IMAGE\"" -i "${GITOPS_DIR}/stocktrader-azure-eks-cr.yml"
-          yq e ".spec.trader.image.tag = \"$VERSION\"" -i "${GITOPS_DIR}/stocktrader-azure-eks-cr.yml"
-          cat "${GITOPS_DIR}/stocktrader-azure-eks-cr.yml"
+          yq e ".spec.trader.image.repository = \"$APP_IMAGE\"" -i "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
+          yq e ".spec.trader.image.tag = \"$VERSION\"" -i "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
+          cat "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
           if [[ $(git status -s | wc -l) -eq 0 ]]; then
             echo "No changes"
             exit 0

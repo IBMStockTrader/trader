@@ -37,7 +37,7 @@ GITOPS_TOKEN - token for gitops repo
 For sample gitops repo and workflow that is used to deploy app check - https://github.com/stocktrader-ops/stocktrader-gitops
 
 ## Azure Workflow
-We also have an Azure-specific workflow defined in [build-test-push-azure-aks.yml](build-test-push-azure-aks.yml) that:
+We also have an Azure-specific workflow defined in [build-test-push-azure-acr.yml](build-test-push-azure-acr.yml) that:
 - Builds the application using Maven
 - Pushes the Docker image to Azure Container Registry (ACR)
 - Updates the GitOps repository with the new image tag for AKS deployment
