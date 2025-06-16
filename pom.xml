@@ -110,6 +110,21 @@
     <build>
         <finalName>TraderUI</finalName>
         <plugins>
+            <!-- generate OpenAPI documentation -->
+            <plugin>
+                <artifactId>smallrye-open-api-maven-plugin</artifactId>
+                <groupId>io.smallrye</groupId>
+                <configuration>
+                    <outputDirectory>${project.basedir}/src/main/generated/openapi</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-schema</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
