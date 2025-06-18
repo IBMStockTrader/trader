@@ -32,7 +32,7 @@ spec:
   providesApis:
     - trader-api
   dependsOn:
-    - component:default/broker-client-config
+    - component:default/broker
 metadata:
   name: trader
   labels:
