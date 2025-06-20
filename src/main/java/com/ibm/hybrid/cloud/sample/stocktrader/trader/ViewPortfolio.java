@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 //CDI 1.2
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.inject.Inject;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -91,6 +92,7 @@ public class ViewPortfolio extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@WithSpan
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 
@@ -123,6 +125,7 @@ public class ViewPortfolio extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@WithSpan
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String owner = request.getParameter("owner");
 		String submit = request.getParameter("submit");
@@ -138,6 +141,7 @@ public class ViewPortfolio extends HttpServlet {
 		}
 	}
 
+	@WithSpan
 	private String getTableRows(JsonObject stocks) {
 		StringBuffer rows = new StringBuffer();
 
