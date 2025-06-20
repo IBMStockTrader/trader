@@ -1,0 +1,46 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: stocktrader
+  description: Stock Trader
+spec:
+  owner: guests
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+spec:
+  type: openapi
+  lifecycle: production
+  owner: guests
+  definition:
+    $text: src/main/generated/openapi/openapi.yaml
+metadata:
+  name: trader-api
+  tags:
+    - java
+    - openliberty
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+spec:
+  # the type must be a service for the CI/CD tab to render unless you change the
+  # EntityPage.tsx to use a ComponentType of `application`
+  type: service
+  lifecycle: production
+  system: stocktrader
+  owner: guests
+  providesApis:
+    - trader-api
+  dependsOn:
+    - component:default/broker
+metadata:
+  name: trader
+  labels:
+    app.kubernetes.io/name: trader
+    app.kubernetes.io/version: 1.0-SNAPSHOT
+  annotations:
+    backstage.io/source-location: url:https://github.com/IBMStockTrader/trader
+    github.com/project-slug: IBMStockTrader/trader
+  tags:
+    - java
+    - openliberty

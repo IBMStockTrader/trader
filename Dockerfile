@@ -1,5 +1,5 @@
 #       Copyright 2017-2021 IBM Corp All Rights Reserved
-#       Copyright 2022-2024 Kyndryl Corp, All Rights Reserved
+#       Copyright 2022-2025 Kyndryl Corp, All Rights Reserved
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # If building locally, you have to complete a maven build first, before running the Docker build
 
 # FROM openliberty/open-liberty:21.0.0.9-kernel-slim-java11-openj9-ubi
-FROM openliberty/open-liberty:24.0.0.12-full-java17-openj9-ubi
+FROM openliberty/open-liberty:25.0.0.3-full-java17-openj9-ubi
 USER root
 
 COPY --chown=1001:0 src/main/liberty/config /config

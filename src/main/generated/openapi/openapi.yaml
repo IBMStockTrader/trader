@@ -1,0 +1,6 @@
+---
+openapi: 3.1.0
+paths: {}
+info:
+  title: Generated API
+  version: "1.0"

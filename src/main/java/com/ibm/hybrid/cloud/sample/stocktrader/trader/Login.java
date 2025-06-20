@@ -68,6 +68,7 @@ public class Login extends HttpServlet {
 			if (request.getUserPrincipal() != null) request.logout(); //in case there's a left over auth cookie but we ended up here
 
 			request.login(id, password);
+			if (utilities.useBasicAuth) utilities.addBasicAuthCredentials(id, password);
 
 			Cookie cookie = new Cookie("user", id); //clear text user id that can be used in Istio routing rules
 			response.addCookie(cookie);

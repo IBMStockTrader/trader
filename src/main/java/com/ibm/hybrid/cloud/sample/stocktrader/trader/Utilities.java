@@ -1,5 +1,5 @@
 /*
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -34,8 +34,11 @@ import com.ibm.cloud.objectstorage.services.s3.AmazonS3ClientBuilder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Base64;
+import java.util.HashMap;
 
 //Servlet 4.0
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,13 +51,18 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 public class Utilities {
 	private static Logger logger = Logger.getLogger(Utilities.class.getName());
 
+	public static boolean useBasicAuth = false;
 	public static boolean useOIDC = false;
+
+	private static HashMap<String,String> basicAuthCredentials = new HashMap<String,String>();
+
 	private static boolean useS3 = false;
 	private static AmazonS3 s3 = null;
 	private static String s3Bucket = null;
 
 	private static final String JWT  = "jwt";
 	private static final String OIDC = "oidc";
+	private static final String BASIC_AUTH = "none";
 
 
 	// Override Broker Client URL if config map is configured to provide URL
@@ -62,6 +70,7 @@ public class Utilities {
 		String authType = System.getenv("AUTH_TYPE");
 		logger.info("authType: "+authType);
 		useOIDC = OIDC.equals(authType);
+		useBasicAuth = BASIC_AUTH.equals(authType);
 
 		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
 		logger.info("useS3: "+useS3);
@@ -79,6 +88,30 @@ public class Utilities {
 
 	public Utilities(Logger callerLogger) {
 		logger = callerLogger;
+	}
+
+	void addBasicAuthCredentials(String user, String password) {
+        String credentials = user + ":" + password;
+        String authString = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+		basicAuthCredentials.put(user, authString);
+	}
+
+	String getAuthHeader(JsonWebToken jwt, HttpServletRequest request) {
+		String authHeader = null;
+		if (useBasicAuth) {
+			Principal principal = request.getUserPrincipal();
+			if (principal!=null) {
+				String user = principal.getName();
+				authHeader = basicAuthCredentials.get(user);
+				if (authHeader==null) logger.warning("No credentials found for user: "+user);
+			} else {
+				logger.warning("No identity associated with request!");
+			}
+		} else {
+			authHeader = "Bearer "+getJWT(jwt, request);
+		}
+		logger.fine("authHeader = "+authHeader);
+		return authHeader;
 	}
 
 	String getJWT(JsonWebToken jwt, HttpServletRequest request) {
