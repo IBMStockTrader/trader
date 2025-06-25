@@ -56,6 +56,10 @@ public class Utilities {
 
 	private static HashMap<String,String> basicAuthCredentials = new HashMap<String,String>();
 
+	private static String whiteLabelHeaderImage = "header.jpg";
+	private static String whiteLabelFooterImage = "footer.jpg";
+	private static String whiteLabelLoginMessage = "Login to Stock Trader";
+
 	private static boolean useS3 = false;
 	private static AmazonS3 s3 = null;
 	private static String s3Bucket = null;
@@ -71,6 +75,13 @@ public class Utilities {
 		logger.info("authType: "+authType);
 		useOIDC = OIDC.equals(authType);
 		useBasicAuth = BASIC_AUTH.equals(authType);
+
+		String headerImageFromEnv = System.getenv("WHITE_LABEL_HEADER_IMAGE");
+		if (headerImageFromEnv != null) whiteLabelHeaderImage = headerImageFromEnv;
+		String footerImageFromEnv = System.getenv("WHITE_LABEL_FOOTER_IMAGE");
+		if (footerImageFromEnv != null) whiteLabelFooterImage = footerImageFromEnv;
+		String loginMessageFromEnv = System.getenv("WHITE_LABEL_LOGIN_MESSAGE");
+		if (loginMessageFromEnv != null) whiteLabelLoginMessage = loginMessageFromEnv;
 
 		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
 		logger.info("useS3: "+useS3);
@@ -139,6 +150,18 @@ public class Utilities {
 			logger.fine("Retrieved JWT provided through CDI injected JsonWebToken");
 		}
 		return token;
+	}
+
+	public static String getHeaderImage() {
+		return whiteLabelHeaderImage;
+	}
+
+	public static String getFooterImage() {
+		return whiteLabelFooterImage;
+	}
+
+	public static String getLoginMessage() {
+		return whiteLabelLoginMessage;
 	}
 
 	public static void logToS3(String key, Object document) {
