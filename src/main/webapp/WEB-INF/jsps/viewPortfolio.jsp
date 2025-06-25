@@ -1,7 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" session="false" 
-import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*,jakarta.json.*,java.util.*"%>
+import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*,jakarta.json.*,java.util.*"%>
 
 <%!
+static String headerImage  = Utilities.getHeaderImage();
+static String footerImage  = Utilities.getFooterImage();
+
 static NumberFormat currency = NumberFormat.getNumberInstance();
 static {
 
@@ -18,7 +21,7 @@ static {
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body>
-    <img src="header.jpg" width="534" height="200" alt="header image"/>
+    <img src="<%=headerImage%>" alt="header image"/>
     <br/>
     <br/>
 		<form method="post"/>
@@ -125,7 +128,7 @@ static {
     <% } //else %>
     <br/>
     <a href="https://github.com/IBMStockTrader">
-      <img src="footer.jpg" alt="footer image"/>
+      <img src="<%=footerImage%>" alt="footer image"/>
     </a>
   </body>
 </html>

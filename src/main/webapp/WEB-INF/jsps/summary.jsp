@@ -1,7 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" session="true"
-import="java.util.List,java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" session="false" 
+import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
 
 <%!
+static String headerImage  = Utilities.getHeaderImage();
+static String footerImage  = Utilities.getFooterImage();
+static String loginMessage = Utilities.getLoginMessage();
+
 static NumberFormat currency = NumberFormat.getNumberInstance();
 static {
 
@@ -18,7 +22,7 @@ static {
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body>
-    <img src="header.jpg" width="534" height="200" alt="header image"/>
+    <img src="<%=headerImage%>" alt="header image"/>
     <br/>
     <br/>
     <%
@@ -49,10 +53,7 @@ static {
        <th scope="col">Loyalty Level</th>
        </tr>
 <%
-if(session.getAttribute("page")==null){
-  session.setAttribute("page", 1);
-}
-List<Broker> brokers = (List<Broker>)request.getAttribute("brokers");
+Broker[] brokers = (Broker[])request.getAttribute("brokers");
 
 if(brokers == null) {
 %>
@@ -62,8 +63,9 @@ if(brokers == null) {
   <p/>
 <% 
 } else {
-  for (int index=0; index<brokers.size(); index++) {
-    Broker broker = brokers.get(index);
+
+  for (int index=0; index<brokers.length; index++) { 
+    Broker broker = brokers[index];
     String owner = broker.getOwner();
     Utilities.logToS3(owner, broker);
 %>
@@ -79,22 +81,6 @@ if(brokers == null) {
 %>
     </table>
     <br/>
-<%
-if(((Integer)session.getAttribute("page"))>1){
-%>
-  <input type="submit" name="submit" value="Previous" style="font-family: sans-serif; font-size: 16px;"/>
-<%
-}
-%>
-<%
-if(brokers.size() >= 10){
-%>
-  <input type="submit" name="submit" value="Next" style="font-family: sans-serif; font-size: 16px;"/>
-<%
-}
-%>
-    <br/>
-    <br/>
     <input type="submit" name="submit" value="Submit" style="font-family: sans-serif; font-size: 16px;"/>
     <input type="submit" name="submit" value="Log Out" style="font-family: sans-serif; font-size: 16px;"/>
   </form>
@@ -105,7 +91,7 @@ if(brokers.size() >= 10){
 
     <br/>
     <a href="https://github.com/IBMStockTrader">
-      <img src="footer.jpg" alt="footer image"/>
+      <img src="<%=footerImage%>" alt="footer image"/>
     </a>
   </body>
 </html>
