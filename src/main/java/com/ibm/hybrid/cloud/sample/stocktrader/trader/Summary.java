@@ -1,6 +1,6 @@
 /*
        Copyright 2017-2021 IBM Corp All Rights Reserved
-       Copyright 2022-2024 Kyndryl, All Rights Reserved
+       Copyright 2022-2025 Kyndryl, All Rights Reserved
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -147,8 +147,8 @@ public class Summary extends HttpServlet {
 			}
 			Integer page = (Integer) session.getAttribute("page");
 			// NOTE: you need to include the JWT here because we're calling from a Servlet, not a JAX-RS resource
-			// JWT is only propagate if a REST Service calls a REST Client.
-			List<Broker> brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers("Bearer "+utilities.getJWT(jwt, request), page, 10);
+			// JWT is only propagated if a REST Service calls a REST Client.
+			List<Broker> brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers(utilities.getAuthHeader(jwt, request), page, 10);
 			brokers.sort((b1, b2)->
 					b1.getOwner().compareToIgnoreCase(b2.getOwner()));
 
