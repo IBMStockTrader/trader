@@ -53,7 +53,7 @@ static {
        <th scope="col">Loyalty Level</th>
        </tr>
 <%
-Broker[] brokers = (Broker[])request.getAttribute("brokers");
+List<Broker> brokers = (List<Broker>)request.getAttribute("brokers");
 
 if(brokers == null) {
 %>
@@ -64,8 +64,8 @@ if(brokers == null) {
 <% 
 } else {
 
-  for (int index=0; index<brokers.length; index++) { 
-    Broker broker = brokers[index];
+  for (int index=0; index<brokers.size(); index++) { 
+    Broker broker = brokers.get(index);
     String owner = broker.getOwner();
     Utilities.logToS3(owner, broker);
 %>
