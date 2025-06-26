@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" session="false" 
-import="java.text.*,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
+import="java.text.*,java.util.List,java.math.RoundingMode,com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities,com.ibm.hybrid.cloud.sample.stocktrader.trader.json.*"%>
 
 <%!
 static String headerImage  = Utilities.getHeaderImage();
