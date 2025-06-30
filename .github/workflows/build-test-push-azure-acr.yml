@@ -66,6 +66,8 @@ jobs:
     name: Setup, Build, Publish Deploy
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      acr_login_server: ${{ steps.build_and_output_acr.outputs.acr_login_server }}
 
     steps:
     # ---------------------------------------------------------------------------------
@@ -115,9 +117,11 @@ jobs:
     # - Uses build args for traceability.
     # - Pushes both tags to ACR.
     # ---------------------------------------------------------------------------------
-    - name: Build and Push Docker Image to ACR
+    - name: Build and Push Docker Image to ACR and Output Login Server
+      id: build_and_output_acr
       run: |
         ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer --output tsv)
+        echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
         docker build -t $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
           --build-arg GITHUB_SHA="$GITHUB_SHA" .
         docker push $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
@@ -155,7 +159,8 @@ jobs:
           cd gitops
           echo "print yq version"
           yq --version
-          APP_IMAGE="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}"
+          ACR_LOGIN_SERVER="${{ needs.setup-build-publish-deploy.outputs.acr_login_server }}"
+          APP_IMAGE="$ACR_LOGIN_SERVER/${IMAGE_NAME}"
           VERSION="${{ github.sha }}"
           APP_NAME="${{ env.APP_NAME }}"
           yq e ".spec.trader.image.repository = \"$APP_IMAGE\"" -i "${GITOPS_DIR}/stocktrader-azure-aks-cr.yml"
