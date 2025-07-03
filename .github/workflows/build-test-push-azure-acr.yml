@@ -56,7 +56,7 @@ env:
   ACR_NAME: kyncjot
   GITOPS_REPO: IBMStockTrader/stocktrader-gitops
   GITOPS_DIR: application
-  IMAGE_NAME: trader
+  IMAGE_NAME: cjot/trader
   APP_NAME: trader
   IMAGE_TAG: ${{ github.sha }}
   GITOPS_USERNAME: ${{ secrets.GITOPS_USERNAME }}
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     outputs:
-      acr_login_server: ${{ steps.build_and_output_acr.outputs.acr_login_server }}
+      acr_login_server: ${{ steps.build_image.outputs.acr_login_server }}
 
     steps:
     # ---------------------------------------------------------------------------------
@@ -112,18 +112,58 @@ jobs:
       run: az acr login --name $ACR_NAME
 
     # ---------------------------------------------------------------------------------
-    # Step 6: Build the Docker image for the microservice and push it to ACR.
+    # Step 6: Build the Docker image for the microservice.
     # - Tags the image with both the commit SHA and 'latest'.
     # - Uses build args for traceability.
-    # - Pushes both tags to ACR.
+    # - Does NOT push the image yet; push happens after security scan.
     # ---------------------------------------------------------------------------------
-    - name: Build and Push Docker Image to ACR and Output Login Server
-      id: build_and_output_acr
+    - name: Build Docker image
+      id: build_image
       run: |
         ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer --output tsv)
         echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
         docker build -t $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
           --build-arg GITHUB_SHA="$GITHUB_SHA" .
+
+    # ---------------------------------------------------------------------------------
+    # Step 7: Scan the built Docker image for vulnerabilities using Trivy.
+    # This step checks for OS, library, secret, and misconfiguration issues in the image.
+    # ---------------------------------------------------------------------------------
+    - name: Security Scan with Trivy
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        format: 'table'
+        output: trivy-report.txt
+        exit-code: '0'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+        scanners: 'vuln,secret,misconfig'
+        timeout: '5m0s'
+
+    # ---------------------------------------------------------------------------------
+    # Step 8: Upload the Trivy scan report as a workflow artifact for later review.
+    # ---------------------------------------------------------------------------------
+    - name: Upload Trivy scan report
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-report
+        path: trivy-report.txt
+
+    # ---------------------------------------------------------------------------------
+    # Step 9: Display the Trivy scan report in the workflow logs for quick visibility.
+    # ---------------------------------------------------------------------------------
+    - name: Show Trivy scan report in log
+      run: cat trivy-report.txt
+      continue-on-error: true
+
+    # ---------------------------------------------------------------------------------
+    # Step 10: Push the Docker image to ACR.
+    # ---------------------------------------------------------------------------------
+    - name: Push Docker image to ACR
+      run: |
+        ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer --output tsv)
         docker push $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         docker tag $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:latest
         docker push $ACR_LOGIN_SERVER/${{ env.IMAGE_NAME }}:latest
