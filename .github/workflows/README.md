@@ -3,7 +3,7 @@
 Workflows are used to build `trader` service.
 For IBM Code Risk Analyzer workflows description and configuration check [README-CRA](README-CRA.md)
 
-This file describes simple workflow that is used to compile app, build image and publish it to registry (Quay).
+This file describes simple workflow that is used to compile app, build image, scan it for vulnerabilities, and publish it to registry (Quay or ACR).
 
 Workflow is defined in the [java-build-push-git-template.yaml](java-build-push-git-template.yaml) file.
 
@@ -39,6 +39,7 @@ For sample gitops repo and workflow that is used to deploy app check - https://g
 ## Azure Workflow
 We also have an Azure-specific workflow defined in [build-test-push-azure-acr.yml](build-test-push-azure-acr.yml) that:
 - Builds the application using Maven
+- Scans the built Docker image for vulnerabilities using Trivy before pushing
 - Pushes the Docker image to Azure Container Registry (ACR)
 - Updates the GitOps repository with the new image tag for AKS deployment
 
