@@ -48,6 +48,8 @@
         <liberty.env.AUTH_TYPE>none</liberty.env.AUTH_TYPE>
         <liberty.env.JWT_AUDIENCE>stock</liberty.env.JWT_AUDIENCE>
         <liberty.env.JWT_ISSUER>trader</liberty.env.JWT_ISSUER>
+        <sonar.organization>ibmstocktrader</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
