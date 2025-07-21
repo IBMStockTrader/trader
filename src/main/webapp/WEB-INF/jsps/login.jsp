@@ -46,6 +46,23 @@ Utilities.getLoginMessage(); %>
         margin-bottom: 1rem;
         letter-spacing: 0.5px;
       }
+      .main-card {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem 2rem 1.5rem 2rem;
+      }
+      .header-img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .form-inner {
+        max-width: 350px;
+        margin-left: auto;
+        margin-right: auto;
+      }
     </style>
     <!-- Bootstrap Icons CDN for eye icon in password toggle -->
     <link
@@ -58,87 +75,85 @@ Utilities.getLoginMessage(); %>
     <div
       class="container min-vh-100 d-flex flex-column justify-content-center align-items-center"
     >
-      <div class="row w-100 justify-content-center">
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card shadow-sm">
-            <div class="card-body p-4">
-              <div class="text-center mb-4">
-                <!-- Header image loaded dynamically -->
-                <img
-                  src="<%=headerImage%>"
-                  alt="header image"
-                  class="img-fluid mb-2"
-                />
-                <!-- Login message from backend utility -->
-                <div class="mb-2 card-title h4 text-center">
-                  <%=loginMessage%>
-                </div>
-              </div>
-              <!-- Login Form: Bootstrap, accessible, responsive -->
-              <form method="post" class="needs-validation" novalidate>
-                <div class="mb-3">
-                  <label for="username" class="form-label">Username</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="username"
-                    name="id"
-                    required
-                    aria-required="true"
-                    autocomplete="username"
-                  />
-                  <div class="invalid-feedback">
-                    Please enter your username.
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="password" class="form-label">Password</label>
-                  <div class="input-group">
-                    <input
-                      type="password"
-                      class="form-control"
-                      id="password"
-                      name="password"
-                      required
-                      aria-required="true"
-                      autocomplete="current-password"
-                    />
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      id="togglePassword"
-                      tabindex="-1"
-                      aria-label="Show or hide password"
-                    >
-                      <span id="togglePasswordIcon" class="bi bi-eye"></span>
-                    </button>
-                  </div>
-                  <div class="invalid-feedback">
-                    Please enter your password.
-                  </div>
-                </div>
-                <div class="d-grid">
-                  <button
-                    type="submit"
-                    name="submit"
-                    class="btn btn-primary btn-block"
-                  >
-                    Submit
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div class="card-footer text-center bg-white border-0">
-              <!-- Footer image loaded dynamically -->
-              <a href="https://github.com/IBMStockTrader">
-                <img
-                  src="<%=footerImage%>"
-                  alt="footer image"
-                  class="img-fluid mt-3"
-                />
-              </a>
+      <div class="card shadow-sm main-card w-100">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <!-- Header image loaded dynamically -->
+            <img
+              src="<%=headerImage%>"
+              alt="header image"
+              class="header-img mb-3"
+            />
+            <!-- Login message from backend utility -->
+            <div class="mb-2 card-title h4 text-center">
+              <%=loginMessage%>
             </div>
           </div>
+          <div class="form-inner">
+            <!-- Login Form: Bootstrap, accessible, responsive -->
+            <form method="post" class="needs-validation" novalidate>
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  name="id"
+                  required
+                  aria-required="true"
+                  autocomplete="username"
+                />
+                <div class="invalid-feedback">
+                  Please enter your username.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    required
+                    aria-required="true"
+                    autocomplete="current-password"
+                  />
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    id="togglePassword"
+                    tabindex="-1"
+                    aria-label="Show or hide password"
+                  >
+                    <span id="togglePasswordIcon" class="bi bi-eye"></span>
+                  </button>
+                </div>
+                <div class="invalid-feedback">
+                  Please enter your password.
+                </div>
+              </div>
+              <div class="d-grid">
+                <button
+                  type="submit"
+                  name="submit"
+                  class="btn btn-primary btn-block"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="card-footer text-center bg-white border-0">
+          <!-- Footer image loaded dynamically -->
+          <a href="https://github.com/IBMStockTrader">
+            <img
+              src="<%=footerImage%>"
+              alt="footer image"
+              class="img-fluid mt-3"
+            />
+          </a>
         </div>
       </div>
     </div>
