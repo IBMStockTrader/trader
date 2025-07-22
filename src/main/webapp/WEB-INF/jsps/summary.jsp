@@ -59,6 +59,34 @@ static {
         color: #0d6efd;
         margin-left: 2px;
       }
+      /* Softer filled action buttons for table */
+      .btn-view {
+        background-color: #2196f3;
+        color: #fff;
+        border: none;
+      }
+      .btn-view:hover, .btn-view:focus {
+        background-color: #1565c0;
+        color: #fff;
+      }
+      .btn-update {
+        background-color: #009688; /* Teal */
+        color: #fff;
+        border: none;
+      }
+      .btn-update:hover, .btn-update:focus {
+        background-color: #00796b;
+        color: #fff;
+      }
+      .btn-delete {
+        background-color: #e53935;
+        color: #fff;
+        border: none;
+      }
+      .btn-delete:hover, .btn-delete:focus {
+        background-color: #ab000d;
+        color: #fff;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -81,73 +109,30 @@ static {
             </div>
           <% } else { %>
           <form method="post">
-            <div class="border rounded p-3 mb-4 bg-white shadow-sm">
-              <% List<Broker> brokers = (List<Broker>)request.getAttribute("brokers"); %>
-              <% boolean noPortfolios = (brokers != null && brokers.isEmpty()); %>
-              <style>
-                .portfolio-actions-heading {
-                  font-family: 'Montserrat', Arial, sans-serif;
-                  font-size: 1.3rem;
-                  font-weight: 700;
-                  letter-spacing: 1.5px;
-                  background: linear-gradient(90deg, #0d6efd 60%, #6610f2 100%);
-                  -webkit-background-clip: text;
-                  -webkit-text-fill-color: transparent;
-                  background-clip: text;
-                  text-fill-color: transparent;
-                  display: inline-block;
-                }
-                .portfolio-actions-divider {
-                  border: none;
-                  border-top: 2px solid #e3e6ea;
-                  margin: 0.5rem 0 1.2rem 0;
-                }
-              </style>
-              <div class="mb-2">
-                <span class="portfolio-actions-heading">
-                  <i class="bi bi-ui-checks-grid me-2"></i>Portfolio Actions
-                </span>
-                <hr class="portfolio-actions-divider"/>
+            <% List<Broker> brokers = (List<Broker>)request.getAttribute("brokers"); %>
+            <% boolean noPortfolios = (brokers != null && brokers.isEmpty()); %>
+            <% if(request.isUserInRole("StockTrader")) { %>
+              <div class="mb-3 text-end">
+                <form method="post" style="display:inline;">
+                  <input type="hidden" name="action" value="create"/>
+                  <button type="submit" name="submit" value="Submit" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Create Portfolio
+                  </button>
+                </form>
               </div>
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="radio" name="action" value="retrieve" id="actionRetrieve" <%= noPortfolios ? "disabled" : "checked" %>>
-                <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %> fw-semibold fs-6" for="actionRetrieve">
-                  <i class="bi bi-search me-1 text-primary"></i>Retrieve selected portfolio
-                </label>
-              </div>
-              <% if(request.isUserInRole("StockTrader")) { %>
-                <div class="form-check mb-2">
-                  <input class="form-check-input" type="radio" name="action" value="create" id="actionCreate" <%= noPortfolios ? "checked" : "" %>>
-                  <label class="form-check-label fw-semibold fs-6" for="actionCreate">
-                    <i class="bi bi-plus-circle me-1 text-success"></i>Create a new portfolio
-                  </label>
-                </div>
-                <div class="form-check mb-2">
-                  <input class="form-check-input" type="radio" name="action" value="update" id="actionUpdate" <%= noPortfolios ? "disabled" : "" %>>
-                  <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %> fw-semibold fs-6" for="actionUpdate">
-                    <i class="bi bi-arrow-repeat me-1 text-info"></i>Update selected portfolio (buy/sell stock)
-                  </label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="action" value="delete" id="actionDelete" <%= noPortfolios ? "disabled" : "" %>>
-                  <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %> fw-semibold fs-6" for="actionDelete">
-                    <i class="bi bi-trash me-1 text-danger"></i>Delete selected portfolio
-                  </label>
-                </div>
-              <% } %>
-              <% if (noPortfolios) { %>
-                <div class="alert alert-info mt-2">You don’t have any portfolios yet. Create one to get started!</div>
-              <% } %>
-            </div>
+            <% } %>
+            <% if (noPortfolios) { %>
+              <div class="alert alert-info mt-2">You don’t have any portfolios yet. Create one to get started!</div>
+            <% } %>
             <% if (brokers != null && !brokers.isEmpty()) { %>
               <div class="table-responsive mb-3">
                 <table class="table table-bordered align-middle table-hover text-center">
                   <thead class="table-light">
                     <tr>
-                      <th scope="col"></th>
                       <th scope="col"><i class="bi bi-person" aria-hidden="true"></i> Owner</th>
                       <th scope="col"><i class="bi bi-cash-stack" aria-hidden="true"></i> Total</th>
                       <th scope="col"><i class="bi bi-award" aria-hidden="true"></i> Loyalty Level</th>
+                      <th scope="col" class="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -165,21 +150,38 @@ static {
                       }
                     %>
                       <tr>
-                        <td><input class="form-check-input" type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
                         <td><%=owner%></td>
                         <td>$<%=currency.format(broker.getTotal())%></td>
                         <td><span class="badge <%=badgeClass%>"><%=loyalty%></span></td>
+                        <td>
+                          <form method="post" style="display:inline;">
+                            <input type="hidden" name="owner" value="<%=owner%>"/>
+                            <input type="hidden" name="action" value="retrieve"/>
+                            <button type="submit" name="submit" value="Submit" class="btn btn-view btn-sm me-1" title="View Portfolio">
+                              <i class="bi bi-eye"></i>
+                            </button>
+                          </form>
+                          <form method="post" style="display:inline;">
+                            <input type="hidden" name="owner" value="<%=owner%>"/>
+                            <input type="hidden" name="action" value="update"/>
+                            <button type="submit" name="submit" value="Submit" class="btn btn-update btn-sm me-1" title="Update Portfolio">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                          </form>
+                          <form method="post" style="display:inline;">
+                            <input type="hidden" name="owner" value="<%=owner%>"/>
+                            <input type="hidden" name="action" value="delete"/>
+                            <button type="submit" name="submit" value="Submit" class="btn btn-delete btn-sm" title="Delete Portfolio" onclick="return confirm('Are you sure you want to delete this portfolio?');">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
+                        </td>
                       </tr>
                     <% } %>
                   </tbody>
                 </table>
               </div>
             <% } %>
-            <div class="d-flex gap-2">
-              <button type="submit" name="submit" value="Submit" class="btn btn-primary">
-                <i class="bi bi-arrow-right-circle me-2" aria-hidden="true"></i>Submit
-              </button>
-            </div>
           </form>
           <% } %>
         </div>
@@ -190,6 +192,13 @@ static {
         </div>
       </div>
     </div>
+    <script>
+      window.addEventListener('pageshow', function() {
+        if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
+          document.activeElement.blur();
+        }
+      });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

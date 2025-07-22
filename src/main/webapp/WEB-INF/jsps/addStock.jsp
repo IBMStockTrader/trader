@@ -82,6 +82,12 @@ Utilities.getFooterImage(); %>
       .form-label {
         font-weight: 600;
       }
+      .info-badge {
+        font-size: 0.9rem;
+        padding: 0.5em 1.2em;
+        border-radius: 0.8em;
+        font-weight: 600;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -108,14 +114,14 @@ Utilities.getFooterImage(); %>
                   <div class="bg-light rounded p-2 d-flex align-items-center h-100">
                     <i class="bi bi-person-circle text-primary me-2 fs-4"></i>
                     <span class="fw-semibold">Owner:</span>
-                    <span class="badge bg-primary ms-2">${param.owner}</span>
+                    <span class="badge bg-primary ms-2 info-badge">${param.owner}</span>
                   </div>
                 </div>
                 <div class="col-12 col-md-6">
                   <div class="bg-light rounded p-2 d-flex align-items-center h-100">
                     <i class="bi bi-cash-coin text-success me-2 fs-4"></i>
                     <span class="fw-semibold">Commission:</span>
-                    <span class="badge bg-success ms-2">${commission}</span>
+                    <span class="badge bg-success ms-2 info-badge">${commission}</span>
                   </div>
                 </div>
               </div>
