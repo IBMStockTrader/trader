@@ -19,59 +19,20 @@ Utilities.getFooterImage(); %>
       rel="stylesheet"
     />
     <!-- Montserrat font for brand -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Bootstrap Icons for heading and button -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-      body,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      label,
-      input,
-      button,
-      textarea,
-      .form-label,
-      .form-control {
-        font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
-      }
-      .main-card {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 2rem 2rem 1.5rem 2rem;
-      }
-      .header-img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .form-inner {
-        max-width: 500px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .page-heading {
-        font-family: 'Montserrat', Arial, sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-      }
-      .brand-main {
-        color: #222;
-      }
-      .brand-accent {
-        color: #0d6efd;
-        margin-left: 2px;
-      }
-      .form-label {
-        font-weight: 600;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/submitFeedback.css"
+    />
   </head>
   <body class="bg-light">
     <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
@@ -90,8 +51,12 @@ Utilities.getFooterImage(); %>
           <div class="form-inner">
             <div class="mb-3 text-center">
               <h1 class="page-heading mb-2">
-                <i class="bi bi-chat-dots text-primary me-2" aria-hidden="true"></i>
-                <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Feedback
+                <i
+                  class="bi bi-chat-dots text-primary me-2"
+                  aria-hidden="true"
+                ></i>
+                <span class="brand-main">Stock</span
+                ><span class="brand-accent">Trader</span> Feedback
               </h1>
               <i>Please share your feedback on this tool!</i>
             </div>
@@ -142,25 +107,6 @@ Utilities.getFooterImage(); %>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // --- Bootstrap client-side validation ---
-      (() => {
-        "use strict";
-        const forms = document.querySelectorAll("form");
-        Array.from(forms).forEach((form) => {
-          form.addEventListener(
-            "submit",
-            (event) => {
-              if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-              form.classList.add("was-validated");
-            },
-            false
-          );
-        });
-      })();
-    </script>
+    <script src="${pageContext.request.contextPath}/js/submitFeedback.js"></script>
   </body>
 </html>

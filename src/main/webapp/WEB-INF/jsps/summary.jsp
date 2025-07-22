@@ -28,66 +28,8 @@ static {
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons for table and buttons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-      body, h1, h2, h3, h4, h5, h6, label, input, button, .form-label, .form-control {
-        font-family: 'Roboto', Arial, Helvetica, system-ui, sans-serif;
-      }
-      .summary-card {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 2rem 2rem 1.5rem 2rem;
-      }
-      .summary-header-img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .summary-footer-img {
-        max-width: 300px;
-        height: auto;
-        margin-top: 2rem;
-      }
-      .table-hover tbody tr:hover {
-        background-color: #f6f9fc;
-      }
-      .brand-main {
-        color: #222;
-      }
-      .brand-accent {
-        color: #0d6efd;
-        margin-left: 2px;
-      }
-      /* Softer filled action buttons for table */
-      .btn-view {
-        background-color: #2196f3;
-        color: #fff;
-        border: none;
-      }
-      .btn-view:hover, .btn-view:focus {
-        background-color: #1565c0;
-        color: #fff;
-      }
-      .btn-update {
-        background-color: #009688; /* Teal */
-        color: #fff;
-        border: none;
-      }
-      .btn-update:hover, .btn-update:focus {
-        background-color: #00796b;
-        color: #fff;
-      }
-      .btn-delete {
-        background-color: #e53935;
-        color: #fff;
-        border: none;
-      }
-      .btn-delete:hover, .btn-delete:focus {
-        background-color: #ab000d;
-        color: #fff;
-      }
-    </style>
+    <!-- Custom CSS for summary page -->
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/summary.css">
   </head>
   <body class="bg-light">
     <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
@@ -192,13 +134,7 @@ static {
         </div>
       </div>
     </div>
-    <script>
-      window.addEventListener('pageshow', function() {
-        if (document.activeElement && document.activeElement.tagName === 'BUTTON') {
-          document.activeElement.blur();
-        }
-      });
-    </script>
+    <script src="${pageContext.request.contextPath}/js/summary.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

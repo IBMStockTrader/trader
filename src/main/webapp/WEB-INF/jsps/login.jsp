@@ -20,72 +20,20 @@ Utilities.getLoginMessage(); %>
       rel="stylesheet"
     />
     <!-- Montserrat font for brand -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
-    <style>
-      /* Apply Roboto and fallback fonts to all relevant elements */
-      body,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      label,
-      input,
-      button,
-      .form-label,
-      .form-control {
-        font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
-      }
-      .card {
-        padding: 1.5rem;
-      }
-      .card-title.h4.text-center {
-        font-size: 1.5rem;
-        font-weight: 500;
-        color: #2c3e50;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        letter-spacing: 0.5px;
-      }
-      .main-card {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 2rem 2rem 1.5rem 2rem;
-      }
-      .header-img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .form-inner {
-        max-width: 350px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .input-group-text {
-        background-color: #f8f9fa;
-      }
-      .login-heading {
-        font-family: 'Montserrat', Arial, sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-      }
-      .brand-main {
-        color: #222;
-      }
-      .brand-accent {
-        color: #0d6efd;
-        margin-left: 2px;
-      }
-    </style>
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Bootstrap Icons CDN for eye icon in password toggle -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/login.css"
     />
   </head>
   <body class="bg-light">
@@ -104,7 +52,8 @@ Utilities.getLoginMessage(); %>
             />
             <!-- Login message from backend utility -->
             <h1 class="login-heading text-center mb-4">
-              Login to <span class="brand-main">Stock</span><span class="brand-accent">Trader</span>
+              Login to <span class="brand-main">Stock</span
+              ><span class="brand-accent">Trader</span>
             </h1>
           </div>
           <div class="form-inner">
@@ -113,7 +62,9 @@ Utilities.getLoginMessage(); %>
               <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+                  <span class="input-group-text"
+                    ><i class="bi bi-person" aria-hidden="true"></i
+                  ></span>
                   <input
                     type="text"
                     class="form-control"
@@ -124,14 +75,14 @@ Utilities.getLoginMessage(); %>
                     autocomplete="username"
                   />
                 </div>
-                <div class="invalid-feedback">
-                  Please enter your username.
-                </div>
+                <div class="invalid-feedback">Please enter your username.</div>
               </div>
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-lock" aria-hidden="true"></i></span>
+                  <span class="input-group-text"
+                    ><i class="bi bi-lock" aria-hidden="true"></i
+                  ></span>
                   <input
                     type="password"
                     class="form-control"
@@ -151,9 +102,7 @@ Utilities.getLoginMessage(); %>
                     <span id="togglePasswordIcon" class="bi bi-eye"></span>
                   </button>
                 </div>
-                <div class="invalid-feedback">
-                  Please enter your password.
-                </div>
+                <div class="invalid-feedback">Please enter your password.</div>
               </div>
               <div class="d-grid">
                 <button
@@ -161,7 +110,11 @@ Utilities.getLoginMessage(); %>
                   name="submit"
                   class="btn btn-primary btn-block"
                 >
-                  <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Login
+                  <i
+                    class="bi bi-box-arrow-in-right me-2"
+                    aria-hidden="true"
+                  ></i
+                  >Login
                 </button>
               </div>
             </form>
@@ -181,52 +134,6 @@ Utilities.getLoginMessage(); %>
     </div>
     <!-- Bootstrap JS for validation (optional, but recommended for client-side feedback) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // --- Bootstrap client-side validation ---
-      // This script enables Bootstrap's validation feedback for forms.
-      // It prevents form submission if fields are invalid and adds the 'was-validated' class for styling.
-      (() => {
-        "use strict";
-        const forms = document.querySelectorAll("form");
-        Array.from(forms).forEach((form) => {
-          form.addEventListener(
-            "submit",
-            (event) => {
-              if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-              form.classList.add("was-validated");
-            },
-            false
-          );
-        });
-      })();
-
-      // --- Show/hide password toggle ---
-      // This script toggles the password field between 'password' and 'text' types
-      // when the eye icon button is clicked. It also switches the icon between
-      // 'bi-eye' and 'bi-eye-slash' for visual feedback.
-      const passwordInput = document.getElementById("password");
-      const togglePasswordBtn = document.getElementById("togglePassword");
-      const togglePasswordIcon = document.getElementById("togglePasswordIcon");
-      if (passwordInput && togglePasswordBtn && togglePasswordIcon) {
-        togglePasswordBtn.addEventListener("click", function () {
-          const type =
-            passwordInput.getAttribute("type") === "password"
-              ? "text"
-              : "password";
-          passwordInput.setAttribute("type", type);
-          // Toggle icon
-          if (type === "text") {
-            togglePasswordIcon.classList.remove("bi-eye");
-            togglePasswordIcon.classList.add("bi-eye-slash");
-          } else {
-            togglePasswordIcon.classList.remove("bi-eye-slash");
-            togglePasswordIcon.classList.add("bi-eye");
-          }
-        });
-      }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/login.js"></script>
   </body>
 </html>

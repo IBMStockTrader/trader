@@ -24,56 +24,15 @@ Utilities.getFooterImage(); %>
       rel="stylesheet"
     />
     <!-- Bootstrap Icons for input fields and buttons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-      body,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      label,
-      input,
-      button,
-      .form-label,
-      .form-control {
-        font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
-      }
-      .main-card {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 2rem 2rem 1.5rem 2rem;
-      }
-      .header-img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .form-inner {
-        max-width: 350px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .input-group-text {
-        background-color: #f8f9fa;
-      }
-      .page-heading {
-        font-family: 'Montserrat', Arial, sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-      }
-      .brand-main {
-        color: #222;
-      }
-      .brand-accent {
-        color: #0d6efd;
-        margin-left: 2px;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/addPortfolio.css"
+    />
   </head>
   <body class="bg-light">
     <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
@@ -89,7 +48,8 @@ Utilities.getFooterImage(); %>
               class="header-img mb-3"
             />
             <h1 class="page-heading text-center mb-4">
-              Add <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Portfolio
+              Add <span class="brand-main">Stock</span
+              ><span class="brand-accent">Trader</span> Portfolio
             </h1>
             <i
               >This account will receive a free <b>$50</b> balance for
@@ -101,7 +61,9 @@ Utilities.getFooterImage(); %>
               <div class="mb-3">
                 <label for="owner" class="form-label">Owner</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+                  <span class="input-group-text"
+                    ><i class="bi bi-person" aria-hidden="true"></i
+                  ></span>
                   <input
                     type="text"
                     class="form-control"
@@ -113,9 +75,13 @@ Utilities.getFooterImage(); %>
                 <div class="invalid-feedback">Please enter the owner name.</div>
               </div>
               <div class="mb-3">
-                <label for="balance" class="form-label">Cash Account initial balance</label>
+                <label for="balance" class="form-label"
+                  >Cash Account initial balance</label
+                >
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                  <span class="input-group-text"
+                    ><i class="bi bi-cash-stack" aria-hidden="true"></i
+                  ></span>
                   <input
                     type="number"
                     class="form-control"
@@ -180,7 +146,8 @@ Utilities.getFooterImage(); %>
                   name="submit"
                   class="btn btn-primary btn-block"
                 >
-                  <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Add Portfolio
+                  <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Add
+                  Portfolio
                 </button>
                 <button
                   type="button"
@@ -205,25 +172,6 @@ Utilities.getFooterImage(); %>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // --- Bootstrap client-side validation ---
-      (() => {
-        "use strict";
-        const forms = document.querySelectorAll("form");
-        Array.from(forms).forEach((form) => {
-          form.addEventListener(
-            "submit",
-            (event) => {
-              if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-              }
-              form.classList.add("was-validated");
-            },
-            false
-          );
-        });
-      })();
-    </script>
+    <script src="${pageContext.request.contextPath}/js/addPortfolio.js"></script>
   </body>
 </html>

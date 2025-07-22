@@ -1,0 +1,11 @@
+body {
+  background: #f8f9fa;
+}
+.notfound-container {
+  max-width: 500px;
+  margin: 5rem auto;
+}
+.notfound-icon {
+  font-size: 4rem;
+  color: #0d6efd;
+}

@@ -19,50 +19,20 @@ Utilities.getFooterImage(); %>
       rel="stylesheet"
     />
     <!-- Montserrat font for brand -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Bootstrap Icons for heading and button -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <style>
-      body,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      label,
-      input,
-      button,
-      .form-label,
-      .form-control {
-        font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
-      }
-      .main-card {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 2rem 2rem 1.5rem 2rem;
-      }
-      .header-img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .page-heading {
-        font-family: 'Montserrat', Arial, sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-      }
-      .brand-main {
-        color: #222;
-      }
-      .brand-accent {
-        color: #0d6efd;
-        margin-left: 2px;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="${pageContext.request.contextPath}/css/error.css"
+    />
   </head>
   <body class="bg-light">
     <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
@@ -80,17 +50,26 @@ Utilities.getFooterImage(); %>
           </div>
           <div class="mb-3 text-center">
             <h1 class="page-heading mb-2">
-              <i class="bi bi-exclamation-triangle-fill text-danger me-2" aria-hidden="true"></i>
-              <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Error
+              <i
+                class="bi bi-exclamation-triangle-fill text-danger me-2"
+                aria-hidden="true"
+              ></i>
+              <span class="brand-main">Stock</span
+              ><span class="brand-accent">Trader</span> Error
             </h1>
           </div>
-          <div class="alert alert-danger text-center mb-4" role="alert" style="font-size: 1.15rem;">
+          <div
+            class="alert alert-danger text-center mb-4"
+            role="alert"
+            style="font-size: 1.15rem"
+          >
             <i class="bi bi-x-octagon-fill me-2" aria-hidden="true"></i>
             An error occurred during login. Please try again.
           </div>
           <form method="post" class="text-center">
             <button type="submit" name="submit" class="btn btn-primary">
-              <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Try again
+              <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Try
+              again
             </button>
           </form>
         </div>
