@@ -61,55 +61,58 @@ static {
           <% } else { %>
           <form method="post">
             <div class="mb-3">
+              <% List<Broker> brokers = (List<Broker>)request.getAttribute("brokers"); %>
+              <% boolean noPortfolios = (brokers != null && brokers.isEmpty()); %>
               <div class="form-check">
-                <input class="form-check-input" type="radio" name="action" value="retrieve" id="actionRetrieve" checked>
-                <label class="form-check-label" for="actionRetrieve">Retrieve selected portfolio</label>
+                <input class="form-check-input" type="radio" name="action" value="retrieve" id="actionRetrieve" <%= noPortfolios ? "disabled" : "checked" %>>
+                <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %>" for="actionRetrieve">Retrieve selected portfolio</label>
               </div>
               <% if(request.isUserInRole("StockTrader")) { %>
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="action" value="create" id="actionCreate">
+                  <input class="form-check-input" type="radio" name="action" value="create" id="actionCreate" <%= noPortfolios ? "checked" : "" %>>
                   <label class="form-check-label" for="actionCreate">Create a new portfolio</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="action" value="update" id="actionUpdate">
-                  <label class="form-check-label" for="actionUpdate">Update selected portfolio (buy/sell stock)</label>
+                  <input class="form-check-input" type="radio" name="action" value="update" id="actionUpdate" <%= noPortfolios ? "disabled" : "" %>>
+                  <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %>" for="actionUpdate">Update selected portfolio (buy/sell stock)</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="action" value="delete" id="actionDelete">
-                  <label class="form-check-label" for="actionDelete">Delete selected portfolio</label>
+                  <input class="form-check-input" type="radio" name="action" value="delete" id="actionDelete" <%= noPortfolios ? "disabled" : "" %>>
+                  <label class="form-check-label<%= noPortfolios ? " text-muted" : "" %>" for="actionDelete">Delete selected portfolio</label>
                 </div>
               <% } %>
+              <% if (noPortfolios) { %>
+                <div class="alert alert-info mt-2">You don’t have any portfolios yet. Create one to get started!</div>
+              <% } %>
             </div>
-            <div class="table-responsive mb-3">
-              <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th scope="col"></th>
-                    <th scope="col">Owner</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Loyalty Level</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% List<Broker> brokers = (List<Broker>)request.getAttribute("brokers");
-                    if(brokers == null) { %>
-                      <tr><td colspan="4" class="text-danger">Error communicating with the Broker microservice: ${message}</td></tr>
-                  <% } else {
-                    for (int index=0; index<brokers.size(); index++) { 
+            <% if (brokers != null && !brokers.isEmpty()) { %>
+              <div class="table-responsive mb-3">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col"></th>
+                      <th scope="col">Owner</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Loyalty Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for (int index=0; index<brokers.size(); index++) { 
                       Broker broker = brokers.get(index);
                       String owner = broker.getOwner();
                       Utilities.logToS3(owner, broker);
-                  %>
-                    <tr>
-                      <td><input class="form-check-input" type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
-                      <td><%=owner%></td>
-                      <td>$<%=currency.format(broker.getTotal())%></td>
-                      <td><%=broker.getLoyalty()%></td>
-                    </tr>
-                  <% } } %>
-                </tbody>
-              </table>
-            </div>
+                    %>
+                      <tr>
+                        <td><input class="form-check-input" type="radio" name="owner" value="<%=owner%>" <%= ((index ==0)?" checked ": " ") %>></td>
+                        <td><%=owner%></td>
+                        <td>$<%=currency.format(broker.getTotal())%></td>
+                        <td><%=broker.getLoyalty()%></td>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
             <div class="d-flex gap-2">
               <button type="submit" name="submit" value="Submit" class="btn btn-primary">Submit</button>
               <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary">Log Out</button>

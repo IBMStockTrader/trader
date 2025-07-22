@@ -144,13 +144,20 @@ Utilities.getFooterImage(); %>
                 </select>
                 <div class="invalid-feedback">Please select a currency.</div>
               </div>
-              <div class="d-grid">
+              <div class="d-grid gap-2">
                 <button
                   type="submit"
                   name="submit"
                   class="btn btn-primary btn-block"
                 >
                   Submit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  onclick="window.history.back();"
+                >
+                  Cancel
                 </button>
               </div>
             </form>
