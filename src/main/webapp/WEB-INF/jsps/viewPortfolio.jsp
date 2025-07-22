@@ -116,7 +116,7 @@ static {
                       <td>
                         <b>
                           <span class="badge 
-                            <% String loyalty = broker.loyalty; String badgeClass = "bg-light text-dark border";
+                            <% String loyalty = broker.getLoyalty(); String badgeClass = "bg-light text-dark border";
                               if (loyalty != null) {
                                 if (loyalty.equalsIgnoreCase("Platinum")) badgeClass = "bg-primary";
                                 else if (loyalty.equalsIgnoreCase("Gold")) badgeClass = "bg-warning text-dark";
@@ -124,7 +124,7 @@ static {
                                 else if (loyalty.equalsIgnoreCase("Bronze")) badgeClass = "bg-light text-dark border";
                               }
                             %><%=badgeClass%>">
-                            ${broker.loyalty}
+                            <%=broker.getLoyalty()%>
                           </span>
                         </b>
                       </td>
