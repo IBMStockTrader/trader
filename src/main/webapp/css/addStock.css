@@ -32,7 +32,6 @@ button,
 .input-group-text {
   background-color: #f8f9fa;
 }
-/* Remove green validation from radio buttons */
 .was-validated .form-check-input:valid {
   border-color: #ced4da;
   box-shadow: none;

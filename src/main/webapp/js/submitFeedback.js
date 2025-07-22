@@ -1,4 +1,3 @@
-// --- Bootstrap client-side validation ---
 (() => {
   "use strict";
   const forms = document.querySelectorAll("form");
