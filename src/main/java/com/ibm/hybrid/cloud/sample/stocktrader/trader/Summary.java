@@ -149,9 +149,8 @@ public class Summary extends HttpServlet {
 			// NOTE: you need to include the JWT here because we're calling from a Servlet, not a JAX-RS resource
 			// JWT is only propagated if a REST Service calls a REST Client.
 			List<Broker> brokers = testMode ? getHardcodedBrokers() : brokerClient.getBrokers(utilities.getAuthHeader(jwt, request), page, 10);
-			if (brokers != null) {
-				brokers.sort((b1, b2) -> b1.getOwner().compareToIgnoreCase(b2.getOwner()));
-			}
+			brokers.sort((b1, b2)->
+					b1.getOwner().compareToIgnoreCase(b2.getOwner()));
 
 			// set brokers for JSP
 			request.setAttribute("brokers", brokers);
