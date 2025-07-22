@@ -6,7 +6,7 @@
       Stock <span class="text-primary">Trader</span>
     </a>
     <div class="d-flex align-items-center ms-auto">
-      <form method="post" class="mb-0">
+      <form method="post" action="/trader/summary" class="mb-0">
         <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">Log Out</button>
       </form>
     </div>

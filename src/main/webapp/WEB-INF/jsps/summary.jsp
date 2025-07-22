@@ -179,9 +179,6 @@ static {
               <button type="submit" name="submit" value="Submit" class="btn btn-primary">
                 <i class="bi bi-arrow-right-circle me-2" aria-hidden="true"></i>Submit
               </button>
-              <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary">
-                <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Log Out
-              </button>
             </div>
           </form>
           <% } %>
