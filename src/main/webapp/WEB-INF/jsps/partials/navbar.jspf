@@ -1,0 +1,15 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+  <div class="container-fluid" style="max-width: 1200px;">
+    <a class="navbar-brand d-flex align-items-center fw-bold"
+       href="/trader/summary"
+       style="font-size: 2rem; letter-spacing: 1px; font-family: 'Montserrat', Arial, sans-serif; padding-top: 0.25rem; padding-bottom: 0.25rem;">
+      Stock <span class="text-primary">Trader</span>
+    </a>
+    <div class="d-flex align-items-center ms-auto">
+      <form method="post" class="mb-0">
+        <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">Log Out</button>
+      </form>
+    </div>
+  </div>
+</nav>
+<div style="padding-top: 56px;"></div> 

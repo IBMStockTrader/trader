@@ -23,6 +23,8 @@ static {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Web fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+    <!-- Montserrat font for brand -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <style>
       body, h1, h2, h3, h4, h5, h6, label, input, button, .form-label, .form-control {
         font-family: 'Roboto', Arial, Helvetica, system-ui, sans-serif;
@@ -47,6 +49,7 @@ static {
     </style>
   </head>
   <body class="bg-light">
+    <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
     <div class="container min-vh-100 d-flex flex-column justify-content-center align-items-center">
       <div class="card shadow-sm main-card w-100">
         <div class="card-body p-4">

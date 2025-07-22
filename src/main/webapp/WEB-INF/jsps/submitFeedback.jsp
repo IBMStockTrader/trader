@@ -18,6 +18,8 @@ Utilities.getFooterImage(); %>
       href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap"
       rel="stylesheet"
     />
+    <!-- Montserrat font for brand -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <style>
       body,
       h1,
@@ -54,6 +56,7 @@ Utilities.getFooterImage(); %>
     </style>
   </head>
   <body class="bg-light">
+    <%@ include file="/WEB-INF/jsps/partials/navbar.jspf" %>
     <div
       class="container min-vh-100 d-flex flex-column justify-content-center align-items-center"
     >
