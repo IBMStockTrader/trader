@@ -29,4 +29,8 @@
 			<url-pattern>/health</url-pattern>
 		</web-resource-collection>
     </security-constraint>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/jsps/error404.jsp</location>
+	</error-page>
 </web-app>
