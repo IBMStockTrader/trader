@@ -20,6 +20,8 @@ Utilities.getFooterImage(); %>
     />
     <!-- Montserrat font for brand -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons for heading and button -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
       body,
       h1,
@@ -47,6 +49,19 @@ Utilities.getFooterImage(); %>
         margin-left: auto;
         margin-right: auto;
       }
+      .page-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -63,12 +78,18 @@ Utilities.getFooterImage(); %>
               class="header-img mb-3"
             />
           </div>
-          <div class="alert alert-info text-center mb-4" role="alert">
+          <div class="mb-3 text-center">
+            <h1 class="page-heading mb-2">
+              <i class="bi bi-info-circle text-primary me-2" aria-hidden="true"></i>
+              <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Message
+            </h1>
+          </div>
+          <div class="alert alert-info text-center mb-4" role="alert" style="font-size: 1.15rem;">
             ${message}
           </div>
           <form method="post" class="text-center">
             <button type="submit" name="submit" class="btn btn-primary">
-              OK
+              <i class="bi bi-check-circle me-2" aria-hidden="true"></i>OK
             </button>
           </form>
         </div>

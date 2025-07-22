@@ -20,6 +20,8 @@ Utilities.getFooterImage(); %>
     />
     <!-- Montserrat font for brand -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons for input fields and buttons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
       body,
       h1,
@@ -52,6 +54,9 @@ Utilities.getFooterImage(); %>
         margin-left: auto;
         margin-right: auto;
       }
+      .input-group-text {
+        background-color: #f8f9fa;
+      }
       /* Remove green validation from radio buttons */
       .was-validated .form-check-input:valid {
         border-color: #ced4da;
@@ -60,6 +65,22 @@ Utilities.getFooterImage(); %>
       .was-validated .form-check-input:valid:checked {
         background-color: #0d6efd;
         border-color: #0d6efd;
+      }
+      .page-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
+      .form-label {
+        font-weight: 600;
       }
     </style>
   </head>
@@ -76,47 +97,55 @@ Utilities.getFooterImage(); %>
               alt="header image"
               class="header-img mb-3"
             />
-            <div class="mb-2 card-title h4 text-center">Add Stock</div>
+            <h1 class="page-heading text-center mb-4">
+              Add <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Stock
+            </h1>
           </div>
           <div class="form-inner">
             <form method="post" class="needs-validation" novalidate>
-              <div class="d-flex mb-2 align-items-center">
-                <span class="fw-bold me-2" style="min-width: 100px"
-                  >Owner:</span
-                >
-                <span>${param.owner}</span>
-              </div>
-              <div class="d-flex mb-3 align-items-center">
-                <span class="fw-bold me-2" style="min-width: 100px"
-                  >Commission:</span
-                >
-                <span>${commission}</span>
+              <div class="row mb-3">
+                <div class="col-12 col-md-6 mb-2 mb-md-0">
+                  <div class="bg-light rounded p-2 d-flex align-items-center h-100">
+                    <i class="bi bi-person-circle text-primary me-2 fs-4"></i>
+                    <span class="fw-semibold">Owner:</span>
+                    <span class="badge bg-primary ms-2">${param.owner}</span>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="bg-light rounded p-2 d-flex align-items-center h-100">
+                    <i class="bi bi-cash-coin text-success me-2 fs-4"></i>
+                    <span class="fw-semibold">Commission:</span>
+                    <span class="badge bg-success ms-2">${commission}</span>
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
-                <label for="symbol" class="form-label"
-                  ><b>Stock Symbol:</b></label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="symbol"
-                  name="symbol"
-                  required
-                />
+                <label for="symbol" class="form-label"><b>Stock Symbol:</b></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-upc-scan" aria-hidden="true"></i></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="symbol"
+                    name="symbol"
+                    required
+                  />
+                </div>
                 <div class="invalid-feedback">Please enter a stock symbol.</div>
               </div>
               <div class="mb-3">
-                <label for="shares" class="form-label"
-                  ><b>Number of Shares:</b></label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  id="shares"
-                  name="shares"
-                  min="1"
-                  required
-                />
+                <label for="shares" class="form-label"><b>Number of Shares:</b></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-hash" aria-hidden="true"></i></span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="shares"
+                    name="shares"
+                    min="1"
+                    required
+                  />
+                </div>
                 <div class="invalid-feedback">
                   Please enter a valid number of shares (1 or more).
                 </div>
@@ -153,8 +182,9 @@ Utilities.getFooterImage(); %>
                   name="submit"
                   value="Submit"
                   class="btn btn-primary"
+                  id="actionButton"
                 >
-                  Submit
+                  <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Buy Stock
                 </button>
                 <button
                   type="button"
@@ -198,6 +228,25 @@ Utilities.getFooterImage(); %>
           );
         });
       })();
+
+      // --- Dynamic button label for Buy/Sell ---
+      document.addEventListener("DOMContentLoaded", function() {
+        const buyRadio = document.getElementById("buyRadio");
+        const sellRadio = document.getElementById("sellRadio");
+        const actionButton = document.getElementById("actionButton");
+
+        function updateButton() {
+          if (sellRadio.checked) {
+            actionButton.innerHTML = '<i class="bi bi-dash-circle me-2" aria-hidden="true"></i>Sell Stock';
+          } else {
+            actionButton.innerHTML = '<i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Buy Stock';
+          }
+        }
+
+        buyRadio.addEventListener("change", updateButton);
+        sellRadio.addEventListener("change", updateButton);
+        updateButton();
+      });
     </script>
   </body>
 </html>

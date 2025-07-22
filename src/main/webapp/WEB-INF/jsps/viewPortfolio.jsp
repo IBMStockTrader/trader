@@ -25,6 +25,8 @@ static {
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
     <!-- Montserrat font for brand -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons for table and buttons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
       body, h1, h2, h3, h4, h5, h6, label, input, button, .form-label, .form-control {
         font-family: 'Roboto', Arial, Helvetica, system-ui, sans-serif;
@@ -46,6 +48,22 @@ static {
         margin-left: auto;
         margin-right: auto;
       }
+      .page-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
+      .table-hover tbody tr:hover {
+        background-color: #f6f9fc;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -59,7 +77,11 @@ static {
           <div class="form-inner">
             <form method="post" class="needs-validation" novalidate>
               <div class="mb-3 text-center">
-                Stock Portfolio for <b>${param.owner}</b>:
+                <h1 class="page-heading mb-2">
+                  <i class="bi bi-graph-up-arrow text-success me-2" aria-hidden="true"></i>
+                  <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Portfolio
+                </h1>
+                <div class="fw-semibold">for <span class="text-primary">${param.owner}</span></div>
               </div>
               <% 
               Broker broker = ((Broker)request.getAttribute("broker"));
@@ -69,15 +91,15 @@ static {
               else {
               %>
               <div class="table-responsive mb-3">
-                <table class="table table-bordered align-middle">
+                <table class="table table-bordered align-middle table-hover">
                   <thead class="table-light">
                     <tr>
-                      <th scope="col">Symbol</th>
-                      <th scope="col">Shares</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Date Quoted</th>
-                      <th scope="col">Total</th>
-                      <th scope="col">Commission</th>
+                      <th scope="col"><i class="bi bi-upc-scan me-1" aria-hidden="true"></i>Symbol</th>
+                      <th scope="col"><i class="bi bi-hash me-1" aria-hidden="true"></i>Shares</th>
+                      <th scope="col"><i class="bi bi-currency-dollar me-1" aria-hidden="true"></i>Price</th>
+                      <th scope="col"><i class="bi bi-calendar-date me-1" aria-hidden="true"></i>Date Quoted</th>
+                      <th scope="col"><i class="bi bi-cash-stack me-1" aria-hidden="true"></i>Total</th>
+                      <th scope="col"><i class="bi bi-receipt me-1" aria-hidden="true"></i>Commission</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -123,44 +145,64 @@ static {
                 <table class="table table-bordered align-middle">
                   <tbody>
                     <tr>
-                      <th scope="row">Portfolio Value:</th>
+                      <th scope="row"><i class="bi bi-cash-coin me-1" aria-hidden="true"></i>Portfolio Value:</th>
                       <td><b>$<%=currency.format(broker.getTotal())%></b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Loyalty Level:</th>
-                      <td><b>${broker.loyalty}</b></td>
+                      <th scope="row"><i class="bi bi-award me-1" aria-hidden="true"></i>Loyalty Level:</th>
+                      <td>
+                        <b>
+                          <span class="badge 
+                            <% String loyalty = broker.loyalty; String badgeClass = "bg-light text-dark border";
+                              if (loyalty != null) {
+                                if (loyalty.equalsIgnoreCase("Platinum")) badgeClass = "bg-primary";
+                                else if (loyalty.equalsIgnoreCase("Gold")) badgeClass = "bg-warning text-dark";
+                                else if (loyalty.equalsIgnoreCase("Silver")) badgeClass = "bg-secondary";
+                                else if (loyalty.equalsIgnoreCase("Bronze")) badgeClass = "bg-light text-dark border";
+                              }
+                            %><%=badgeClass%>">
+                            ${broker.loyalty}
+                          </span>
+                        </b>
+                      </td>
                     </tr>
                     <tr>
-                      <th scope="row">Account Balance:</th>
+                      <th scope="row"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>Account Balance:</th>
                       <td><b>$<%=currency.format(broker.getBalance())%></b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Cash Account Balance:</th>
+                      <th scope="row"><i class="bi bi-bank me-1" aria-hidden="true"></i>Cash Account Balance:</th>
                       <td><b><%=broker.getCashAccountCurrency()%> <%=currency.format(broker.getCashAccountBalance())%></b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Total Commissions Paid:</th>
+                      <th scope="row"><i class="bi bi-receipt me-1" aria-hidden="true"></i>Total Commissions Paid:</th>
                       <td><b>$<%=currency.format(broker.getCommissions())%></b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Free Trades Available:</th>
+                      <th scope="row"><i class="bi bi-gift me-1" aria-hidden="true"></i>Free Trades Available:</th>
                       <td><b>${broker.free}</b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Sentiment:</th>
+                      <th scope="row"><i class="bi bi-emoji-smile me-1" aria-hidden="true"></i>Sentiment:</th>
                       <td><b>${broker.sentiment}</b></td>
                     </tr>
                     <tr>
-                      <th scope="row">Return On Investment:</th>
+                      <th scope="row"><i class="bi bi-graph-up-arrow me-1" aria-hidden="true"></i>Return On Investment:</th>
                       <td><b>${returnOnInvestment}</b></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <button type="submit" name="submit" value="OK" class="btn btn-primary">OK</button>
-                <button type="submit" name="submit" value="Buy/Sell Stock" class="btn btn-success">Buy/Sell Stock</button>
-                <button type="submit" name="submit" value="Submit Feedback" class="btn btn-outline-secondary">Submit Feedback</button>
+                <button type="submit" name="submit" value="OK" class="btn btn-primary">
+                  <i class="bi bi-arrow-left-circle me-2" aria-hidden="true"></i>OK
+                </button>
+                <button type="submit" name="submit" value="Buy/Sell Stock" class="btn btn-success">
+                  <i class="bi bi-currency-exchange me-2" aria-hidden="true"></i>Buy/Sell Stock
+                </button>
+                <button type="submit" name="submit" value="Submit Feedback" class="btn btn-outline-secondary">
+                  <i class="bi bi-chat-dots me-2" aria-hidden="true"></i>Submit Feedback
+                </button>
               </div>
               <% } //else %>
             </form>

@@ -23,6 +23,8 @@ Utilities.getFooterImage(); %>
       href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap"
       rel="stylesheet"
     />
+    <!-- Bootstrap Icons for input fields and buttons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
       body,
       h1,
@@ -55,6 +57,22 @@ Utilities.getFooterImage(); %>
         margin-left: auto;
         margin-right: auto;
       }
+      .input-group-text {
+        background-color: #f8f9fa;
+      }
+      .page-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -70,7 +88,9 @@ Utilities.getFooterImage(); %>
               alt="header image"
               class="header-img mb-3"
             />
-            <div class="mb-2 card-title h4 text-center">Add Portfolio</div>
+            <h1 class="page-heading text-center mb-4">
+              Add <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Portfolio
+            </h1>
             <i
               >This account will receive a free <b>$50</b> balance for
               commissions!</i
@@ -80,29 +100,33 @@ Utilities.getFooterImage(); %>
             <form method="post" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="owner" class="form-label">Owner</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="owner"
-                  name="owner"
-                  required
-                />
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="owner"
+                    name="owner"
+                    required
+                  />
+                </div>
                 <div class="invalid-feedback">Please enter the owner name.</div>
               </div>
               <div class="mb-3">
-                <label for="balance" class="form-label"
-                  >Cash Account initial balance</label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  id="balance"
-                  name="balance"
-                  step="0.01"
-                  min="0"
-                  value="10000.00"
-                  required
-                />
+                <label for="balance" class="form-label">Cash Account initial balance</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="balance"
+                    name="balance"
+                    step="0.01"
+                    min="0"
+                    value="10000.00"
+                    required
+                  />
+                </div>
                 <div class="invalid-feedback">
                   Please enter a valid initial balance (0 or greater).
                 </div>
@@ -156,7 +180,7 @@ Utilities.getFooterImage(); %>
                   name="submit"
                   class="btn btn-primary btn-block"
                 >
-                  Submit
+                  <i class="bi bi-plus-circle me-2" aria-hidden="true"></i>Add Portfolio
                 </button>
                 <button
                   type="button"

@@ -19,6 +19,8 @@ Utilities.getLoginMessage(); %>
       href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap"
       rel="stylesheet"
     />
+    <!-- Montserrat font for brand -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <style>
       /* Apply Roboto and fallback fonts to all relevant elements */
       body,
@@ -63,6 +65,22 @@ Utilities.getLoginMessage(); %>
         margin-left: auto;
         margin-right: auto;
       }
+      .input-group-text {
+        background-color: #f8f9fa;
+      }
+      .login-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
     </style>
     <!-- Bootstrap Icons CDN for eye icon in password toggle -->
     <link
@@ -85,24 +103,27 @@ Utilities.getLoginMessage(); %>
               class="header-img mb-3"
             />
             <!-- Login message from backend utility -->
-            <div class="mb-2 card-title h4 text-center">
-              <%=loginMessage%>
-            </div>
+            <h1 class="login-heading text-center mb-4">
+              Login to <span class="brand-main">Stock</span><span class="brand-accent">Trader</span>
+            </h1>
           </div>
           <div class="form-inner">
             <!-- Login Form: Bootstrap, accessible, responsive -->
             <form method="post" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="username"
-                  name="id"
-                  required
-                  aria-required="true"
-                  autocomplete="username"
-                />
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person" aria-hidden="true"></i></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="id"
+                    required
+                    aria-required="true"
+                    autocomplete="username"
+                  />
+                </div>
                 <div class="invalid-feedback">
                   Please enter your username.
                 </div>
@@ -110,6 +131,7 @@ Utilities.getLoginMessage(); %>
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock" aria-hidden="true"></i></span>
                   <input
                     type="password"
                     class="form-control"
@@ -139,7 +161,7 @@ Utilities.getLoginMessage(); %>
                   name="submit"
                   class="btn btn-primary btn-block"
                 >
-                  Submit
+                  <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>Login
                 </button>
               </div>
             </form>

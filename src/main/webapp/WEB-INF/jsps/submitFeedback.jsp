@@ -20,6 +20,8 @@ Utilities.getFooterImage(); %>
     />
     <!-- Montserrat font for brand -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons for heading and button -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
       body,
       h1,
@@ -53,6 +55,22 @@ Utilities.getFooterImage(); %>
         margin-left: auto;
         margin-right: auto;
       }
+      .page-heading {
+        font-family: 'Montserrat', Arial, sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand-main {
+        color: #222;
+      }
+      .brand-accent {
+        color: #0d6efd;
+        margin-left: 2px;
+      }
+      .form-label {
+        font-weight: 600;
+      }
     </style>
   </head>
   <body class="bg-light">
@@ -71,6 +89,10 @@ Utilities.getFooterImage(); %>
           </div>
           <div class="form-inner">
             <div class="mb-3 text-center">
+              <h1 class="page-heading mb-2">
+                <i class="bi bi-chat-dots text-primary me-2" aria-hidden="true"></i>
+                <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Feedback
+              </h1>
               <i>Please share your feedback on this tool!</i>
             </div>
             <form method="post" class="needs-validation" novalidate>
@@ -95,7 +117,7 @@ Utilities.getFooterImage(); %>
                   value="Submit"
                   class="btn btn-primary"
                 >
-                  Submit
+                  <i class="bi bi-send me-2" aria-hidden="true"></i>Submit
                 </button>
                 <button
                   type="button"
