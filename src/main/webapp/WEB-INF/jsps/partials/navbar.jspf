@@ -7,7 +7,9 @@
     </a>
     <div class="d-flex align-items-center ms-auto">
       <form method="post" action="/trader/summary" class="mb-0">
-        <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">Log Out</button>
+        <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">
+          <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Log Out
+        </button>
       </form>
     </div>
   </div>
