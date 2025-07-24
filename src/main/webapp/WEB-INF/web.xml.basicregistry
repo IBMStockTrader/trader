@@ -24,7 +24,7 @@
 			<web-resource-name>unsecured content</web-resource-name>
 			<url-pattern>/index.html</url-pattern>
 			<url-pattern>/</url-pattern>
-			<url-pattern>/headernew.jpg</url-pattern>
+			<url-pattern>/header.jpg</url-pattern>
 			<url-pattern>/footer.jpg</url-pattern>
                         <url-pattern>/health</url-pattern>
 		</web-resource-collection>
