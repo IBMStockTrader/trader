@@ -117,6 +117,7 @@ static {
                               data-owner="<%=owner%>" onclick="showDeleteModal(this)">
                               <i class="bi bi-trash"></i>
                             </button>
+                            <button type="submit" name="submit" value="Submit" style="display:none;"></button>
                           </form>
                         </td>
                       </tr>
