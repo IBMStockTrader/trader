@@ -56,7 +56,7 @@ public class Utilities {
 
 	private static HashMap<String,String> basicAuthCredentials = new HashMap<String,String>();
 
-	private static String whiteLabelHeaderImage = "header.jpg";
+	private static String whiteLabelHeaderImage = "headernew.jpg";
 	private static String whiteLabelFooterImage = "footer.jpg";
 	private static String whiteLabelLoginMessage = "Login to Stock Trader";
 
