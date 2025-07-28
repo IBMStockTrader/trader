@@ -22,6 +22,7 @@ Utilities.getFooterImage(); %>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons for heading and button -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css" />
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/message.css" />
   </head>
   <body class="bg-light">
@@ -58,7 +59,7 @@ Utilities.getFooterImage(); %>
             <img
               src="<%=footerImage%>"
               alt="footer image"
-              class="img-fluid mt-3"
+              class="footer-img"
             />
           </a>
         </div>

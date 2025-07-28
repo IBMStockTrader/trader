@@ -1,22 +1,11 @@
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-label,
-input,
-button,
-.form-label,
-.form-control {
-  font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
-}
+/* Summary page specific styles */
+
 .summary-card {
   max-width: 700px;
   margin: 2rem auto;
   padding: 2rem 2rem 1.5rem 2rem;
 }
+
 .summary-header-img {
   max-width: 100%;
   height: auto;
@@ -24,46 +13,38 @@ button,
   margin-left: auto;
   margin-right: auto;
 }
-.summary-footer-img {
-  max-width: 300px;
-  height: auto;
-  margin-top: 2rem;
-}
-.table-hover tbody tr:hover {
-  background-color: #f6f9fc;
-}
-.brand-main {
-  color: #222;
-}
-.brand-accent {
-  color: #0d6efd;
-  margin-left: 2px;
-}
+
+/* Button styles for summary page actions */
 .btn-view {
   background-color: #2196f3;
   color: #fff;
   border: none;
 }
+
 .btn-view:hover,
 .btn-view:focus {
   background-color: #1565c0;
   color: #fff;
 }
+
 .btn-update {
   background-color: #009688; /* Teal */
   color: #fff;
   border: none;
 }
+
 .btn-update:hover,
 .btn-update:focus {
   background-color: #00796b;
   color: #fff;
 }
+
 .btn-delete {
   background-color: #e53935;
   color: #fff;
   border: none;
 }
+
 .btn-delete:hover,
 .btn-delete:focus {
   background-color: #ab000d;

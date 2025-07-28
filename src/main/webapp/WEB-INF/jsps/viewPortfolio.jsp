@@ -27,6 +27,7 @@ static {
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons for table and buttons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/common.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/viewPortfolio.css">
   </head>
   <body class="bg-light">
@@ -173,7 +174,7 @@ static {
         </div>
         <div class="card-footer text-center bg-white border-0">
           <a href="https://github.com/IBMStockTrader">
-            <img src="<%=footerImage%>" alt="footer image" class="img-fluid mt-3"/>
+            <img src="<%=footerImage%>" alt="footer image" class="footer-img"/>
           </a>
         </div>
       </div>

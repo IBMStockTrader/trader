@@ -33,6 +33,11 @@ Utilities.getLoginMessage(); %>
     <link
       rel="stylesheet"
       type="text/css"
+      href="${pageContext.request.contextPath}/css/common.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
       href="${pageContext.request.contextPath}/css/login.css"
     />
     <style>
@@ -186,7 +191,7 @@ Utilities.getLoginMessage(); %>
             <img
               src="<%=footerImage%>"
               alt="footer image"
-              class="img-fluid mt-3"
+              class="footer-img"
             />
           </a>
         </div>

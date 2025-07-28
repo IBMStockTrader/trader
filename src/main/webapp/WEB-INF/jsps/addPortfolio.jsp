@@ -31,6 +31,11 @@ Utilities.getFooterImage(); %>
     <link
       rel="stylesheet"
       type="text/css"
+      href="${pageContext.request.contextPath}/css/common.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
       href="${pageContext.request.contextPath}/css/addPortfolio.css"
     />
   </head>
@@ -165,7 +170,7 @@ Utilities.getFooterImage(); %>
             <img
               src="<%=footerImage%>"
               alt="footer image"
-              class="img-fluid mt-3"
+              class="footer-img"
             />
           </a>
         </div>
