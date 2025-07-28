@@ -30,11 +30,11 @@ Utilities.getLoginMessage(); %>
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     />
-    <!-- <link
+    <link
       rel="stylesheet"
       type="text/css"
       href="${pageContext.request.contextPath}/css/login.css"
-    /> -->
+    />
     <style>
       body,
       h1,
@@ -194,7 +194,7 @@ Utilities.getLoginMessage(); %>
     </div>
     <!-- Bootstrap JS for validation (optional, but recommended for client-side feedback) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="${pageContext.request.contextPath}/js/login.js"></script> -->
+    
     <script>
       (() => {
         "use strict";
