@@ -50,3 +50,65 @@
   background-color: #ab000d;
   color: #fff;
 }
+
+/* Mobile responsive adjustments for summary page */
+@media (max-width: 768px) {
+  .summary-card {
+    max-width: 95%;
+    margin: 1rem auto;
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+  
+  /* Make action buttons larger on mobile for better touch targets */
+  .btn-view,
+  .btn-update,
+  .btn-delete {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Reduce table cell padding on mobile */
+  .table-responsive td,
+  .table-responsive th {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  /* Make badges more readable on mobile */
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  /* Ensure footer image shrinks properly */
+  .footer-img {
+    max-width: 300px !important;
+    width: 100%;
+    height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .summary-card {
+    max-width: 98%;
+    margin: 0.5rem auto;
+    padding: 1rem 0.75rem 0.75rem 0.75rem;
+  }
+  
+  /* Stack action buttons vertically on very small screens */
+  .table-responsive td:last-child {
+    white-space: nowrap;
+  }
+  
+  .table-responsive .btn {
+    margin: 0.125rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Ensure footer image shrinks properly on very small screens */
+  .footer-img {
+    max-width: 250px !important;
+    width: 100%;
+    height: auto;
+  }
+}

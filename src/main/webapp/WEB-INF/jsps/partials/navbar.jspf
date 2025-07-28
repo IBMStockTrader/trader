@@ -5,12 +5,21 @@
        style="font-size: 2rem; letter-spacing: 1px; font-family: 'Montserrat', Arial, sans-serif; padding-top: 0.25rem; padding-bottom: 0.25rem;">
       Stock <span class="text-primary">Trader</span>
     </a>
-    <div class="d-flex align-items-center ms-auto">
-      <form method="post" action="/trader/summary" class="mb-0">
-        <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">
-          <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Log Out
-        </button>
-      </form>
+    
+    <!-- Mobile menu button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <!-- Collapsible navbar content -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <div class="d-flex align-items-center ms-auto">
+        <form method="post" action="/trader/summary" class="mb-0">
+          <button type="submit" name="submit" value="Log Out" class="btn btn-outline-secondary ms-2">
+            <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Log Out
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </nav>
