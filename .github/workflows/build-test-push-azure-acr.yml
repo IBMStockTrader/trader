@@ -41,7 +41,7 @@ name: Build, Push to Azure ACR, Gitops
 on:
   push:
     branches:
-      - feat-newUI2
+      - feat-newUI3
     paths-ignore:
       - '.github/**'
   release:
