@@ -41,7 +41,7 @@ name: Build, Push to Azure ACR, Gitops
 on:
   push:
     branches:
-      - feat-newUI3
+      - master
     paths-ignore:
       - '.github/**'
   release:
@@ -54,9 +54,9 @@ permissions:
 env:
   GITHUB_SHA: ${{ github.sha }}
   ACR_NAME: kyncjot
-  GITOPS_REPO: anandDev77/stocktrader-gitops
+  GITOPS_REPO: IBMStockTrader/stocktrader-gitops
   GITOPS_DIR: application
-  IMAGE_NAME: trader
+  IMAGE_NAME: cjot/trader
   APP_NAME: trader
   IMAGE_TAG: ${{ github.sha }}
   GITOPS_USERNAME: ${{ secrets.GITOPS_USERNAME }}
