@@ -87,6 +87,7 @@ Utilities.getFooterImage(); %>
                   name="submit"
                   value="Submit"
                   class="btn btn-primary"
+                  disabled
                 >
                   <i class="bi bi-send me-2" aria-hidden="true"></i>Submit
                 </button>
