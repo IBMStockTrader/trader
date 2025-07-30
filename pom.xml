@@ -28,7 +28,7 @@
 <!--    <parent>
         <groupId>io.openliberty.tools</groupId>
         <artifactId>liberty-maven-app-parent</artifactId>
-        <version>3.11.2</version>
+        <version>3.11.4</version>
     </parent>
 -->
     <properties>
@@ -162,7 +162,7 @@
             <plugin>
                 <groupId>io.openliberty.tools</groupId>
                 <artifactId>liberty-maven-plugin</artifactId>
-                <version>3.11.3</version>
+                <version>3.11.4</version>
                 <executions>
                     <execution>
                         <id>start-server</id>
@@ -201,7 +201,7 @@
                      <assemblyArtifact>
                             <groupId>com.ibm.websphere.appserver.runtime</groupId>
                             <artifactId>wlp-webProfile10</artifactId>
-                            <version>25.0.0.3</version>
+                            <version>25.0.0.6</version>
                             <type>zip</type>
                      </assemblyArtifact>
                      <configDirectory>${basedir}/src/main/liberty/config</configDirectory>
@@ -221,7 +221,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
                 <executions>
                   <execution>
                     <goals>
