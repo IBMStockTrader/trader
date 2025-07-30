@@ -248,16 +248,16 @@ public class Summary extends HttpServlet {
 		Broker ryan = new Broker("Ryan");
 		ryan.setTotal(23456.78);
 		ryan.setLoyalty("Bronze");
-		Broker raunak = new Broker("Raunak");
-		raunak.setTotal(98765.43);
-		raunak.setLoyalty("Silver");
+		Broker anand = new Broker("Anand");
+		anand.setTotal(98765.43);
+		anand.setLoyalty("Silver");
 		Broker greg = new Broker("Greg");
 		greg.setTotal(123456.78);
 		greg.setLoyalty("Gold");
 		Broker eric = new Broker("Eric");
 		eric.setTotal(1234567.89);
 		eric.setLoyalty("Platinum");
-		List<Broker> brokers = Arrays.asList(john, karri, ryan, raunak, greg, eric);
+		List<Broker> brokers = Arrays.asList(john, karri, ryan, anand, greg, eric);
 		return brokers;
 	}
 }
