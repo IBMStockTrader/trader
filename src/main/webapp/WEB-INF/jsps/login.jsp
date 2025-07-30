@@ -58,8 +58,7 @@ Utilities.getLoginMessage(); %>
             />
             <!-- Login message from backend utility -->
             <h1 class="login-heading text-center mb-4">
-              Login to <span class="brand-main">Stock</span
-              ><span class="brand-accent">Trader</span>
+              <%=loginMessage%>
             </h1>
           </div>
           <div class="form-inner">
