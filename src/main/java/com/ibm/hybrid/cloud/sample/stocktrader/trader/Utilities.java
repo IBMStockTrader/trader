@@ -58,7 +58,7 @@ public class Utilities {
 
 	private static String whiteLabelHeaderImage = "header.jpg";
 	private static String whiteLabelFooterImage = "footer.jpg";
-	private static String whiteLabelLoginMessage = "Login to Stock Trader";
+	private static String whiteLabelLoginMessage = "Login to <span class=\"brand-main\">Stock</span><span class=\"brand-accent\">Trader</span>";
 
 	private static boolean useS3 = false;
 	private static AmazonS3 s3 = null;
