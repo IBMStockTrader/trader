@@ -1,0 +1,57 @@
+body {
+  background: #f8f9fa;
+}
+
+.notfound-container {
+  max-width: 500px;
+  margin: 5rem auto;
+}
+
+.notfound-icon {
+  font-size: 4rem;
+  color: #0d6efd;
+}
+
+/* Mobile responsive adjustments for error404 page */
+@media (max-width: 768px) {
+  .notfound-container {
+    max-width: 95%;
+    margin: 3rem auto;
+  }
+  
+  .notfound-icon {
+    font-size: 3rem;
+  }
+  
+  .display-4 {
+    font-size: 2.5rem;
+  }
+  
+  .lead {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .notfound-container {
+    max-width: 98%;
+    margin: 2rem auto;
+  }
+  
+  .notfound-icon {
+    font-size: 2.5rem;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}

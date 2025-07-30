@@ -1,0 +1,60 @@
+/* SubmitFeedback page specific styles */
+
+.form-label {
+  font-weight: 600;
+}
+
+/* Mobile responsive adjustments for submitFeedback page */
+@media (max-width: 768px) {
+  .form-inner {
+    max-width: 100%;
+    /* Ensure proper centering on mobile */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .form-inner form {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  /* Make form elements more touch-friendly */
+  .form-control,
+  textarea.form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-inner {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  
+  .form-inner form {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Ensure buttons are full width on very small screens */
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .d-grid {
+    gap: 0.5rem !important;
+  }
+  
+  /* Make textarea more usable on mobile */
+  textarea.form-control {
+    min-height: 120px;
+  }
+}

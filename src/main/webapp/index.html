@@ -3,12 +3,58 @@
   <head>
     <meta http-equiv="Refresh" content="0; url=summary" />
     <title>Redirect to Trader UI</title>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Web fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      label,
+      input,
+      button,
+      .form-label,
+      .form-control {
+        font-family: "Roboto", Arial, Helvetica, system-ui, sans-serif;
+      }
+      .main-card {
+        max-width: 400px;
+        margin: 4rem auto;
+        padding: 2rem 2rem 1.5rem 2rem;
+      }
+    </style>
   </head>
-  <body>
-    <p>
-      If not automatically redirected,
-      <a href="summary">click here</a>
-      to redirect to the Trader UI.
-    </p>
+  <body class="bg-light">
+    <div
+      class="container min-vh-100 d-flex flex-column justify-content-center align-items-center"
+    >
+      <div class="card shadow-sm main-card w-100 text-center">
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Redirecting...</span>
+            </div>
+          </div>
+          <h5 class="mb-3">Redirecting to Trader UI...</h5>
+          <p class="mb-0">
+            If not automatically redirected,
+            <a href="summary">click here</a>
+            to go to the Trader UI.
+          </p>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
