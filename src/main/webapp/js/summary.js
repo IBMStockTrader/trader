@@ -39,4 +39,44 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+  
+  // Add row click functionality for portfolio rows
+  const portfolioRows = document.querySelectorAll('.portfolio-row');
+  portfolioRows.forEach(function(row) {
+    row.addEventListener('click', function(e) {
+      // Don't trigger if clicking on action buttons
+      if (e.target.closest('.actions-cell') || e.target.closest('button')) {
+        return;
+      }
+      
+      const owner = row.getAttribute('data-owner');
+      if (owner) {
+        // Create and submit form to view portfolio
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.style.display = 'none';
+        
+        const ownerInput = document.createElement('input');
+        ownerInput.type = 'hidden';
+        ownerInput.name = 'owner';
+        ownerInput.value = owner;
+        
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'retrieve';
+        
+        const submitInput = document.createElement('input');
+        submitInput.type = 'hidden';
+        submitInput.name = 'submit';
+        submitInput.value = 'Submit';
+        
+        form.appendChild(ownerInput);
+        form.appendChild(actionInput);
+        form.appendChild(submitInput);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  });
 });

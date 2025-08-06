@@ -31,13 +31,18 @@
   font-weight: 600;
 }
 
+/* Page heading font size for addStock page */
+.page-heading {
+  font-size: 1.75rem !important;
+}
+
 /* Mobile responsive adjustments for addStock page */
 @media (max-width: 768px) {
   .form-inner {
     max-width: 100%;
     /* Ensure proper centering on mobile */
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
   }
   
@@ -92,8 +97,8 @@
   }
   
   /* Stack info badges vertically on very small screens */
-  .d-flex {
-    flex-direction: column;
+  .form-inner .d-flex {
+    /* flex-direction: column; */
     gap: 0.5rem;
   }
   

@@ -61,6 +61,31 @@
     padding: 0.75rem;
     font-size: 1rem;
   }
+  
+  /* Fix password toggle button layout on mobile */
+  .input-group {
+    flex-wrap: nowrap;
+  }
+  
+  .input-group .btn {
+    flex-shrink: 0;
+    width: auto;
+  }
+  
+  /* Ensure password field and toggle button stay on same line */
+  .input-group .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Force the toggle button to stay inline */
+  .input-group .btn[type="button"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    min-width: 44px;
+  }
 }
 
 @media (max-width: 576px) {
@@ -82,5 +107,51 @@
   /* Reduce card padding on very small screens */
   .card {
     padding: 1rem;
+  }
+  
+  /* Additional fixes for password toggle on very small screens */
+  .input-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch;
+  }
+  
+  .input-group .form-control {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .input-group .btn[type="button"] {
+    flex-shrink: 0;
+    width: auto !important;
+    min-width: 44px;
+    border-left: 1px solid #dee2e6;
+  }
+  
+  /* Override any Bootstrap responsive classes that might cause wrapping */
+  .input-group > * {
+    flex-shrink: 0;
+  }
+  
+  .input-group > .form-control {
+    flex: 1 1 auto;
+  }
+}
+
+/* Additional fixes for extremely narrow screens */
+@media (max-width: 480px) {
+  .input-group {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+  }
+  
+  .input-group .form-control {
+    min-width: 0;
+    width: auto;
+  }
+  
+  .input-group .btn[type="button"] {
+    min-width: 44px;
+    max-width: 44px;
   }
 }
