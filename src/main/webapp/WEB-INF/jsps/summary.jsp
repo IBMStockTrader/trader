@@ -40,12 +40,12 @@ static {
       <div class="card shadow-sm summary-card w-100">
         <div class="card-body">
           <div class="mb-3 text-center">
+            <img src="<%=headerImage%>" alt="header image" class="summary-header-img mb-3"/>
             <h1 class="page-heading mb-2">
               <i class="bi bi-bar-chart-fill text-primary me-2" aria-hidden="true"></i>
               <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Portfolio Summary
             </h1>
           </div>
-          <img src="<%=headerImage%>" alt="header image" class="summary-header-img mb-3"/>
           <div class="mb-4"></div>
           <% if(request.getAttribute("error") != null && ((Boolean)request.getAttribute("error")).booleanValue() == true) { %>
             <div class="alert alert-danger" role="alert">
@@ -91,37 +91,79 @@ static {
                         if (loyalty.equalsIgnoreCase("Platinum")) badgeClass = "bg-primary";
                         else if (loyalty.equalsIgnoreCase("Gold")) badgeClass = "bg-warning text-dark";
                         else if (loyalty.equalsIgnoreCase("Silver")) badgeClass = "bg-secondary";
-                        else if (loyalty.equalsIgnoreCase("Bronze")) badgeClass = "bg-light text-dark border";
+                        else if (loyalty.equalsIgnoreCase("Bronze")) badgeClass = "bg-bronze";
+                        else if (loyalty.equalsIgnoreCase("Basic")) badgeClass = "bg-light text-dark border";
                       }
                     %>
-                      <tr>
+                      <tr class="portfolio-row" data-owner="<%=owner%>" style="cursor: pointer;">
                         <td><%=owner%></td>
-                        <td>$<%=currency.format(broker.getTotal())%></td>
+                        <td class="text-end">$<%=currency.format(broker.getTotal())%></td>
                         <td><span class="badge <%=badgeClass%>"><%=loyalty%></span></td>
-                        <td>
-                          <form method="post" style="display:inline;">
-                            <input type="hidden" name="owner" value="<%=owner%>"/>
-                            <input type="hidden" name="action" value="retrieve"/>
-                            <button type="submit" name="submit" value="Submit" class="btn btn-view btn-sm me-1" title="View Portfolio">
-                              <i class="bi bi-eye"></i>
+                        <td class="actions-cell">
+                          <!-- Desktop: Show all buttons inline -->
+                          <div class="d-none d-md-block">
+                            <form method="post" style="display:inline;">
+                              <input type="hidden" name="owner" value="<%=owner%>"/>
+                              <input type="hidden" name="action" value="retrieve"/>
+                              <button type="submit" name="submit" value="Submit" class="btn btn-view btn-sm me-1" title="View Portfolio">
+                                <i class="bi bi-eye"></i>
+                              </button>
+                            </form>
+                            <form method="post" style="display:inline;">
+                              <input type="hidden" name="owner" value="<%=owner%>"/>
+                              <input type="hidden" name="action" value="update"/>
+                              <button type="submit" name="submit" value="Submit" class="btn btn-update btn-sm me-1" title="Update Portfolio">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                            </form>
+                            <form method="post" style="display:inline;">
+                              <input type="hidden" name="owner" value="<%=owner%>"/>
+                              <input type="hidden" name="action" value="delete"/>
+                              <button type="button" class="btn btn-delete btn-sm" title="Delete Portfolio"
+                                data-owner="<%=owner%>" onclick="showDeleteModal(this)">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                              <button type="submit" name="submit" value="Submit" style="display:none;"></button>
+                            </form>
+                          </div>
+                          
+                          <!-- Mobile: Show dropdown menu -->
+                          <div class="dropdown d-md-none">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                              <i class="bi bi-three-dots-vertical"></i>
                             </button>
-                          </form>
-                          <form method="post" style="display:inline;">
-                            <input type="hidden" name="owner" value="<%=owner%>"/>
-                            <input type="hidden" name="action" value="update"/>
-                            <button type="submit" name="submit" value="Submit" class="btn btn-update btn-sm me-1" title="Update Portfolio">
-                              <i class="bi bi-pencil"></i>
-                            </button>
-                          </form>
-                          <form method="post" style="display:inline;">
-                            <input type="hidden" name="owner" value="<%=owner%>"/>
-                            <input type="hidden" name="action" value="delete"/>
-                            <button type="button" class="btn btn-delete btn-sm" title="Delete Portfolio"
-                              data-owner="<%=owner%>" onclick="showDeleteModal(this)">
-                              <i class="bi bi-trash"></i>
-                            </button>
-                            <button type="submit" name="submit" value="Submit" style="display:none;"></button>
-                          </form>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                              <li>
+                                <form method="post" class="dropdown-item-form">
+                                  <input type="hidden" name="owner" value="<%=owner%>"/>
+                                  <input type="hidden" name="action" value="retrieve"/>
+                                  <button type="submit" name="submit" value="Submit" class="dropdown-item">
+                                    <i class="bi bi-eye me-2"></i>View Portfolio
+                                  </button>
+                                </form>
+                              </li>
+                              <li>
+                                <form method="post" class="dropdown-item-form">
+                                  <input type="hidden" name="owner" value="<%=owner%>"/>
+                                  <input type="hidden" name="action" value="update"/>
+                                  <button type="submit" name="submit" value="Submit" class="dropdown-item">
+                                    <i class="bi bi-pencil me-2"></i>Edit Portfolio
+                                  </button>
+                                </form>
+                              </li>
+                              <li><hr class="dropdown-divider"></li>
+                              <li>
+                                <form method="post" class="dropdown-item-form">
+                                  <input type="hidden" name="owner" value="<%=owner%>"/>
+                                  <input type="hidden" name="action" value="delete"/>
+                                  <button type="button" class="dropdown-item text-danger" data-owner="<%=owner%>" onclick="showDeleteModal(this)">
+                                    <i class="bi bi-trash me-2"></i>Delete Portfolio
+                                  </button>
+                                  <button type="submit" name="submit" value="Submit" style="display:none;"></button>
+                                </form>
+                              </li>
+                            </ul>
+                          </div>
                         </td>
                       </tr>
                     <% } %>
@@ -141,7 +183,7 @@ static {
     </div>
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
           <div class="modal-header bg-danger text-white">
             <h5 class="modal-title" id="deleteConfirmModalLabel">

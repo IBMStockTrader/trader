@@ -39,8 +39,6 @@ Utilities.getFooterImage(); %>
               alt="header image"
               class="header-img mb-3"
             />
-          </div>
-          <div class="mb-3 text-center">
             <h1 class="page-heading mb-2">
               <i class="bi bi-info-circle text-primary me-2" aria-hidden="true"></i>
               <span class="brand-main">Stock</span><span class="brand-accent">Trader</span> Message

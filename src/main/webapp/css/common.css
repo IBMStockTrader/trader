@@ -32,17 +32,11 @@ button,
   }
   
   .page-heading {
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
   }
   
   .login-heading {
     font-size: 1.5rem !important;
-  }
-  
-  .footer-img {
-    max-width: 300px !important;
-    width: 100%;
-    height: auto;
   }
 }
 
@@ -54,17 +48,11 @@ button,
   }
   
   .page-heading {
-    font-size: 1.25rem !important;
+    font-size: 1rem !important;
   }
   
   .login-heading {
     font-size: 1.25rem !important;
-  }
-  
-  .footer-img {
-    max-width: 250px !important;
-    width: 100%;
-    height: auto;
   }
   
   .container {
@@ -82,9 +70,9 @@ button,
   margin-right: auto;
 }
 
-/* Footer image styling - consistent size across all pages */
+/* Footer image styling - proportional to header image */
 .footer-img {
-  max-width: 400px;
+  max-width: 80%;
   width: 100%;
   height: auto;
   display: block;
@@ -114,6 +102,8 @@ button,
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 1px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Form inner styling */
@@ -174,57 +164,65 @@ button,
   }
 }
 
+/* Navbar logout button styling */
+.navbar-logout-btn {
+  transition: all 0.2s ease;
+}
+
 /* Mobile responsive navbar adjustments */
 @media (max-width: 768px) {
   .navbar-brand {
-    font-size: 1.5rem !important;
+    font-size: 1.75rem !important;
   }
   
-  .navbar .btn {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
+  .navbar-logout-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Ensure proper spacing */
+  .navbar .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
 /* Fix navbar visibility issues */
 @media (max-width: 576px) {
   .navbar-brand {
-    font-size: 1.25rem !important;
+    font-size: 1.5rem !important;
   }
   
-  .navbar .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+  .navbar-logout-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
   }
   
   /* Ensure navbar doesn't get cut off */
   .navbar .container-fluid {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-  
-  /* Force footer image to be smaller on very small screens */
-  .footer-img {
-    max-width: 200px !important;
-    width: 100%;
-    height: auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 }
 
 /* Additional fixes for very small screens */
 @media (max-width: 480px) {
   .navbar-brand {
-    font-size: 1rem !important;
+    font-size: 1.25rem !important;
   }
   
-  .navbar .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
+  .navbar-logout-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
   }
   
-  .footer-img {
-    max-width: 180px !important;
-    width: 100%;
-    height: auto;
+  .page-heading {
+    font-size: 0.875rem !important;
   }
+}
+
+/* Custom bronze badge styling */
+.badge.bg-bronze {
+  background-color: #cd7f32 !important;
+  color: white !important;
 } 

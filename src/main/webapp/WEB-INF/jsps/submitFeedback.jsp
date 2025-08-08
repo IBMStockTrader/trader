@@ -53,19 +53,17 @@ Utilities.getFooterImage(); %>
               alt="header image"
               class="header-img mb-3"
             />
+            <h1 class="page-heading mb-2">
+              <i
+                class="bi bi-chat-dots text-primary me-2"
+                aria-hidden="true"
+              ></i>
+              <span class="brand-main">Stock</span
+              ><span class="brand-accent">Trader</span> Feedback
+            </h1>
+            <i>Please share your feedback on this tool!</i>
           </div>
           <div class="form-inner">
-            <div class="mb-3 text-center">
-              <h1 class="page-heading mb-2">
-                <i
-                  class="bi bi-chat-dots text-primary me-2"
-                  aria-hidden="true"
-                ></i>
-                <span class="brand-main">Stock</span
-                ><span class="brand-accent">Trader</span> Feedback
-              </h1>
-              <i>Please share your feedback on this tool!</i>
-            </div>
             <form method="post" class="needs-validation" novalidate>
               <div class="mb-3">
                 <label for="feedback" class="form-label">Feedback</label>
