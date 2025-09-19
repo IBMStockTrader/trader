@@ -201,7 +201,7 @@
                      <assemblyArtifact>
                             <groupId>com.ibm.websphere.appserver.runtime</groupId>
                             <artifactId>wlp-webProfile10</artifactId>
-                            <version>25.0.0.6</version>
+                            <version>25.0.0.9</version>
                             <type>zip</type>
                      </assemblyArtifact>
                      <configDirectory>${basedir}/src/main/liberty/config</configDirectory>
