@@ -33,6 +33,8 @@ on:
     - '.github/**' 
   release:
     types: [created]
+  # Allow Manual Trigger of Builds
+  workflow_dispatch:
 
 # Environment variables available to all jobs and steps in this workflow
 env:
@@ -54,6 +56,9 @@ jobs:
     name: Setup, Build, Publish Deploy
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      id-token: write   # REQUIRED for OIDC
+      contents: read
 
     steps:
     - name: Checkout
@@ -84,16 +89,15 @@ jobs:
         # fi
         echo '::set-output name=unit-test-result::success'
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-2
+    - name: Configure AWS credentials via OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:          
+        role-to-assume: arn:aws:iam::992382412216:role/GHActionECRPushRole
+        aws-region: us-east-1
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
