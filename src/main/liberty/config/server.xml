@@ -16,7 +16,8 @@
 <server description="Trader UI server">
     <!-- Enable features -->
     <featureManager>
-        <feature>microProfile-6.1</feature>
+        <feature>microProfile-7.1</feature>
+        <feature>mpTelemetry-2.1</feature>
         <feature>pages-3.1</feature>
     </featureManager>
 
