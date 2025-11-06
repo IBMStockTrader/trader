@@ -187,6 +187,7 @@
                             <feature>microprofile-7.1</feature>
                             <feature>mpTelemetry-2.1</feature>
                             <feature>pages-3.1</feature>
+                            <feature>mpMetrics-5.1</feature>
                         </features>
                     </configuration>
                     </execution>                  
