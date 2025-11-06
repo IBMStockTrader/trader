@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.eclipse.microprofile</groupId>
             <artifactId>microprofile</artifactId>
-            <version>6.1</version>
+            <version>7.1</version>
             <type>pom</type>
             <scope>provided</scope>
         </dependency>
@@ -185,9 +185,7 @@
                     <configuration>
                         <features>
                             <feature>microprofile-7.1</feature>
-                            <feature>mpTelemetry-2.1</feature>
                             <feature>pages-3.1</feature>
-                            <feature>mpMetrics-5.1</feature>
                         </features>
                     </configuration>
                     </execution>                  
