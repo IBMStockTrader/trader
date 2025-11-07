@@ -13,6 +13,9 @@ IMAGE_TAG ?= latest
 OTEL_IMAGE ?= docker.io/otel/opentelemetry-collector:latest
 OTEL_CONFIG ?= otel-collector-config.yaml
 
+# Network
+NETWORK_NAME ?= trader-network
+
 # Container names
 TRADER_CONTAINER ?= trader
 OTEL_CONTAINER ?= otel-collector
@@ -55,27 +58,49 @@ build-image: ## Build only the container image (requires prior Maven build)
 	@echo "$(GREEN)Building container image...$(NC)"
 	$(CONTAINER_RUNTIME) build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
+.PHONY: network-create
+network-create: ## Create the custom network
+	@echo "$(GREEN)Creating network $(NETWORK_NAME)...$(NC)"
+	@$(CONTAINER_RUNTIME) network inspect $(NETWORK_NAME) >/dev/null 2>&1 || \
+		$(CONTAINER_RUNTIME) network create $(NETWORK_NAME)
+	@echo "$(GREEN)Network $(NETWORK_NAME) ready$(NC)"
+
+.PHONY: network-remove
+network-remove: ## Remove the custom network
+	@echo "$(YELLOW)Removing network $(NETWORK_NAME)...$(NC)"
+	@$(CONTAINER_RUNTIME) network rm $(NETWORK_NAME) 2>/dev/null || true
+	@echo "$(GREEN)Network removed$(NC)"
+
 .PHONY: start-otel
-start-otel: ## Start OpenTelemetry Collector
+start-otel: network-create ## Start OpenTelemetry Collector
 	@echo "$(GREEN)Starting OpenTelemetry Collector...$(NC)"
 	@$(CONTAINER_RUNTIME) rm -f $(OTEL_CONTAINER) 2>/dev/null || true
 	$(CONTAINER_RUNTIME) run -d \
 		--name $(OTEL_CONTAINER) \
-		--network host \
+		--network $(NETWORK_NAME) \
+		-p $(OTEL_GRPC_PORT):4317 \
+		-p $(OTEL_HTTP_PORT):4318 \
+		-p $(OTEL_METRICS_PORT):8888 \
 		-v $(PWD)/$(OTEL_CONFIG):/etc/otelcol/config.yaml:Z \
 		$(OTEL_IMAGE)
-	@echo "$(GREEN)OpenTelemetry Collector started on ports $(OTEL_GRPC_PORT), $(OTEL_HTTP_PORT), $(OTEL_METRICS_PORT)$(NC)"
+	@echo "$(GREEN)OpenTelemetry Collector started on network $(NETWORK_NAME)$(NC)"
+	@echo "$(GREEN)Ports: gRPC=$(OTEL_GRPC_PORT), HTTP=$(OTEL_HTTP_PORT), Metrics=$(OTEL_METRICS_PORT)$(NC)"
 
 .PHONY: start-trader
-start-trader: ## Start trader application
+start-trader: network-create ## Start trader application
 	@echo "$(GREEN)Starting trader application...$(NC)"
 	@$(CONTAINER_RUNTIME) rm -f $(TRADER_CONTAINER) 2>/dev/null || true
 	$(CONTAINER_RUNTIME) run -d \
 		--name $(TRADER_CONTAINER) \
-		--network host \
+		--network $(NETWORK_NAME) \
+		-p $(TRADER_HTTP_PORT):9080 \
+		-p $(TRADER_HTTPS_PORT):9443 \
+		-e OTEL_EXPORTER_OTLP_ENDPOINT=http://$(OTEL_CONTAINER):4317 \
+		-e JWT_AUDIENCE=stock \
+		-e JWT_ISSUER=trader \
 		$(IMAGE_NAME):$(IMAGE_TAG)
-	@echo "$(GREEN)Trader started on port $(TRADER_HTTP_PORT)$(NC)"
-	@echo "Access the app at: http://localhost:$(TRADER_HTTP_PORT)/trader/summary"
+	@echo "$(GREEN)Trader started on network $(NETWORK_NAME)$(NC)"
+	@echo "$(GREEN)Access the app at: http://localhost:$(TRADER_HTTP_PORT)/trader$(NC)"
 
 .PHONY: start
 start: start-otel start-trader ## Start both OpenTelemetry Collector and trader
@@ -95,6 +120,10 @@ clean: ## Stop and remove all containers
 	@$(CONTAINER_RUNTIME) rm -f $(TRADER_CONTAINER) $(OTEL_CONTAINER) 2>/dev/null || true
 	@echo "$(GREEN)Cleanup complete$(NC)"
 
+.PHONY: clean-all
+clean-all: clean network-remove ## Stop and remove all containers and network
+	@echo "$(GREEN)Full cleanup complete$(NC)"
+
 .PHONY: restart
 restart: clean start ## Restart all services
 
@@ -102,6 +131,9 @@ restart: clean start ## Restart all services
 status: ## Show status of containers
 	@echo "$(GREEN)Container Status:$(NC)"
 	@$(CONTAINER_RUNTIME) ps --filter name=$(OTEL_CONTAINER) --filter name=$(TRADER_CONTAINER) --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+	@echo ""
+	@echo "$(GREEN)Network Status:$(NC)"
+	@$(CONTAINER_RUNTIME) network inspect $(NETWORK_NAME) --format '{{.Name}}: {{len .Containers}} container(s)' 2>/dev/null || echo "$(YELLOW)Network $(NETWORK_NAME) not found$(NC)"
 
 .PHONY: logs-trader
 logs-trader: ## Follow trader logs
@@ -140,10 +172,20 @@ test-health: ## Test health endpoint
 .PHONY: test-app
 test-app: ## Open trader app in browser
 	@echo "$(GREEN)Opening trader app...$(NC)"
-	@echo "URL: http://localhost:$(TRADER_HTTP_PORT)/trader/summary"
-	@command -v xdg-open >/dev/null && xdg-open "http://localhost:$(TRADER_HTTP_PORT)/trader/summary" 2>/dev/null || \
-	 command -v open >/dev/null && open "http://localhost:$(TRADER_HTTP_PORT)/trader/summary" 2>/dev/null || \
-	 echo "Please open http://localhost:$(TRADER_HTTP_PORT)/trader/summary in your browser"
+	@echo "URL: http://localhost:$(TRADER_HTTP_PORT)/trader"
+	@command -v xdg-open >/dev/null && xdg-open "http://localhost:$(TRADER_HTTP_PORT)/trader" 2>/dev/null || \
+	 command -v open >/dev/null && open "http://localhost:$(TRADER_HTTP_PORT)/trader" 2>/dev/null || \
+	 echo "Please open http://localhost:$(TRADER_HTTP_PORT)/trader in your browser"
+
+.PHONY: test-otel-metrics
+test-otel-metrics: ## Test OpenTelemetry Collector metrics endpoint
+	@echo "$(GREEN)Testing OpenTelemetry Collector metrics...$(NC)"
+	@curl -s http://localhost:$(OTEL_METRICS_PORT)/metrics | head -20 || echo "$(RED)Failed to fetch OTEL metrics$(NC)"
+
+.PHONY: network-inspect
+network-inspect: ## Inspect the network and show connected containers
+	@echo "$(GREEN)Network Details:$(NC)"
+	@$(CONTAINER_RUNTIME) network inspect $(NETWORK_NAME) 2>/dev/null || echo "$(RED)Network $(NETWORK_NAME) not found$(NC)"
 
 .PHONY: test
 test: test-health test-metrics ## Run all tests
