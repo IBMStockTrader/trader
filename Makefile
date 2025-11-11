@@ -10,7 +10,7 @@ endif
 # Variables
 IMAGE_NAME ?= trader
 IMAGE_TAG ?= latest
-OTEL_IMAGE ?= docker.io/otel/opentelemetry-collector:latest
+OTEL_IMAGE ?= ghrc.io/otel/opentelemetry-collector:latest
 OTEL_CONFIG ?= otel-collector-config.yaml
 
 # Network
