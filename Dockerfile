@@ -30,5 +30,14 @@ COPY --chown=1001:0 src/main/liberty/config /config
 # RUN features.sh
 COPY --chown=1001:0 target/TraderUI.war /config/apps/TraderUI.war
 
+# OpenTelemetry configuration used for local builds - when deployed via Helm chart, these will be set via environment variables within the chart
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+# Disabled by default, enable for testing
+ENV OTEL_SDK_DISABLED=true
+ENV OTEL_TRACES_EXPORTER=otlp
+ENV OTEL_LOGS_EXPORTER=otlp
+ENV OTEL_METRICS_EXPORTER=otlp
+ENV OTEL_SERVICE_NAME=trader
+
 USER 1001
 RUN configure.sh
