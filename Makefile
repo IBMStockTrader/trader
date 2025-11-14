@@ -14,7 +14,7 @@ LOCAL_IMAGE := $(IMAGE_NAME):$(IMAGE_TAG)
 
 # Registry configuration
 DEV_REGISTRY ?= stocktraderotel.azurecr.io
-PROD_REGISTRY ?= ghrc.io
+PROD_REGISTRY ?= ghcr.io
 DEV_IMAGE := $(DEV_REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 PROD_IMAGE := $(PROD_REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
