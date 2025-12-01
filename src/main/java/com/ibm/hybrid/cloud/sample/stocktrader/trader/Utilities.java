@@ -61,6 +61,8 @@ public class Utilities {
 	private static String whiteLabelLoginMessage = "Login to <span class=\"brand-main\">Stock</span><span class=\"brand-accent\">Trader</span>";
 
 	private static boolean useS3 = false;
+	private static boolean sentimentEnabled = false;
+	private static String sentimentDashboardUrl = null;
 	private static AmazonS3 s3 = null;
 	private static String s3Bucket = null;
 
@@ -85,6 +87,15 @@ public class Utilities {
 
 		useS3 = Boolean.parseBoolean(System.getenv("S3_ENABLED"));
 		logger.info("useS3: "+useS3);
+
+		sentimentEnabled = Boolean.parseBoolean(System.getenv("SENTIMENT_ENABLED"));
+		logger.info("Sentiment enabled: " + sentimentEnabled);
+		
+		String sentimentDashboardUrlFromEnv = System.getenv("SENTIMENT_DASHBOARD_URL");
+		if (sentimentDashboardUrlFromEnv != null && !sentimentDashboardUrlFromEnv.isEmpty()) {
+			sentimentDashboardUrl = sentimentDashboardUrlFromEnv;
+			logger.info("Sentiment dashboard URL: " + sentimentDashboardUrl);
+		}
 
 		String mpUrlPropName = BrokerClient.class.getName() + "/mp-rest/url";
 		String brokerURL = System.getenv("BROKER_URL");
@@ -162,6 +173,14 @@ public class Utilities {
 
 	public static String getLoginMessage() {
 		return whiteLabelLoginMessage;
+	}
+
+	public static boolean getSentimentEnabled() {
+		return sentimentEnabled;
+	}
+
+	public static String getSentimentDashboardUrl() {
+		return sentimentDashboardUrl;
 	}
 
 	public static void logToS3(String key, Object document) {
