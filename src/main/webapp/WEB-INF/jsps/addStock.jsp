@@ -101,6 +101,49 @@ Utilities.getFooterImage(); %>
                   />
                 </div>
                 <div class="invalid-feedback">Please enter a stock symbol.</div>
+                <!-- Sentiment Preview Section -->
+                <div id="sentimentPreview" class="mt-3" style="display: none;">
+                  <div class="alert alert-info mb-0">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="bi bi-graph-up me-2"></i>
+                      <strong>Sentiment Analysis:</strong>
+                    </div>
+                    <div id="sentimentContent">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><strong>Dominant Sentiment:</strong></span>
+                        <span id="dominantSentiment" class="badge"></span>
+                      </div>
+                      <div class="row text-center small">
+                        <div class="col-4">
+                          <div class="text-success">Positive</div>
+                          <div id="positiveScore" class="fw-bold">-</div>
+                        </div>
+                        <div class="col-4">
+                          <div class="text-danger">Negative</div>
+                          <div id="negativeScore" class="fw-bold">-</div>
+                        </div>
+                        <div class="col-4">
+                          <div class="text-secondary">Neutral</div>
+                          <div id="neutralScore" class="fw-bold">-</div>
+                        </div>
+                      </div>
+                      <div class="mt-2 small text-muted">
+                        <span>Net Sentiment: <strong id="netSentiment">-</strong></span> | 
+                        <span>Sources Analyzed: <strong id="sourcesAnalyzed">-</strong></span>
+                      </div>
+                    </div>
+                    <div id="sentimentLoading" class="text-center">
+                      <div class="spinner-border spinner-border-sm me-2" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      <span>Analyzing sentiment...</span>
+                    </div>
+                    <div id="sentimentError" class="text-danger small" style="display: none;">
+                      <i class="bi bi-exclamation-triangle me-1"></i>
+                      Sentiment analysis unavailable
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="shares" class="form-label"
