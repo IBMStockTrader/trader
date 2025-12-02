@@ -88,7 +88,8 @@ document.addEventListener("DOMContentLoaded", function () {
           sentimentError.style.display = "none";
 
           // Update sentiment display
-          const dominant = data.dominant_sentiment || "unknown";
+          console.log("Sentiment data received:", data); // Debug log
+          const dominant = (data.dominant_sentiment && data.dominant_sentiment !== "null" && data.dominant_sentiment !== "NULL") ? data.dominant_sentiment : "unknown";
           const dominantBadge = document.getElementById("dominantSentiment");
           dominantBadge.textContent = dominant.toUpperCase();
           
@@ -111,10 +112,12 @@ document.addEventListener("DOMContentLoaded", function () {
             (data.neutral * 100).toFixed(1) + "%";
           
           // Update net sentiment and sources
+          console.log("sources_analyzed value:", data.sources_analyzed, "type:", typeof data.sources_analyzed); // Debug log
+          const netSentiment = data.net_sentiment !== undefined && data.net_sentiment !== null ? data.net_sentiment : 0;
+          const sourcesAnalyzed = data.sources_analyzed !== undefined && data.sources_analyzed !== null ? data.sources_analyzed : 0;
           document.getElementById("netSentiment").textContent = 
-            (data.net_sentiment > 0 ? "+" : "") + data.net_sentiment.toFixed(3);
-          document.getElementById("sourcesAnalyzed").textContent = 
-            data.sources_analyzed || 0;
+            (netSentiment > 0 ? "+" : "") + netSentiment.toFixed(3);
+          document.getElementById("sourcesAnalyzed").textContent = sourcesAnalyzed;
         })
         .catch(error => {
           console.error("Sentiment fetch error:", error);

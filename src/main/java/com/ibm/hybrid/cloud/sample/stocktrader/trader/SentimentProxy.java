@@ -100,15 +100,23 @@ public class SentimentProxy extends HttpServlet {
 			if (sentiment != null) {
 				// Convert Sentiment object to JSON
 				response.setStatus(HttpServletResponse.SC_OK);
+				String dominantSentiment = sentiment.getDominantSentiment();
+				int sourcesAnalyzed = sentiment.getSourcesAnalyzed();
+				logger.info("SentimentProxy: Received sentiment for " + symbol + 
+					" - dominant: " + dominantSentiment + 
+					", sources: " + sourcesAnalyzed +
+					", positive: " + sentiment.getPositive() +
+					", negative: " + sentiment.getNegative() +
+					", neutral: " + sentiment.getNeutral());
 				response.getWriter().write("{" +
 					"\"symbol\":\"" + sentiment.getSymbol() + "\"," +
 					"\"positive\":" + sentiment.getPositive() + "," +
 					"\"negative\":" + sentiment.getNegative() + "," +
 					"\"neutral\":" + sentiment.getNeutral() + "," +
 					"\"net_sentiment\":" + sentiment.getNetSentiment() + "," +
-					"\"dominant_sentiment\":\"" + sentiment.getDominantSentiment() + "\"," +
+					"\"dominant_sentiment\":\"" + (dominantSentiment != null ? dominantSentiment : "null") + "\"," +
 					"\"timestamp\":\"" + (sentiment.getTimestamp() != null ? sentiment.getTimestamp() : "") + "\"," +
-					"\"sources_analyzed\":" + sentiment.getSourcesAnalyzed() +
+					"\"sources_analyzed\":" + sourcesAnalyzed +
 					"}");
 				logger.fine("Successfully proxied sentiment response for " + symbol);
 			} else {

@@ -17,6 +17,8 @@
 
 package com.ibm.hybrid.cloud.sample.stocktrader.trader.json;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+
 /** JSON-B POJO class representing a Sentiment JSON object from the Sentiment Analysis API */
 public class Sentiment {
     private String symbol;
@@ -63,18 +65,22 @@ public class Sentiment {
         this.neutral = neutral;
     }
 
+    @JsonbProperty("net_sentiment")
     public double getNetSentiment() {
         return netSentiment;
     }
 
+    @JsonbProperty("net_sentiment")
     public void setNetSentiment(double netSentiment) {
         this.netSentiment = netSentiment;
     }
 
+    @JsonbProperty("dominant_sentiment")
     public String getDominantSentiment() {
         return dominantSentiment;
     }
 
+    @JsonbProperty("dominant_sentiment")
     public void setDominantSentiment(String dominantSentiment) {
         this.dominantSentiment = dominantSentiment;
     }
@@ -87,10 +93,12 @@ public class Sentiment {
         this.timestamp = timestamp;
     }
 
+    @JsonbProperty("sources_analyzed")
     public int getSourcesAnalyzed() {
         return sourcesAnalyzed;
     }
 
+    @JsonbProperty("sources_analyzed")
     public void setSourcesAnalyzed(int sourcesAnalyzed) {
         this.sourcesAnalyzed = sourcesAnalyzed;
     }
