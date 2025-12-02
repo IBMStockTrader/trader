@@ -69,7 +69,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const symbolUpper = symbol.trim().toUpperCase();
       const url = `${sentimentApiUrl}/${symbolUpper}`;
 
-      fetch(url)
+      fetch(url, {
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);

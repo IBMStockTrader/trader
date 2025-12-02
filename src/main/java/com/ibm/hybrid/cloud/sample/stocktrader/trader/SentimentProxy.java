@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.annotation.HttpConstraint;
+import jakarta.servlet.annotation.ServletSecurity;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +44,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
  * Flow: Browser → Trader (this servlet) → Broker → Sentiment API
  */
 @WebServlet(description = "Sentiment API Proxy servlet via Broker", urlPatterns = { "/sentiment/*" })
+@ServletSecurity(@HttpConstraint(rolesAllowed = { "StockTrader" }))
 public class SentimentProxy extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(SentimentProxy.class.getName());
