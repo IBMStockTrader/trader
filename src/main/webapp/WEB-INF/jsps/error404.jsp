@@ -1,4 +1,5 @@
-<%@ page isErrorPage="true" %>
+<%@ page isErrorPage="true" 
+         import="com.ibm.hybrid.cloud.sample.stocktrader.trader.Utilities"%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
