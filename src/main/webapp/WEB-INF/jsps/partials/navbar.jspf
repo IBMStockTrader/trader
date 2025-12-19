@@ -6,6 +6,17 @@
       Stock <span class="text-primary">Trader</span>
     </a>
     
+    <!-- Sentiment Dashboard Link (if enabled) -->
+    <% if(Utilities.getSentimentEnabled() && Utilities.getSentimentDashboardUrl() != null) { %>
+      <a href="<%=Utilities.getSentimentDashboardUrl()%>" 
+         target="_blank" 
+         class="btn btn-outline-primary btn-sm me-2"
+         title="View Sentiment Dashboard">
+        <i class="bi bi-graph-up me-1"></i>
+        <span class="d-none d-md-inline">Sentiment Dashboard</span>
+      </a>
+    <% } %>
+    
     <!-- Always visible logout button -->
     <div class="d-flex align-items-center ms-auto">
       <form method="post" action="/trader/summary" class="mb-0">

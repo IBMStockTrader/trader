@@ -84,6 +84,12 @@ public interface BrokerClient {
 	@WithSpan(kind = SpanKind.CLIENT, value="BrokerClient.getReturnOnInvestment")
 	public String getReturnOnInvestment(@HeaderParam("Authorization") String jwt, @PathParam("owner") String owner);
 
+	@GET
+	@Path("/sentiment/{symbol}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@WithSpan(kind = SpanKind.CLIENT, value="BrokerClient.getSentiment")
+	public com.ibm.hybrid.cloud.sample.stocktrader.trader.json.Sentiment getSentiment(@HeaderParam("Authorization") String jwt, @PathParam("symbol") String symbol);
+
 	@POST
 	@Path("/{owner}/feedback")
 	@Consumes("application/json")
