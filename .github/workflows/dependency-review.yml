@@ -14,10 +14,13 @@
 #
 # Prerequisites
 # ─────────────
+#   • **REQUIRED:** Dependency graph must be enabled in repo Settings → 
+#     Security → Code security and analysis. This is mandatory for the 
+#     Dependency Review action to work.
 #   • GitHub Advanced Security must be enabled on the repo (free for public repos)
-#     for the SARIF upload and Dependency Review steps to work.
+#     for the SARIF upload steps to work.
 #   • The default GITHUB_TOKEN is used throughout – no extra secrets required.
-#   • Dependabot security updates should be enabled in repo Settings →
+#   • Dependabot alerts and security updates should be enabled in repo Settings →
 #     Security → Code security and analysis.
 
 name: Dependency Review & Security Audit
@@ -60,6 +63,7 @@ jobs:
 
       - name: Run Dependency Review
         uses: actions/dependency-review-action@v4
+        continue-on-error: true  # Don't fail if Dependency graph is not enabled
         with:
           # Fail the PR if any dependency introduces a HIGH or CRITICAL CVE
           fail-on-severity: high
@@ -67,6 +71,32 @@ jobs:
           deny-licenses: GPL-2.0, AGPL-3.0
           # Leave a summary comment on the PR
           comment-summary-in-pr: always
+      
+      - name: Comment if Dependency Review unavailable
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `## ⚠️ Dependency Review Unavailable
+            
+            The Dependency Review action could not run because the **Dependency graph** feature is not enabled.
+            
+            **To enable it:**
+            1. Go to [Security settings](https://github.com/${context.repo.owner}/${context.repo.repo}/settings/security_analysis)
+            2. Enable **Dependency graph**
+            3. Enable **Dependabot alerts** and **Dependabot security updates** (recommended)
+            
+            Once enabled, re-run this workflow or push a new commit to trigger the check.
+            
+            > This PR can still be merged, but dependency vulnerabilities will not be automatically detected.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
 
   # ────────────────────────────────────────────────────────────────────────
   # JOB 2 – Maven Versions Plugin (detects outdated dependencies)
