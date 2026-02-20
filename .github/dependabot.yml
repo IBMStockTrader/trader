@@ -21,7 +21,7 @@ updates:
     open-pull-requests-limit: 10
 
     # Target branch for dependency-update PRs
-    target-branch: "main"
+    target-branch: "master"
 
     # Group all non-major updates into a single PR to reduce noise
     groups:

@@ -24,14 +24,14 @@ name: Dependency Build Verification
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ["master"]
     paths:
       - "pom.xml"
       - "src/**"
       - ".github/workflows/dependency-build-verification.yml"
 
   push:
-    branches: ["main"]
+    branches: ["master"]
     paths:
       - "pom.xml"
       - "src/**"
@@ -56,7 +56,7 @@ permissions:
 jobs:
   # ────────────────────────────────────────────────────────────────────────
   # JOB 1 – Core Build Verification
-  # Runs on every PR and push to main to confirm the current state builds
+  # Runs on every PR and push to master to confirm the current state builds
   # ────────────────────────────────────────────────────────────────────────
   build-verification:
     name: Build & Test Verification (JDK ${{ inputs.jdk_version || '17' }})
@@ -327,7 +327,7 @@ jobs:
               repo:  context.repo.repo,
               title: `⬆️ chore(deps): Bump Maven dependencies to latest – ${date}`,
               head:  branch,
-              base:  'main',
+              base:  'master',
               body: [
                 '## 🤖 Automated Dependency Update – Build Verified',
                 '',

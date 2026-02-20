@@ -25,11 +25,11 @@ name: Dependency Review & Security Audit
 on:
   # Run on every PR to catch newly introduced vulnerable or outdated deps
   pull_request:
-    branches: ["main"]
+    branches: ["master"]
 
-  # Run on every push to main to keep the baseline clean
+  # Run on every push to master to keep the baseline clean
   push:
-    branches: ["main"]
+    branches: ["master"]
 
   # Weekly full scan independent of PRs (Sunday night UTC)
   schedule:
@@ -70,7 +70,7 @@ jobs:
 
   # ────────────────────────────────────────────────────────────────────────
   # JOB 2 – Maven Versions Plugin (detects outdated dependencies)
-  # Runs on push to main, schedule, and workflow_dispatch
+  # Runs on push to master, schedule, and workflow_dispatch
   # ────────────────────────────────────────────────────────────────────────
   versions-check:
     name: Check for Outdated Maven Dependencies
@@ -184,7 +184,7 @@ jobs:
 
   # ────────────────────────────────────────────────────────────────────────
   # JOB 3 – OWASP Dependency-Check (CVE / security scan)
-  # Runs on push to main, schedule, and workflow_dispatch
+  # Runs on push to master, schedule, and workflow_dispatch
   # ────────────────────────────────────────────────────────────────────────
   owasp-scan:
     name: OWASP Dependency-Check (CVE Scan)
