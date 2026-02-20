@@ -214,7 +214,7 @@ jobs:
             -DoutputDirectory=target/dependency-check-report \
             --no-transfer-progress \
             || true   # Don't fail the step; we handle failures via the issue below
-        env:
+        # env:
           # Optional: supply an NVD API key to avoid rate-limiting on the CVE database
           # NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
