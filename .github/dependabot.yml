@@ -1,0 +1,75 @@
+# .github/dependabot.yml
+#
+# Dependabot configuration for IBMStockTrader/trader
+# Monitors Java (Maven) packages and GitHub Actions for outdated versions.
+#
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ── Java / Maven ──────────────────────────────────────────────────────────
+  - package-ecosystem: "maven"
+    directory: "/"                   # Location of the root pom.xml
+    schedule:
+      interval: "weekly"             # Check every Monday by default
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+
+    # Raise a maximum of 10 open PRs for Maven deps at any one time
+    open-pull-requests-limit: 10
+
+    # Target branch for dependency-update PRs
+    target-branch: "master"
+
+    # Group all non-major updates into a single PR to reduce noise
+    groups:
+      minor-and-patch-updates:
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Labels automatically applied to Dependabot PRs
+    labels:
+      - "dependencies"
+      - "java"
+      - "automated"
+
+    # Commit message prefix for easy filtering in git log / changelogs
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+    # Reviewers and assignees (adjust to your team's GitHub handles)
+    # reviewers:
+    #   - "your-github-username"
+    # assignees:
+    #   - "your-github-username"
+
+    # Allow both direct and indirect (transitive) dependency updates
+    allow:
+      - dependency-type: "all"
+
+    # Example: pin or ignore a specific dependency if needed
+    # ignore:
+    #   - dependency-name: "com.example:some-library"
+    #     versions: ["2.x"]           # Ignore all 2.x releases
+
+  # ── GitHub Actions ────────────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "chore(actions)"
+

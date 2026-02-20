@@ -17,9 +17,11 @@
     <!-- Enable features -->
     <featureManager>
         <feature>microProfile-7.1</feature>
-        <feature>mpTelemetry-2.1</feature>
         <feature>pages-3.1</feature>
+        
     </featureManager>
+
+    <mpTelemetry source="message, trace, ffdc"/>
 
     <variable name="AUTH_TYPE"  defaultValue="basic"/>
     <variable name="TRACE_SPEC" defaultValue="*=info"/>
