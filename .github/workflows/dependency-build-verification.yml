@@ -1,0 +1,493 @@
+# .github/workflows/dependency-build-verification.yml
+#
+# Dependency Build Verification for IBMStockTrader/trader
+#
+# This workflow verifies that after any dependency update (from Dependabot or
+# manual changes), the project still compiles and builds successfully.
+#
+# It runs:
+#   1. build-verification   – Full Maven compile, test, and package on every PR
+#                             and push to main. Catches broken builds immediately.
+#   2. dependency-update-smoke-test – Simulates a dependency update by running
+#                             `mvn versions:use-latest-releases` on a temp branch,
+#                             then attempts a full build to confirm nothing breaks.
+#                             Runs weekly and on workflow_dispatch.
+#   3. matrix-build         – Validates the build across multiple JDK versions
+#                             (11, 17, 21) to ensure forward compatibility.
+#
+# Prerequisites
+# ─────────────
+#   • A valid pom.xml at the repo root (Maven project).
+#   • GITHUB_TOKEN with contents:write and pull-requests:write for PR creation.
+
+name: Dependency Build Verification
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "pom.xml"
+      - "src/**"
+      - ".github/workflows/dependency-build-verification.yml"
+
+  push:
+    branches: ["main"]
+    paths:
+      - "pom.xml"
+      - "src/**"
+
+  # Weekly dry-run: update all deps and verify the build still passes
+  schedule:
+    - cron: "0 3 * * 1"   # Monday 03:00 UTC (after Dependabot's 06:00 check)
+
+  workflow_dispatch:
+    inputs:
+      jdk_version:
+        description: "JDK version to build with (default: 17)"
+        required: false
+        default: "17"
+
+permissions:
+  contents: write        # Required to push the verification branch
+  pull-requests: write   # Required to open the verification PR
+  issues: write          # Required to comment on build failures
+  checks: write          # Required to post check run results
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 1 – Core Build Verification
+  # Runs on every PR and push to main to confirm the current state builds
+  # ────────────────────────────────────────────────────────────────────────
+  build-verification:
+    name: Build & Test Verification (JDK ${{ inputs.jdk_version || '17' }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.jdk_version || '17' }}
+          distribution: "temurin"
+          cache: "maven"
+
+      # Validate the POM structure before attempting a build
+      - name: Validate POM
+        run: mvn --batch-mode validate --no-transfer-progress
+
+      # Full compile to surface any source-level breakage
+      - name: Compile
+        run: mvn --batch-mode compile --no-transfer-progress
+
+      # Run the test suite — includes unit and integration tests
+      - name: Test
+        run: |
+          mvn --batch-mode test \
+            --no-transfer-progress \
+            -Dsurefire.failIfNoSpecifiedTests=false
+        continue-on-error: false
+
+      # Package into a WAR/JAR (mirrors the actual Docker build step)
+      - name: Package
+        run: |
+          mvn --batch-mode package \
+            --no-transfer-progress \
+            -DskipTests \
+            -Dmaven.test.skip=false
+
+      # Verify runs all integration-test lifecycle phases and checks
+      - name: Verify (full lifecycle)
+        run: mvn --batch-mode verify --no-transfer-progress
+
+      # Upload test results so they appear in the Actions UI
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-jdk${{ inputs.jdk_version || '17' }}
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          retention-days: 14
+
+      # Upload the built artefact so it can be inspected
+      - name: Upload build artefact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: trader-build-jdk${{ inputs.jdk_version || '17' }}
+          path: target/*.war
+          retention-days: 7
+
+      # Post a PR comment summarising the build outcome
+      - name: Comment build result on PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const outcome = '${{ job.status }}';
+            const icon    = outcome === 'success' ? '✅' : '❌';
+            const jdk     = '${{ inputs.jdk_version || '17' }}';
+
+            const body = [
+              `## ${icon} Build Verification – JDK ${jdk}`,
+              '',
+              `**Status:** ${outcome.toUpperCase()}`,
+              `**Run:** [${context.runId}](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              '',
+              outcome === 'success'
+                ? '✅ All Maven lifecycle phases passed: `validate → compile → test → package → verify`.'
+                : '❌ The build failed. Check the run logs above for details. This PR should not be merged until the build is green.',
+            ].join('\n');
+
+            // Find and update an existing bot comment rather than spamming new ones
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const marker   = '<!-- build-verification-comment -->';
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
+                comment_id: existing.id,
+                body:       marker + '\n' + body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner:       context.repo.owner,
+                repo:        context.repo.repo,
+                issue_number: context.issue.number,
+                body:        marker + '\n' + body,
+              });
+            }
+
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 2 – Dependency Update Smoke Test
+  # Weekly: bumps all deps to latest, attempts a full build, then opens a PR
+  # if the build passes — or an issue if it fails.
+  # ────────────────────────────────────────────────────────────────────────
+  dependency-update-smoke-test:
+    name: Dependency Update Smoke Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Full history needed to push a new branch
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Configure Git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Record what the dependencies look like before any changes
+      - name: Capture current dependency tree
+        run: |
+          mvn --batch-mode dependency:tree \
+            --no-transfer-progress \
+            -DoutputFile=before-dependency-tree.txt \
+            -DoutputType=text
+
+      # Bump all dependencies to their latest available release
+      - name: Update dependencies to latest releases
+        id: update_deps
+        run: |
+          mvn --batch-mode versions:use-latest-releases \
+            versions:use-latest-versions \
+            -DgenerateBackupPoms=false \
+            -DprocessAllModules=true \
+            --no-transfer-progress
+
+          # Check if pom.xml was actually changed
+          if git diff --quiet pom.xml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No dependency version changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Dependency versions were updated in pom.xml."
+          fi
+
+      # Record what the dependencies look like after the update
+      - name: Capture updated dependency tree
+        if: steps.update_deps.outputs.changed == 'true'
+        run: |
+          mvn --batch-mode dependency:tree \
+            --no-transfer-progress \
+            -DoutputFile=after-dependency-tree.txt \
+            -DoutputType=text || true
+
+      # Produce a human-readable diff of what changed
+      - name: Generate dependency diff
+        if: steps.update_deps.outputs.changed == 'true'
+        id: dep_diff
+        run: |
+          diff before-dependency-tree.txt after-dependency-tree.txt \
+            > dependency-diff.txt || true
+
+          # Summarise: show only the lines that changed version numbers
+          grep -E "^\+.*:[0-9]|^\-.*:[0-9]" dependency-diff.txt \
+            > dependency-diff-summary.txt || true
+
+          echo "summary<<EOF" >> "$GITHUB_OUTPUT"
+          head -100 dependency-diff-summary.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      # ── Attempt a full build with the updated dependencies ───────────────
+      - name: Compile with updated dependencies
+        if: steps.update_deps.outputs.changed == 'true'
+        id: compile_check
+        run: mvn --batch-mode compile --no-transfer-progress
+        continue-on-error: true
+
+      - name: Test with updated dependencies
+        if: steps.update_deps.outputs.changed == 'true' && steps.compile_check.outcome == 'success'
+        id: test_check
+        run: |
+          mvn --batch-mode test \
+            --no-transfer-progress \
+            -Dsurefire.failIfNoSpecifiedTests=false
+        continue-on-error: true
+
+      - name: Package with updated dependencies
+        if: steps.update_deps.outputs.changed == 'true' && steps.test_check.outcome == 'success'
+        id: package_check
+        run: |
+          mvn --batch-mode package \
+            --no-transfer-progress \
+            -DskipTests
+        continue-on-error: true
+
+      - name: Verify full lifecycle with updated dependencies
+        if: steps.update_deps.outputs.changed == 'true' && steps.package_check.outcome == 'success'
+        id: verify_check
+        run: mvn --batch-mode verify --no-transfer-progress
+        continue-on-error: true
+
+      # ── Upload test results for inspection regardless of build outcome ───
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: steps.update_deps.outputs.changed == 'true' && always()
+        with:
+          name: smoke-test-results
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+            dependency-diff.txt
+            dependency-diff-summary.txt
+            after-dependency-tree.txt
+          retention-days: 14
+
+      # ── If the build passed: push a branch and open a PR ────────────────
+      - name: Push update branch and open PR
+        if: |
+          steps.update_deps.outputs.changed == 'true' &&
+          steps.compile_check.outcome  == 'success' &&
+          steps.test_check.outcome     == 'success' &&
+          steps.package_check.outcome  == 'success' &&
+          steps.verify_check.outcome   == 'success'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
+            const date    = new Date().toISOString().slice(0, 10);
+            const branch  = `dependabot/maven-smoke-test-${date}`;
+
+            // Push the updated pom.xml to a new branch
+            execSync(`git checkout -b ${branch}`);
+            execSync('git add pom.xml');
+            execSync(`git commit -m "chore(deps): bump Maven dependencies to latest (smoke-tested ${date})"`);
+            execSync(`git push origin ${branch}`);
+
+            const fs   = require('fs');
+            const diff = fs.existsSync('dependency-diff-summary.txt')
+              ? fs.readFileSync('dependency-diff-summary.txt', 'utf8').trim()
+              : 'No diff available.';
+
+            // Open the PR
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              title: `⬆️ chore(deps): Bump Maven dependencies to latest – ${date}`,
+              head:  branch,
+              base:  'main',
+              body: [
+                '## 🤖 Automated Dependency Update – Build Verified',
+                '',
+                '> This PR was opened automatically by the **Dependency Build Verification** workflow.',
+                '> All Maven lifecycle phases (`validate → compile → test → package → verify`) passed',
+                '> with the updated dependency versions before this PR was created.',
+                '',
+                '### What changed',
+                '```diff',
+                diff.slice(0, 10000),
+                '```',
+                '',
+                `**Workflow run:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                '### Merge checklist',
+                '- [ ] Review the dependency diff above for unexpected major-version bumps',
+                '- [ ] Confirm CI checks pass on this PR',
+                '- [ ] Check the OWASP scan results in the Security tab',
+              ].join('\n'),
+              draft: false,
+            });
+
+            // Apply labels to the PR
+            await github.rest.issues.addLabels({
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              issue_number: pr.number,
+              labels:       ['dependencies', 'java', 'automated'],
+            });
+
+            console.log(`Opened PR #${pr.number}: ${pr.html_url}`);
+
+      # ── If the build failed: open an issue with the failure details ──────
+      - name: Open issue for failed smoke test
+        if: |
+          steps.update_deps.outputs.changed == 'true' &&
+          (steps.compile_check.outcome  == 'failure' ||
+           steps.test_check.outcome     == 'failure' ||
+           steps.package_check.outcome  == 'failure' ||
+           steps.verify_check.outcome   == 'failure')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const compileStatus = '${{ steps.compile_check.outcome }}';
+            const testStatus    = '${{ steps.test_check.outcome }}';
+            const packageStatus = '${{ steps.package_check.outcome }}';
+            const verifyStatus  = '${{ steps.verify_check.outcome }}';
+
+            const diff = fs.existsSync('dependency-diff-summary.txt')
+              ? fs.readFileSync('dependency-diff-summary.txt', 'utf8').trim()
+              : 'No diff available.';
+
+            const icon = s => s === 'success' ? '✅' : s === 'failure' ? '❌' : '⏭️ skipped';
+
+            const title = '💥 Dependency Update Smoke Test Failed – Build Broken';
+            const body = [
+              '## 💥 Dependency Update Smoke Test Failed',
+              '',
+              '> The weekly dependency smoke test bumped all Maven packages to their latest',
+              '> releases, but the build failed. **No PR was opened.** Manual investigation required.',
+              '',
+              `**Workflow run:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '',
+              '### Build phase results',
+              `| Phase   | Result |`,
+              `|---------|--------|`,
+              `| Compile | ${icon(compileStatus)} |`,
+              `| Test    | ${icon(testStatus)} |`,
+              `| Package | ${icon(packageStatus)} |`,
+              `| Verify  | ${icon(verifyStatus)} |`,
+              '',
+              '### Dependency changes that were attempted',
+              '```diff',
+              diff.slice(0, 10000),
+              '```',
+              '',
+              '### Recommended actions',
+              '1. Download the **smoke-test-results** artifact from the workflow run for full logs.',
+              '2. Identify which dependency upgrade broke the build.',
+              '3. Fix the incompatibility (update code, or pin the breaking dep in `pom.xml`).',
+              '4. Add a suppression to `.github/owasp-suppressions.xml` if the failure is a known false positive.',
+            ].join('\n');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner:  context.repo.owner,
+              repo:   context.repo.repo,
+              state:  'open',
+              labels: 'dependencies,automated',
+            });
+
+            const existing = issues.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              console.log(`Updated existing issue #${existing.number}`);
+            } else {
+              const { data: newIssue } = await github.rest.issues.create({
+                owner:  context.repo.owner,
+                repo:   context.repo.repo,
+                title,
+                body,
+                labels: ['dependencies', 'java', 'automated', 'build-failure'],
+              });
+              console.log(`Created issue #${newIssue.number}`);
+            }
+
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 3 – Matrix Build
+  # Validates the build compiles and tests cleanly on JDK 11, 17, and 21
+  # Runs on PRs that touch pom.xml or src/, and on schedule
+  # ────────────────────────────────────────────────────────────────────────
+  matrix-build:
+    name: Matrix Build (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    strategy:
+      fail-fast: false   # Let all JDK versions run even if one fails
+      matrix:
+        java: ["11", "17", "21"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Compile (JDK ${{ matrix.java }})
+        run: mvn --batch-mode compile --no-transfer-progress
+
+      - name: Test (JDK ${{ matrix.java }})
+        run: |
+          mvn --batch-mode test \
+            --no-transfer-progress \
+            -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Package (JDK ${{ matrix.java }})
+        run: |
+          mvn --batch-mode package \
+            --no-transfer-progress \
+            -DskipTests
+
+      - name: Upload test results (JDK ${{ matrix.java }})
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matrix-test-results-jdk${{ matrix.java }}
+          path: target/surefire-reports/
+          retention-days: 14
+

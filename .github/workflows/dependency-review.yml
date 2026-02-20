@@ -1,0 +1,323 @@
+# .github/workflows/dependency-review.yml
+#
+# Dependency Review & Security Audit for IBMStockTrader/trader
+#
+# This workflow does three things:
+#   1. dependency-review   – Blocks PRs that introduce known-vulnerable packages
+#                            (uses GitHub's native Dependency Review Action)
+#   2. versions-check      – Runs the Maven Versions Plugin to detect outdated
+#                            dependencies and opens a tracking issue / PR comment
+#   3. owasp-scan          – Runs OWASP Dependency-Check for CVE scanning on
+#                            every push to main and weekly, uploads an SARIF
+#                            report to GitHub Security, and opens an issue if
+#                            vulnerabilities are found
+#
+# Prerequisites
+# ─────────────
+#   • GitHub Advanced Security must be enabled on the repo (free for public repos)
+#     for the SARIF upload and Dependency Review steps to work.
+#   • The default GITHUB_TOKEN is used throughout – no extra secrets required.
+#   • Dependabot security updates should be enabled in repo Settings →
+#     Security → Code security and analysis.
+
+name: Dependency Review & Security Audit
+
+on:
+  # Run on every PR to catch newly introduced vulnerable or outdated deps
+  pull_request:
+    branches: ["main"]
+
+  # Run on every push to main to keep the baseline clean
+  push:
+    branches: ["main"]
+
+  # Weekly full scan independent of PRs (Sunday night UTC)
+  schedule:
+    - cron: "0 2 * * 0"
+
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read         # Needed to check out code
+  security-events: write # Needed to upload SARIF results
+  issues: write          # Needed to open issues for outdated/vulnerable deps
+  pull-requests: write   # Needed to comment on PRs
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 1 – GitHub Dependency Review (blocks PRs with new CVEs)
+  # Runs only on pull_request events
+  # ────────────────────────────────────────────────────────────────────────
+  dependency-review:
+    name: Dependency Review (PR gate)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail the PR if any dependency introduces a HIGH or CRITICAL CVE
+          fail-on-severity: high
+          # Also flag packages with OSI-incompatible licences (optional – remove if unwanted)
+          deny-licenses: GPL-2.0, AGPL-3.0
+          # Leave a summary comment on the PR
+          comment-summary-in-pr: always
+
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 2 – Maven Versions Plugin (detects outdated dependencies)
+  # Runs on push to main, schedule, and workflow_dispatch
+  # ────────────────────────────────────────────────────────────────────────
+  versions-check:
+    name: Check for Outdated Maven Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      # Run versions:display-dependency-updates and capture the output
+      - name: Run Maven Versions Plugin – dependency updates
+        id: versions
+        run: |
+          mvn --batch-mode versions:display-dependency-updates \
+              versions:display-plugin-updates \
+              -DprocessAllModules=true \
+              -DgenerateBackupPoms=false \
+              2>&1 | tee versions-report.txt
+
+          # Extract only the lines that contain update suggestions
+          grep -E "^\[INFO\].*->|The following dependencies" versions-report.txt \
+            > versions-summary.txt || true
+
+          echo "has_updates=$([ -s versions-summary.txt ] && echo 'true' || echo 'false')" \
+            >> "$GITHUB_OUTPUT"
+
+      # Upload the full report as a build artefact (visible in the Actions UI)
+      - name: Upload versions report
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-versions-report
+          path: |
+            versions-report.txt
+            versions-summary.txt
+          retention-days: 30
+
+      # Open or update a GitHub Issue with the outdated dependency list
+      - name: Create / update issue for outdated dependencies
+        if: steps.versions.outputs.has_updates == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('versions-summary.txt', 'utf8').trim();
+            const fullReport = fs.readFileSync('versions-report.txt', 'utf8').trim();
+
+            const title = '⬆️ Outdated Maven Dependencies Detected';
+            const body = [
+              '## Outdated Maven Dependencies',
+              '',
+              '> Auto-generated by the **Dependency Review & Security Audit** workflow.',
+              '> Run: ' + context.runId,
+              '> Triggered: ' + new Date().toISOString(),
+              '',
+              '### Summary of Available Updates',
+              '```',
+              summary.slice(0, 5000),   // GitHub issue body limit guard
+              '```',
+              '',
+              '<details>',
+              '<summary>Full Maven Versions Report</summary>',
+              '',
+              '```',
+              fullReport.slice(0, 30000),
+              '```',
+              '</details>',
+              '',
+              '### Next Steps',
+              '- Dependabot will open individual PRs for each update on the next scheduled run.',
+              '- To trigger immediately: go to **Insights → Dependency graph → Dependabot** and click *Check for updates*.',
+              '- Review major version bumps manually before merging.',
+            ].join('\n');
+
+            // Look for an existing open issue with the same title to avoid duplicates
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependencies,automated',
+            });
+
+            const existing = issues.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              console.log(`Updated existing issue #${existing.number}`);
+            } else {
+              const { data: newIssue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['dependencies', 'java', 'automated'],
+              });
+              console.log(`Created new issue #${newIssue.number}`);
+            }
+
+  # ────────────────────────────────────────────────────────────────────────
+  # JOB 3 – OWASP Dependency-Check (CVE / security scan)
+  # Runs on push to main, schedule, and workflow_dispatch
+  # ────────────────────────────────────────────────────────────────────────
+  owasp-scan:
+    name: OWASP Dependency-Check (CVE Scan)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      # Run OWASP Dependency-Check via its Maven plugin
+      # Generates HTML, JSON, and SARIF reports in target/dependency-check-report/
+      - name: Run OWASP Dependency-Check
+        run: |
+          mvn --batch-mode org.owasp:dependency-check-maven:check \
+            -DfailBuildOnCVSS=9 \
+            -Dformat=ALL \
+            -DprettyPrint=true \
+            -DsuppressionFiles=.github/owasp-suppressions.xml \
+            -DoutputDirectory=target/dependency-check-report \
+            --no-transfer-progress \
+            || true   # Don't fail the step; we handle failures via the issue below
+        env:
+          # Optional: supply an NVD API key to avoid rate-limiting on the CVE database
+          # NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+      # Upload the full HTML report as a build artefact
+      - name: Upload OWASP HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-check-report
+          path: target/dependency-check-report/
+          retention-days: 30
+
+      # Upload SARIF to GitHub Security tab (Code Scanning alerts)
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: target/dependency-check-report/dependency-check-report.sarif
+        continue-on-error: true   # Graceful if SARIF wasn't produced (e.g. no deps scanned)
+
+      # Parse the JSON report and open an issue if HIGH/CRITICAL CVEs are found
+      - name: Create / update issue for security vulnerabilities
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reportPath = 'target/dependency-check-report/dependency-check-report.json';
+
+            if (!fs.existsSync(reportPath)) {
+              console.log('No JSON report found – skipping issue creation.');
+              return;
+            }
+
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            const dependencies = report.dependencies || [];
+
+            // Collect all vulnerabilities rated HIGH or CRITICAL
+            const findings = [];
+            for (const dep of dependencies) {
+              const vulns = (dep.vulnerabilities || []).filter(
+                v => ['HIGH', 'CRITICAL'].includes((v.severity || '').toUpperCase())
+              );
+              if (vulns.length > 0) {
+                findings.push({ dep: dep.fileName, vulns });
+              }
+            }
+
+            if (findings.length === 0) {
+              console.log('No HIGH/CRITICAL CVEs found. 🎉');
+              return;
+            }
+
+            const lines = findings.flatMap(f => [
+              `### 📦 \`${f.dep}\``,
+              ...f.vulns.map(v =>
+                `- **${v.name}** (${v.severity}) – CVSS ${v.cvssv3?.baseScore ?? v.cvssv2?.score ?? 'N/A'}: ${v.description?.slice(0, 200) ?? ''}…`
+              ),
+              '',
+            ]);
+
+            const title = '🚨 Security Vulnerabilities Detected in Dependencies';
+            const body = [
+              '## Security Vulnerabilities (HIGH / CRITICAL)',
+              '',
+              '> Auto-generated by the **Dependency Review & Security Audit** workflow.',
+              '> Run: ' + context.runId,
+              '> Triggered: ' + new Date().toISOString(),
+              '',
+              lines.join('\n').slice(0, 60000),
+              '',
+              '### Next Steps',
+              '- Check the **Security** tab for full Code Scanning alerts.',
+              '- Download the full HTML report from the workflow **Artifacts**.',
+              '- Dependabot will automatically open PRs to upgrade vulnerable packages.',
+              '- For false positives, add a suppression entry to `.github/owasp-suppressions.xml`.',
+            ].join('\n');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,automated',
+            });
+
+            const existing = issues.find(i => i.title === title);
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+              console.log(`Updated existing security issue #${existing.number}`);
+            } else {
+              const { data: newIssue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['security', 'java', 'automated'],
+              });
+              console.log(`Created new security issue #${newIssue.number}`);
+            }
+

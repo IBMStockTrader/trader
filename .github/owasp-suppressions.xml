@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  .github/owasp-suppressions.xml
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Use this file to suppress false-positive CVE findings from the OWASP
+  Dependency-Check scan. Each <suppress> block targets a specific CVE/CWE
+  for a specific package.
+
+  Docs: https://jeremylong.github.io/DependencyCheck/general/suppression.html
+
+  Example entry (uncomment and adapt as needed):
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  <suppress>
+    <notes>
+      CVE-XXXX-YYYY is a false positive for this package because ...
+      Suppressed by: your-name on YYYY-MM-DD
+      Review date:   YYYY-MM-DD (re-evaluate if still applicable)
+    </notes>
+    <packageUrl regex="true">^pkg:maven/com\.example/some\-library@.*$</packageUrl>
+    <cve>CVE-XXXX-YYYY</cve>
+  </suppress>
+-->
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+  <!-- Add suppression entries below as needed -->
+
+</suppressions>
